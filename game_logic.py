@@ -2,9 +2,41 @@ import abc
 import enum
 
 # Typing
+Day = int
+Days = int
 Hours = int
 Points = int
 Image = ...
+
+
+class Effect:
+    def __init__(self, name: str, description: str, image: Image,
+                 period: Days, delay: Days, is_removable: bool,
+                 init_event: callable, final_event: callable, everyday_event: callable, init_day: Day):
+        """
+        An effect applied to the player
+
+        :param name: Effect name
+        :param description: Effect description
+        :param image: Effect image
+        :param period: Duration of the effect
+        :param delay: Delay before the effect starts
+        :param is_removable: Can the player remove the effect or not
+        :param init_event: An event that occurs at the beginning of the effect
+        :param final_event: An event that occurs at the end of the effect
+        :param everyday_event: An event that occurs every day while the effect is active
+        :param init_day: The day when the effect was applied
+        """
+        self.name = name
+        self.description = description
+        self.image = image
+        self.period = period
+        self.delay = delay
+        self.is_removable = is_removable
+        self.init_event = init_event
+        self.final_event = final_event
+        self.everyday_event = everyday_event
+        self.init_day = init_day
 
 
 class Task:
