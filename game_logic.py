@@ -125,3 +125,41 @@ class TaskCard(Card):
         super().__init__(name, description, image)
         self.task = task
         self.valid_targets = valid_targets
+
+
+class Deadline(Task):
+    def __init__(self, name: str, description: str, image: Image,
+                 difficulty: Hours, award: Points, penalty: Points,
+                 event_on_success: callable, event_on_fail: callable,
+                 init_day: Day):
+        """
+        Player's deadline
+
+        :param name: Task name
+        :param description: Task description
+        :param image: Task image
+        :param difficulty: The number of hours required to complete the task
+        :param award: The number of points awarded for completing the task
+        :param penalty: The number of points taken away if the task is failed
+        :param event_on_success: An event that occurs if task is completed
+        :param event_on_fail: An event that occurs if task is failed
+        :param init_day: The day when the task was issued
+        """
+        super().__init__(name, description, image, difficulty, award, penalty, event_on_success, event_on_fail)
+        self.init_day = init_day
+        self.deadline: Day = init_day + difficulty  # The day before which the task must be completed
+        self.progress: Hours = 0  # How many hours the player has already worked on the task.
+
+    def work(self, hours: Hours):
+        """
+        Work on the task for `hours` hours
+
+        :param hours: How long to work on the task
+        """
+        pass
+
+    def new_day(self):
+        """
+        Update the deadline when a new day arrives
+        """
+        pass
