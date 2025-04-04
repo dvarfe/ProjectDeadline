@@ -6,6 +6,7 @@ Day = int
 Days = int
 Hours = int
 Points = int
+PlayerID = ...
 Image = ...
 
 
@@ -161,5 +162,36 @@ class Deadline(Task):
     def new_day(self):
         """
         Update the deadline when a new day arrives
+        """
+        pass
+
+
+class Player:
+    def __init__(self, pid: PlayerID, name: str, hours_in_day: Hours):
+        """
+        A player
+
+        :param pid: Player unique identifier
+        :param name: Player name
+        :param hours_in_day: Number of free hours per day
+        """
+        self.pid = pid
+        self.name = name
+        self.free_hours_today = hours_in_day
+        self.score: Points = 0  # Player score
+        self.hand: list[Card] = []  # Player's cards
+        self.deadlines: list[Deadline] = []  # Player deadlines
+        self.effects: list[Effect] = []  # Effects applied to the player
+        self.delayed_effects: dict[Day, list[Effect]] = {}  # Delayed effects by the days when they start
+
+    def use_card(self):
+        """
+        Play a card
+        """
+        pass
+
+    def manage_time(self):
+        """
+        Allocate time for tasks
         """
         pass
