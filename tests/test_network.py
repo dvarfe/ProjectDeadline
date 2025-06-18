@@ -1,7 +1,7 @@
 import unittest
 import sys
 import time
-from game_logic import Network
+from Deadline.game_logic import Network
 
 sys.path.insert(0, "..")
 
