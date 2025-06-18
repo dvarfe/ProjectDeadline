@@ -6,11 +6,13 @@ import threading
 import subprocess
 import time
 import re
+import os
 
 from colors import strip_color
 
-translation = gettext.translation("Dummy", 'po', fallback=True)
-_ = translation.gettext  # TODO: Replace dummy with real path and domain
+_podir = os.path.join("..", "po")
+translation = gettext.translation("Deadline", _podir, fallback=True)
+_ = translation.gettext
 
 # Typing
 Day = int

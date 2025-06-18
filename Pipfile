@@ -6,6 +6,9 @@ name = "pypi"
 [packages]
 flake8 = "*"
 ansicolors = "*"
+sphinx = "*"
+doit = "*"
+babel = "*"
 
 [dev-packages]
 pre-commit = "*"

@@ -1,1 +1,8 @@
+*~
+*.bak
 Pipfile.lock
+**/__pycache__/
+docs/build
+*.db
+*.pot
+*.mo
