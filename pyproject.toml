@@ -1,0 +1,41 @@
+[project]
+name = "Deadline"
+version = "0.0"
+description = "Deadline is a card game about time management under the onslaught of endless tasks."
+readme = "README.md"
+requires-python = ">=3.12"
+authors = [
+    { name = "Anenokil", email = "anenokil@msu.ru" },
+    { name = "dvarfe", email = "dvarfe@msu.ru" },
+    { name = "ZSTRANNICK", email = "ZSTRANNICK@msu.ru" },
+
+]
+
+keywords = ["game", "multiplayer", "card"]
+classifiers = [
+    "Development Status :: 1 - Planning",
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+repository = "https://github.com/Anenokil/PythonProject-PreciousSource"
+
+# [project.gui-scripts]
+# MainApp = "Deadline.????:main"
+
+[build-system]
+requires = [
+    "doit",
+    "Sphinx",
+    "flake8",
+    "pydocstyle",
+    "wheel",
+    "setuptools",
+    "pybabel",
+    "build",
+]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.package-data]
+Deadline = ["po/*/*/*.mo"]
