@@ -7,6 +7,7 @@ import subprocess
 import time
 import re
 import os
+from typing import List, Optional
 
 from colors import strip_color
 
@@ -442,7 +443,7 @@ class Network:
             except BlockingIOError:
                 pass
 
-    def check_for_message(self):
+    def check_for_message(self) -> Optional[str]:
         """
         Check for incoming messages without blocking.
 
@@ -462,6 +463,47 @@ class Network:
         except Exception as e:
             raise Exception(_("Error checking for message:") + str(e))
 
+    def parse_msg(self):
+        """Parses incoming messages from the opponent.
+
+            Messages follow a format: [Action_name][,params]*\n
+
+            Supported Actions:
+                quit
+                    - Indicates the player has left the game
+
+                draw [first_player_flag]
+                    - Used at game start to determine move order
+                    - Params:
+                        first_player_flag (int): 
+                            1 - opponent moves first
+                            0 - player moves first
+
+                work [task_idx] [hours]
+                    - Player works on specified task
+                    - Params:
+                        task_idx (int): index of task in task list
+                        hours (int): duration of work in hours
+
+                use_card [card_id] [player_pid] [target_idx]
+                    - Player uses a card
+                    - Params:
+                        card_id (int): ID of the card being used
+                        player_pid (int): target player ID
+                        target_idx (int): 
+                            Index of target card (-1 if no target)
+        """
+        pass
+
+    def get_messages(self) -> List[str]:
+        msgs = self.check_for_message()
+        msg_list = []
+        if msgs is not None:
+            msgs = msgs.split('\n')
+            for msg in msgs:
+                msg_list.append(self.parse_msg(msg))
+        return msg_list
+
     def close_client_socket(self):
         """
         Close the client/peer socket connection.
@@ -470,7 +512,7 @@ class Network:
             try:
                 self.socket.close()
             except Exception as e:
-                print(f"Error closing client socket: {e}")
+                print(_("Error closing client socket:") + str(e))
             self.socket = None
             self.connection = False
 
@@ -482,7 +524,7 @@ class Network:
             try:
                 self.server_socket.close()
             except Exception as e:
-                print(f"Error closing server socket: {e}")
+                print(_("Error closing server socket:") + str(e))
             self.server_socket = None
 
     def close_all_connections(self):
