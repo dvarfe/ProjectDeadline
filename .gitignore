@@ -6,3 +6,4 @@ docs/build
 *.db
 *.pot
 *.mo
+.coverage

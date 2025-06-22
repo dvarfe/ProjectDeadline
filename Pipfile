@@ -12,6 +12,9 @@ babel = "*"
 
 [dev-packages]
 pre-commit = "*"
+pydocstyle = "*"
+coverage = "*"
+build = "*"
 
 [requires]
 python_version = "3.12"
