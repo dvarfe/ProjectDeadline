@@ -11,4 +11,3 @@ Deadline documentation
    :caption: Contents:
 
    API
-   modules

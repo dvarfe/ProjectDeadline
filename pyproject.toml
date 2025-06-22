@@ -32,10 +32,13 @@ requires = [
     "pydocstyle",
     "wheel",
     "setuptools",
-    "pybabel",
+    "babel",
     "build",
 ]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools.package-dir]
+Deadline = "Deadline"
 
 [tool.setuptools.package-data]
 Deadline = ["po/*/*/*.mo"]

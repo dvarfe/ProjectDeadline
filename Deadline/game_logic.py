@@ -406,7 +406,7 @@ class Network:
         Args:
             port (str): Port number to bind the server to
             use_bore_flag (bool, optional): Whether to create a public bore tunnel.
-                                          Defaults to False for local-only hosting.
+            Defaults to False for local-only hosting.
 
         Note:
             When use_bore_flag is True, the method sets up external access via bore.pub so bore should be installed.
@@ -464,7 +464,8 @@ class Network:
             raise Exception(_("Error checking for message:") + str(e))
 
     def parse_msg(self):
-        """Parses incoming messages from the opponent.
+        """
+        Parses incoming messages from the opponent.
 
             Messages follow a format: [Action_name][,params]*\n
 
@@ -475,7 +476,7 @@ class Network:
                 draw [first_player_flag]
                     - Used at game start to determine move order
                     - Params:
-                        first_player_flag (int): 
+                        first_player_flag (int):
                             1 - opponent moves first
                             0 - player moves first
 
@@ -490,8 +491,7 @@ class Network:
                     - Params:
                         card_id (int): ID of the card being used
                         player_pid (int): target player ID
-                        target_idx (int): 
-                            Index of target card (-1 if no target)
+                        target_idx (int): Index of target card (-1 if no target)
         """
         pass
 
