@@ -9,6 +9,7 @@ ansicolors = "*"
 sphinx = "*"
 doit = "*"
 babel = "*"
+pygame-ce = "*"
 
 [dev-packages]
 pre-commit = "*"
