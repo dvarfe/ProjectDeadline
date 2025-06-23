@@ -3,33 +3,35 @@ import abc
 import pygame as pg
 
 # Typing
-Vector2     = tuple[int, int]
-Point       = Vector2
+Vector2 = tuple[int, int]
+Point = Vector2
 
-WINDOW_SIZE     = (1920, 1080)
-DEFAULT_FONT    = pg.font.get_default_font()
+WINDOW_SIZE = (1920, 1080)
+DEFAULT_FONT = pg.font.get_default_font()
+
 
 def get_events_dict() -> dict:
     """
     Get all Pygame events and organize them in a dictionary by event type.
-    
+
     Returns:
         dict: A dictionary where keys are event types and values are lists of events.
     """
-    events      = pg.event.get()
+    events = pg.event.get()
     events_dict = {}
-    
+
     for event in events:
         if event.type not in events_dict:
             events_dict[event.type] = []
         events_dict[event.type].append(event)
-    
+
     return events_dict
+
 
 class Game():
     """
     Main game class that manages the game loop.
-    
+
     Attributes:
         window_size (tuple): The size of the game window (width, height).
         canvas (pygame.Surface): The main drawing surface.
@@ -42,18 +44,18 @@ class Game():
     def __init__(self, scene_class):
         """
         Initialize the game with a starting scene.
-        
+
         Args:
             scene_class: The class of the initial scene to run.
         """
 
         pg.init()
-        self.window_size    = WINDOW_SIZE
-        self.canvas         = pg.Surface(self.window_size)
-        self.display        = pg.display.set_mode(self.window_size)
-        self.default_font   = DEFAULT_FONT
-        self.current_scene  = scene_class(self)
-        self.running: bool  = True
+        self.window_size = WINDOW_SIZE
+        self.canvas = pg.Surface(self.window_size)
+        self.display = pg.display.set_mode(self.window_size)
+        self.default_font = DEFAULT_FONT
+        self.current_scene = scene_class(self)
+        self.running: bool = True
 
     def run(self) -> None:
         """Run the main game loop until self.running becomes False."""
@@ -75,7 +77,7 @@ class Game():
 class Anchor(enum.Enum):
     """
     Enumeration for different anchor points of UI elements.
-    
+
     Used for positioning elements relative to different points of their bounding boxes.
     """
 
@@ -85,10 +87,11 @@ class Anchor(enum.Enum):
     BOTTOM_LEFT = 4
     BOTTOM_RIGHT = 5
 
+
 def anchor_rect(rect: pg.rect, pos: Vector2, anchor: Anchor) -> None:
     """
     Position a rectangle relative to a given anchor point.
-    
+
     Args:
         rect: The pygame Rect to position.
         pos: The target position (x, y).
@@ -100,21 +103,22 @@ def anchor_rect(rect: pg.rect, pos: Vector2, anchor: Anchor) -> None:
             rect.center = pos
         case Anchor.TOP_LEFT:
             rect.topleft = pos
-        case Anchor.TOP_RIGHT:            
+        case Anchor.TOP_RIGHT:
             rect.topright = pos
         case Anchor.BOTTOM_LEFT:
             rect.bottomleft = pos
-        case Anchor.BOTTOM_RIGHT:            
+        case Anchor.BOTTOM_RIGHT:
             rect.bottomright = pos
+
 
 def rect_anchor_pos(rect: pg.rect, anchor: Anchor) -> Vector2:
     """
     Get the position of a specific anchor point on a rectangle.
-    
+
     Args:
         rect: The pygame Rect to examine.
         anchor: The Anchor enum value specifying which point to get.
-    
+
     Returns:
         Vector2: The (x, y) coordinates of the requested anchor point.
     """
@@ -124,17 +128,18 @@ def rect_anchor_pos(rect: pg.rect, anchor: Anchor) -> Vector2:
             return rect.center
         case Anchor.TOP_LEFT:
             return rect.topleft
-        case Anchor.TOP_RIGHT:            
+        case Anchor.TOP_RIGHT:
             return rect.topright
         case Anchor.BOTTOM_LEFT:
             return rect.bottomleft
-        case Anchor.BOTTOM_RIGHT:            
+        case Anchor.BOTTOM_RIGHT:
             return rect.bottomright
+
 
 class Text():
     """
     A class for creating and rendering text surfaces.
-    
+
     Attributes:
         game (Game): Reference to the main Game instance.
         rect (pygame.Rect): The bounding rectangle of the text surface.
@@ -155,10 +160,10 @@ class Text():
             anchor:     Anchor,
             text:       str,
             font_size:  int,
-            font_name:  str         = DEFAULT_FONT,
-            color:      pg.color    = (0,0,0)):
+            font_name:  str = DEFAULT_FONT,
+            color:      pg.color = (0, 0, 0)):
         """Initialize a Text object.
-        
+
         Args:
             game: Reference to the Game instance.
             pos: Position to place the text.
@@ -168,24 +173,24 @@ class Text():
             font_name: Name of the font to use.
             color: Color of the text (RGB tuple).
         """
-        
+
         self.game = game
         self.rect = None
         self.update(pos, anchor, text, font_size, font_name, color)
 
     def update(
             self,
-            pos:        Point       = None,
-            anchor:     Anchor      = None,
-            text:       str         = None,
-            font_size:  int         = None,
-            font_name:  str         = None,
-            color:      pg.color    = None) -> None:
+            pos:        Point = None,
+            anchor:     Anchor = None,
+            text:       str = None,
+            font_size:  int = None,
+            font_name:  str = None,
+            color:      pg.color = None) -> None:
         """Update the text properties.
-        
+
         Any argument not provided will keep its current value.
         Automatically handles re-rendering the text surface when needed.
-        
+
         Args:
             pos: New position.
             anchor: New anchor point.
@@ -194,7 +199,7 @@ class Text():
             font_name: New font name.
             color: New text color.
         """
-        
+
         update = font_size or font_name
         if update:
             if font_size:
@@ -202,7 +207,7 @@ class Text():
             if font_name:
                 self.font_name = font_name
             self.font = pg.font.Font(font_name, font_size)
-        
+
         update = update or text or color
         if update:
             if text:
@@ -218,7 +223,7 @@ class Text():
             if anchor:
                 self.anchor = anchor
             self.rect = self.text_surface.get_rect()
-            anchor_rect(self.rect,self. pos, self.anchor)
+            anchor_rect(self.rect, self. pos, self.anchor)
 
     def draw(self):
         """Draw the text surface to the game's canvas."""
@@ -227,7 +232,7 @@ class Text():
 
 class Button(abc.ABC):
     """Abstract base class for button UI elements.
-    
+
     Attributes:
         game (Game): Reference to the main Game instance.
         size (Vector2): Size of the button (width, height).
@@ -245,12 +250,12 @@ class Button(abc.ABC):
             game: Game,
             size: Vector2,
             pos: Point,
-            anchor: Anchor=Anchor.CENTRE,
+            anchor: Anchor = Anchor.CENTRE,
             image_paths=None,
-            text: Text=None,
-            text_anchor: Anchor=Anchor.CENTRE):
+            text: Text = None,
+            text_anchor: Anchor = Anchor.CENTRE):
         """Initialize a Button instance.
-        
+
         Args:
             game: Reference to the Game instance.
             size: Size of the button (width, height).
@@ -260,7 +265,7 @@ class Button(abc.ABC):
             text: Text object for the button (optional).
             text_anchor: Anchor point for the button text.
         """
-        
+
         self.game = game
         self.size = size
         self.pos = pos
@@ -292,7 +297,7 @@ class Button(abc.ABC):
 
         self.rect = pg.Rect(0, 0, size[0], size[1])
         anchor_rect(self.rect, pos, anchor)
-        
+
         if self.text:
             self.text.update(pos=rect_anchor_pos(self.rect, text_anchor))
 
@@ -300,7 +305,7 @@ class Button(abc.ABC):
         self.mousedown = False
         self.mousehold = False
         self.mouseup = False
-    
+
     def draw(self):
         """Draw the button to the game's canvas."""
 
@@ -311,7 +316,7 @@ class Button(abc.ABC):
                 self.image = self.image_hover
             else:
                 self.image = self.image_idle
-            
+
             self.game.canvas.blit(self.image, self.rect)
         else:
             if self.mousehold:
@@ -320,12 +325,12 @@ class Button(abc.ABC):
                 self.color = self.color_hover
             else:
                 self.color = self.color_idle
-            
+
             pg.draw.rect(self.game.canvas, self.color, self.rect)
-            
+
         if self.text:
             self.text.draw()
-    
+
     def check_event(self):
         """Check for mouse events related to the button (hover, click)."""
 
@@ -344,7 +349,7 @@ class Button(abc.ABC):
                     self.mousedown = True
                     self.mousehold = True
                     break
-        
+
         if self.mousedown and pg.MOUSEBUTTONUP in self.game.events.keys():
             for event in self.game.events[pg.MOUSEBUTTONDOWN]:
                 if event.button == 1:
@@ -368,12 +373,12 @@ class SceneSwitchButton(Button):
             scene_class,
             size: Vector2,
             pos: Point,
-            anchor: Anchor=Anchor.CENTRE,
+            anchor: Anchor = Anchor.CENTRE,
             image_paths=None,
-            text: Text=None,
-            text_anchor: Anchor=Anchor.CENTRE):
+            text: Text = None,
+            text_anchor: Anchor = Anchor.CENTRE):
         """Initialize a SceneSwitchButton.
-        
+
         Args:
             game: Reference to the Game instance.
             scene_class: The scene class to switch to when clicked.
@@ -402,13 +407,13 @@ class ExitButton(Button):
             game: Game,
             size: Vector2,
             pos: Point,
-            anchor: Anchor=Anchor.CENTRE,
+            anchor: Anchor = Anchor.CENTRE,
             image_paths=None,
-            text: Text=None,
-            text_anchor: Anchor=Anchor.CENTRE):
+            text: Text = None,
+            text_anchor: Anchor = Anchor.CENTRE):
         """
         Initialize a ExitButton.
-        
+
         Args:
             game: Reference to the Game instance.
             size: Size of the button (width, height).

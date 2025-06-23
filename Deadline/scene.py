@@ -1,30 +1,30 @@
 import abc
 import pygame as pg
-from game import *
+from game import Game, Text, Anchor, SceneSwitchButton, ExitButton
 from game_logic import _
 
 
 class Scene(abc.ABC):
     """
     Abstract base class representing a game scene/screen.
-    
+
     All game scenes should inherit from this class and implement the abstract methods.
-    
+
     Attributes:
         game (Game): Reference to the main Game instance.
     """
 
     def __init__(self, game: Game):
         self.game = game
-    
+
     @abc.abstractmethod
     def run(self):
         """Main scene loop method that coordinates event checking, updating and drawing."""
-        
+
         self.check_events()
         self.update_scene()
         self.draw_scene()
-    
+
     @abc.abstractmethod
     def check_events(self):
         """Check and handle all relevant input events for this scene."""
@@ -52,10 +52,10 @@ class MainMenu(Scene):
             Anchor.CENTRE,
             _("Deadline"),
             150)
-        
+
         button_text = Text(
             game,
-            (0,0),
+            (0, 0),
             Anchor.CENTRE,
             _("Host game"),
             80)
@@ -69,10 +69,10 @@ class MainMenu(Scene):
             None,
             button_text,
             Anchor.CENTRE)
-        
+
         button_text = Text(
             game,
-            (0,0),
+            (0, 0),
             Anchor.CENTRE,
             _("Connect"),
             80)
@@ -86,10 +86,10 @@ class MainMenu(Scene):
             None,
             button_text,
             Anchor.CENTRE)
-        
+
         button_text = Text(
             game,
-            (0,0),
+            (0, 0),
             Anchor.CENTRE,
             _("Settings"),
             80)
@@ -103,10 +103,10 @@ class MainMenu(Scene):
             None,
             button_text,
             Anchor.CENTRE)
-        
+
         button_text = Text(
             game,
-            (0,0),
+            (0, 0),
             Anchor.CENTRE,
             _("Exit"),
             80)
@@ -119,12 +119,12 @@ class MainMenu(Scene):
             None,
             button_text,
             Anchor.CENTRE)
-    
+
     def run(self):
         self.check_events()
         self.update_scene()
         self.draw_scene()
-    
+
     def check_events(self):
         self.button_host_game.check_event()
         self.button_connect.check_event()
@@ -158,7 +158,7 @@ class HostScene(Scene):
         self.check_events()
         self.update_scene()
         self.draw_scene()
-    
+
     def check_events(self):
         pass
 
@@ -179,7 +179,7 @@ class ConnectScene(Scene):
         self.check_events()
         self.update_scene()
         self.draw_scene()
-    
+
     def check_events(self):
         pass
 
@@ -200,7 +200,7 @@ class SettingsScene(Scene):
         self.check_events()
         self.update_scene()
         self.draw_scene()
-    
+
     def check_events(self):
         pass
 
@@ -221,7 +221,7 @@ class EmptyScene(Scene):
         self.check_events()
         self.update_scene()
         self.draw_scene()
-    
+
     def check_events(self):
         pass
 
