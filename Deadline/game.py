@@ -403,6 +403,45 @@ class SceneSwitchButton(Button):
             self.game.current_scene = self.scene_class(self.game)
 
 
+class BackButton(SceneSwitchButton):
+    """A Button implementation that brings user back when clicked."""
+
+    def __init__(
+            self,
+            game: Game,
+            scene_class,
+            size: Vector2 = (120, 120),
+            pos: Point = (0, 0),
+            anchor: Anchor = Anchor.TOP_LEFT,
+            image_paths=None):
+        """Initialize a BackButton.
+
+        Args:
+            game: Reference to the Game instance.
+            scene_class: The scene class to switch to when clicked.
+            size: Size of the button (width, height).
+            pos: Position of the button.
+            anchor: Anchor point for positioning.
+            image_paths: Paths to button images (optional).
+        """
+
+        super().__init__(game, scene_class, size, pos, anchor, image_paths)
+        self.arrow_color = (255, 255, 255)
+        self.arrow_polygon = ((0, 100), (0, 200), (200, 200), (200, 300), (300, 150), (200, 0), (200, 100))
+        self.arrow_polygon = ((110, 10), (110, 110), (10, 110), (10, 165), (0, 83), (10, 0), (10, 100))
+        self.arrow_polygon = ((100, 55), (100, 65), (40, 65), (40, 75), (15, 60), (40, 45), (40, 55))
+
+    def update(self):
+        """Switch scene if clicked."""
+        if self.mousedown:
+            self.game.current_scene = self.scene_class(self.game)
+
+    def draw(self):
+        """Draw the button to the game's canvas."""
+        super().draw()
+        pg.draw.polygon(self.game.canvas, self.arrow_color, self.arrow_polygon)
+
+
 class ExitButton(Button):
     """A Button implementation that exits the game when clicked."""
 
