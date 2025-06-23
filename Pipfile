@@ -6,9 +6,15 @@ name = "pypi"
 [packages]
 flake8 = "*"
 ansicolors = "*"
+sphinx = "*"
+doit = "*"
+babel = "*"
 
 [dev-packages]
 pre-commit = "*"
+pydocstyle = "*"
+coverage = "*"
+build = "*"
 
 [requires]
 python_version = "3.12"
