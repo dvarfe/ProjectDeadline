@@ -1,6 +1,7 @@
 import abc
 import pygame as pg
-from .game import Game, Text, Anchor, SceneSwitchButton, ExitButton
+import locale
+from .game import Game, Text, Anchor, SceneSwitchButton, ExitButton, BackButton, ChooseLanguageButton
 from .game import _
 
 
@@ -195,6 +196,23 @@ class SettingsScene(Scene):
     def __init__(self, game):
         super().__init__(game)
         pg.display.set_caption(_('Deadline - Settings'))
+        self.buttons = []
+        self.texts = []
+        self.cur_locale = locale.getlocale()
+        self.texts.append(Text(
+            game,
+            (self.game.window_size[0] / 2, self.game.window_size[1] / 8),
+            Anchor.CENTRE,
+            _("Settings"),
+            150))
+
+        self.buttons.append(BackButton(
+            game,
+            MainMenu))
+        self.buttons.append(ChooseLanguageButton(game,
+                                                 (600, 120),
+                                                 (self.game.window_size[0] / 2, self.game.window_size[1] / 16 * 9),
+                                                 Anchor.CENTRE))
 
     def run(self):
         self.check_events()
@@ -202,13 +220,25 @@ class SettingsScene(Scene):
         self.draw_scene()
 
     def check_events(self):
-        pass
+        for button in self.buttons:
+            button.check_event()
+        if self.cur_locale != locale.getlocale():
+            self.cur_locale = locale.getlocale()
+            self.texts[0] = Text(
+                self.game,
+                (self.game.window_size[0] / 2, self.game.window_size[1] / 8),
+                Anchor.CENTRE,
+                _("Settings"),
+                150)
 
     def update_scene(self):
-        pass
+        for object in self.buttons + self.texts:
+            object.update()
 
     def draw_scene(self):
-        self.game.canvas.fill((0, 0, 0))
+        self.game.canvas.fill("white")
+        for objects in self.buttons + self.texts:
+            objects.draw()
         self.game.blit_screen()
 
 

@@ -2,7 +2,7 @@
 import glob
 from doit.tools import create_folder
 
-PODEST = 'Deadline/po'
+PODEST = 'po'
 
 
 def task_gitclean():

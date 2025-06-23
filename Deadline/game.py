@@ -1,13 +1,23 @@
 import enum
 import abc
+import locale
 from typing import Dict, List
 import pygame as pg
 import gettext
-import os
 
-_podir = os.path.join("..", "po")
+_podir = "po"
 translation = gettext.translation("Deadline", _podir, fallback=True)
 _ = translation.gettext
+
+LOCALES = {
+    ("ru_RU", "UTF-8"): gettext.translation("Deadline", _podir, ["ru_RU.UTF-8"]),
+    ("en_US", "UTF-8"): gettext.NullTranslations(),
+}
+
+
+def _(text):
+    return LOCALES[locale.getlocale()].gettext(text)
+
 
 # Typing
 Vector2 = tuple[int, int]
@@ -43,6 +53,7 @@ class Game():
         default_font (str): The default font name.
         current_scene (Scene): The currently active scene.
         running (bool): Flag indicating if the game is running.
+        language (str): Language selected. RU or EN.
     """
 
     def __init__(self, scene_class):
@@ -426,20 +437,58 @@ class BackButton(SceneSwitchButton):
         """
 
         super().__init__(game, scene_class, size, pos, anchor, image_paths)
-        self.arrow_color = (255, 255, 255)
-        self.arrow_polygon = ((0, 100), (0, 200), (200, 200), (200, 300), (300, 150), (200, 0), (200, 100))
-        self.arrow_polygon = ((110, 10), (110, 110), (10, 110), (10, 165), (0, 83), (10, 0), (10, 100))
+        self.arrow_color = "black"
         self.arrow_polygon = ((100, 55), (100, 65), (40, 65), (40, 75), (15, 60), (40, 45), (40, 55))
-
-    def update(self):
-        """Switch scene if clicked."""
-        if self.mousedown:
-            self.game.current_scene = self.scene_class(self.game)
 
     def draw(self):
         """Draw the button to the game's canvas."""
         super().draw()
         pg.draw.polygon(self.game.canvas, self.arrow_color, self.arrow_polygon)
+
+
+class ChooseLanguageButton(Button):
+    """A Button implementation for the language selection drop-down menu."""
+
+    def __init__(
+            self,
+            game: Game,
+            size: Vector2,
+            pos: Point,
+            anchor: Anchor = Anchor.CENTRE):
+        super().__init__(game=game,
+                         size=size,
+                         pos=pos,
+                         anchor=anchor)
+
+        self.pos = pos
+        self.show_options = False
+        self.options = [(("en_US", "UTF-8"), "English"),
+                        (("ru_RU", "UTF-8"), "Русский")]
+
+        cur_locale = locale.getlocale()
+        self.cur_option = 0
+        while self.options[self.cur_option][0] != cur_locale:
+            self.cur_option += 1
+        self.text = Text(
+            game,
+            pos,
+            Anchor.CENTRE,
+            self.options[self.cur_option][1],
+            80)
+
+    def update(self):
+        """Switch locale if clicked."""
+        if self.mousedown:
+            self.cur_option = (self.cur_option + 1) % len(self.options)
+            locale.setlocale(locale.LC_ALL, self.options[self.cur_option][0])
+            self.text = Text(
+                self.game,
+                self.pos,
+                Anchor.CENTRE,
+                self.options[self.cur_option][1],
+                80)
+            self.mousedown = False
+            self.mousehold = False
 
 
 class ExitButton(Button):
