@@ -19,27 +19,27 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.17.0\n"
 
-#: Deadline/game_logic.py:361
+#: Deadline/network.py:104
 msgid "Bore failed: "
 msgstr "Ошибка запуска bore:"
 
-#: Deadline/game_logic.py:373
+#: Deadline/network.py:116
 msgid "Error reading bore output:"
 msgstr "Ошибка при парсинге вывода bore:"
 
-#: Deadline/game_logic.py:376
+#: Deadline/network.py:119
 msgid "Bore tunnel setup timed out"
 msgstr "Время установления соединения истекло"
 
-#: Deadline/game_logic.py:464
+#: Deadline/network.py:207
 msgid "Error checking for message:"
 msgstr "Ошибка при получении сообщения:"
 
-#: Deadline/game_logic.py:515
+#: Deadline/network.py:258
 msgid "Error closing client socket:"
 msgstr "Ошибочное закрытие сокета клиента"
 
-#: Deadline/game_logic.py:527
+#: Deadline/network.py:270
 msgid "Error closing server socket:"
 msgstr "Ошибочное закрытие сокета сервера"
 
