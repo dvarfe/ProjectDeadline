@@ -1,7 +1,7 @@
 import abc
 import pygame as pg
 from .game import Game, Text, Anchor, SceneSwitchButton, ExitButton
-from .game_logic import _
+from .game import _
 
 
 class Scene(abc.ABC):

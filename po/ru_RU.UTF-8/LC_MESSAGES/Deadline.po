@@ -19,19 +19,63 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.17.0\n"
 
-#: Deadline/game_logic.py:360
+#: Deadline/game_logic.py:361
 msgid "Bore failed: "
 msgstr "Ошибка запуска bore:"
 
-#: Deadline/game_logic.py:372
+#: Deadline/game_logic.py:373
 msgid "Error reading bore output:"
 msgstr "Ошибка при парсинге вывода bore:"
 
-#: Deadline/game_logic.py:375
+#: Deadline/game_logic.py:376
 msgid "Bore tunnel setup timed out"
 msgstr "Время установления соединения истекло"
 
-#: Deadline/game_logic.py:463
+#: Deadline/game_logic.py:464
 msgid "Error checking for message:"
 msgstr "Ошибка при получении сообщения:"
+
+#: Deadline/game_logic.py:515
+msgid "Error closing client socket:"
+msgstr "Ошибочное закрытие сокета клиента"
+
+#: Deadline/game_logic.py:527
+msgid "Error closing server socket:"
+msgstr "Ошибочное закрытие сокета сервера"
+
+#: Deadline/scene.py:47
+msgid "Deadline - Main menu"
+msgstr "Deadline - Главное меню"
+
+#: Deadline/scene.py:53
+msgid "Deadline"
+msgstr "Deadline"
+
+#: Deadline/scene.py:60
+msgid "Host game"
+msgstr "Создать игру"
+
+#: Deadline/scene.py:77
+msgid "Connect"
+msgstr "Подключиться"
+
+#: Deadline/scene.py:94
+msgid "Settings"
+msgstr "Настройки"
+
+#: Deadline/scene.py:111
+msgid "Exit"
+msgstr "Выход"
+
+#: Deadline/scene.py:155
+msgid "Deadline - Host game"
+msgstr "Deadline - Создать игру"
+
+#: Deadline/scene.py:176
+msgid "Deadline - Connect"
+msgstr "Deadline - Подключиться"
+
+#: Deadline/scene.py:197
+msgid "Deadline - Settings"
+msgstr "Deadline - Настройки"
 

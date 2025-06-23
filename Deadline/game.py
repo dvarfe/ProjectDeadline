@@ -2,6 +2,12 @@ import enum
 import abc
 from typing import Dict, List
 import pygame as pg
+import gettext
+import os
+
+_podir = os.path.join("..", "po")
+translation = gettext.translation("Deadline", _podir, fallback=True)
+_ = translation.gettext
 
 # Typing
 Vector2 = tuple[int, int]
