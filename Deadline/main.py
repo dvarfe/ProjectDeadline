@@ -1,5 +1,11 @@
-from game import Game
-from scene import MainMenu
+from .game import Game
+from .scene import MainMenu
 
-g = Game(MainMenu)
-g.run()
+
+def main():
+    g = Game(MainMenu)
+    g.run()
+
+
+if __name__ == '__main__':
+    main()

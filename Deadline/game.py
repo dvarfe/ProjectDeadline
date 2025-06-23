@@ -1,5 +1,6 @@
 import enum
 import abc
+from typing import Dict, List
 import pygame as pg
 
 # Typing
@@ -10,7 +11,7 @@ WINDOW_SIZE = (1920, 1080)
 DEFAULT_FONT = pg.font.get_default_font()
 
 
-def get_events_dict() -> dict:
+def get_events_dict() -> Dict[int, List[pg.Event]]:
     """
     Get all Pygame events and organize them in a dictionary by event type.
 
@@ -18,13 +19,10 @@ def get_events_dict() -> dict:
         dict: A dictionary where keys are event types and values are lists of events.
     """
     events = pg.event.get()
-    events_dict = {}
+    events_dict: Dict[int, List[pg.Event]] = {}
 
     for event in events:
-        if event.type not in events_dict:
-            events_dict[event.type] = []
-        events_dict[event.type].append(event)
-
+        events_dict[event.type] = events_dict.get(event.type, []) + [event]
     return events_dict
 
 

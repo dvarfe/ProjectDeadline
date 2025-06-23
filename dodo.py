@@ -8,8 +8,17 @@ PODEST = 'Deadline/po'
 def task_gitclean():
     """Clean all generated files not tracked by GIT."""
     return {
-            'actions': ['git clean -xdf'],
-           }
+        'actions': ['git clean -xdf'],
+    }
+
+
+def task_app():
+    """Run application."""
+    import Deadline.main
+    return {
+        'actions': [Deadline.main.main],
+        'task_dep': ['mo'],
+    }
 
 
 def task_build_docs():
@@ -66,25 +75,25 @@ def task_mo():
 def task_requirements():
     """Dump Pipfile requirements"""
     return {
-            'actions': ['pipenv requirements --categories="packages" > requirements.txt'],
-            'file_dep': ['Pipfile'],
-            'targets': ['requirements.txt'],
-           }
+        'actions': ['pipenv requirements --categories="packages" > requirements.txt'],
+        'file_dep': ['Pipfile'],
+        'targets': ['requirements.txt'],
+    }
 
 
 def task_style():
     """Check style against flake8."""
     return {
-            'actions': ['flake8 Deadline']
-           }
+        'actions': ['flake8 Deadline']
+    }
 
 
 def task_docstyle():
     """Check docstrings against pydocstyle."""
     return {'actions': ['']}  # TODO: Remove
     return {
-            'actions': ['pydocstyle Deadline']
-           }
+        'actions': ['pydocstyle Deadline']
+    }
 
 
 def task_test():
@@ -96,22 +105,22 @@ def task_test():
 def task_check():
     """Perform all checks."""
     return {
-            'actions': None,
-            'task_dep': ['style', 'docstyle', 'test']
-           }
+        'actions': None,
+        'task_dep': ['style', 'docstyle', 'test']
+    }
 
 
 def task_wheel():
     """Create binary wheel distribution."""
     return {
-            'actions': ['python -m build -w'],
-            'task_dep': ['mo', 'requirements'],
-           }
+        'actions': ['python -m build -w'],
+        'task_dep': ['mo', 'requirements'],
+    }
 
 
 def task_all():
     """Perform all build task."""
     return {
-            'actions': None,
-            'task_dep': ['check', 'build_docs', 'wheel']
-           }
+        'actions': None,
+        'task_dep': ['check', 'build_docs', 'wheel']
+    }
