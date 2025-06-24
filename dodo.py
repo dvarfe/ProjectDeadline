@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
 import glob
-from doit.tools import create_folder
-
-PODEST = 'po'
 
 
 def task_gitclean():
@@ -12,23 +9,15 @@ def task_gitclean():
     }
 
 
-def task_app():
-    """Run application."""
-    import Deadline.main
-    return {
-        'actions': [Deadline.main.main],
-        'task_dep': ['mo'],
-    }
-
-
 def task_build_docs():
     """Make HTML documentation."""
     return {
         'actions': ['sphinx-build -M html docs/sphinx docs/build'],
+        'task_dep': ['run_autodoc']
     }
 
 
-def task_clean_build_docs():
+def task_clean_docs():
     """Remove all documentation build files."""
     return {
         'actions': ['rm -rf docs/build'],
@@ -56,7 +45,6 @@ def task_po():
     return {
         'actions': ['pybabel update --ignore-pot-creation-date -D Deadline -d po -i Deadline.pot'],
         'file_dep': ['Deadline.pot'],
-        'targets': ['po/ru/LC_MESSAGES/Deadline.po'],
     }
 
 
@@ -64,11 +52,10 @@ def task_mo():
     """Compile translations."""
     return {
         'actions': [
-            (create_folder, [f'{PODEST}/ru_RU.UTF-8/LC_MESSAGES']),
             'pybabel compile -D Deadline -d po'
         ],
         'file_dep': ['po/ru_RU.UTF-8/LC_MESSAGES/Deadline.po'],
-        'targets': [f'{PODEST}/ru_RU.UTF-8/LC_MESSAGES/Deadline.mo'],
+        'targets': ['po/ru_RU.UTF-8/LC_MESSAGES/Deadline.mo'],
     }
 
 
