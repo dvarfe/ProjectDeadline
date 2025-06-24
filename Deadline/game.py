@@ -6,8 +6,6 @@ from typing import Dict, List, Optional, Tuple
 import pygame as pg
 from pygame.typing import ColorLike
 
-from .scene import Scene
-
 _podir = "po"
 translation = gettext.translation("Deadline", _podir, fallback=True)
 
@@ -422,7 +420,7 @@ class BackButton(SceneSwitchButton):
     def __init__(
             self,
             game: Game,
-            scene_class: Scene,
+            scene_class,
             size: Vector2 = (120, 120),
             pos: Point = (0, 0),
             anchor: Anchor = Anchor.TOP_LEFT,
