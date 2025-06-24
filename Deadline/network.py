@@ -7,7 +7,7 @@ from typing import List, Optional
 
 from colors import strip_color
 
-from .game import _
+from .localization import _
 
 
 class Network:

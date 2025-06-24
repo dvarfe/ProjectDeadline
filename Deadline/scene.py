@@ -1,7 +1,8 @@
 import abc
 import pygame as pg
 import locale
-from .game import Game, Text, Anchor, SceneSwitchButton, ExitButton, BackButton, ChooseLanguageButton
+from .game import Game, Text, Anchor, TextField, \
+    BackButton, ChooseLanguageButton, SceneSwitchButton, ExitButton, ConnectButton
 from .game import _
 
 
@@ -175,6 +176,47 @@ class ConnectScene(Scene):
     def __init__(self, game):
         super().__init__(game)
         pg.display.set_caption(_('Deadline - Connect'))
+        self.buttons = []
+
+        self.buttons.append(BackButton(
+            game,
+            MainMenu))
+
+        connect_button_text = Text(
+            game,
+            (0, 0),
+            Anchor.CENTRE,
+            _("Connect"),
+            80)
+
+        self.connect_button = ConnectButton(game,
+                                            size=(600, 120),
+                                            pos=(self.game.window_size[0] / 32 * 14, self.game.window_size[1] / 16 * 7),
+                                            anchor=Anchor.CENTRE,
+                                            text=connect_button_text)
+
+        self.ip_field = TextField(game,
+                                  size=(600, 120),
+                                  pos=(self.game.window_size[0] / 32 * 14, self.game.window_size[1] / 16 * 5),
+                                  anchor=Anchor.CENTRE,
+                                  placeholder=_('Enter IP')
+                                  )
+        self.port_field = TextField(game,
+                                    size=(200, 120),
+                                    pos=(self.game.window_size[0] / 32 * 21, self.game.window_size[1] / 16 * 5),
+                                    anchor=Anchor.CENTRE,
+                                    max_length=5,
+                                    placeholder=_('Enter Port')
+                                    )
+        self.buttons += [self.connect_button, self.ip_field, self.port_field]
+
+        self.texts = []
+        self.texts.append(Text(
+            game,
+            (self.game.window_size[0] / 2, self.game.window_size[1] / 8),
+            Anchor.CENTRE,
+            _("Connect"),
+            150))
 
     def run(self):
         self.check_events()
@@ -182,13 +224,27 @@ class ConnectScene(Scene):
         self.draw_scene()
 
     def check_events(self):
-        pass
+        for button in self.buttons:
+            button.check_event()
+        if self.connect_button.mousedown:
+            try:
+                host = int(self.ip_field.value)
+                port = int(self.port_field.value)
+                self.game.network.connect_to_host(host, port)
+                print("Успех!")
+            except Exception as e:
+                print("Ой-ё-ё-юшки, что-то пошло совсем не так!", e)
+            self.connect_button.mousedown = False
+            self.connect_button.mousehold = False
 
     def update_scene(self):
-        pass
+        for object in self.buttons + self.texts:
+            object.update()
 
     def draw_scene(self):
-        self.game.canvas.fill((0, 0, 0))
+        self.game.canvas.fill("white")
+        for object in self.buttons + self.texts:
+            object.draw()
         self.game.blit_screen()
 
 
