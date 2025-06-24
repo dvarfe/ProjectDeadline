@@ -1,8 +1,11 @@
 import enum
 import abc
+import locale
+from typing import Dict, List, Optional
 import pygame as pg
 import pygame.typing as pgt
-from typing import Optional, List, Dict
+from .network import Network
+from Deadline.localization import _
 
 # Typing
 Vector2 = tuple[int, int]
@@ -23,10 +26,7 @@ def get_events_dict() -> Dict[int, List[pg.Event]]:
     events_dict: Dict[int, List[pg.Event]] = {}
 
     for event in events:
-        if event.type not in events_dict:
-            events_dict[event.type] = []
-        events_dict[event.type].append(event)
-
+        events_dict[event.type] = events_dict.get(event.type, []) + [event]
     return events_dict
 
 
@@ -41,6 +41,8 @@ class Game():
         default_font (str): The default font name.
         current_scene (Scene): The currently active scene.
         running (bool): Flag indicating if the game is running.
+        language (str): Language selected. RU or EN.
+        network (Network): class for network communication
     """
 
     def __init__(self, scene_class):
@@ -58,6 +60,7 @@ class Game():
         self.default_font = DEFAULT_FONT
         self.current_scene = scene_class(self)
         self.running: bool = True
+        self.network = Network()
 
     def run(self) -> None:
         """Run the main game loop until self.running becomes False."""
@@ -252,7 +255,7 @@ class Button(abc.ABC):
             size: Vector2,
             pos: Point,
             anchor: Anchor = Anchor.CENTRE,
-            image_paths: Optional[List[str]] = None,
+            image_paths=None,
             text: Optional[Text] = None,
             text_anchor: Anchor = Anchor.CENTRE):
         """Initialize a Button instance.
@@ -396,6 +399,92 @@ class SceneSwitchButton(Button):
             self.game.current_scene = self.scene_class(self.game)
 
 
+class BackButton(SceneSwitchButton):
+    """A Button implementation that brings user back when clicked."""
+
+    def __init__(
+            self,
+            game: Game,
+            scene_class,
+            size: Vector2 = (120, 120),
+            pos: Point = (0, 0),
+            anchor: Anchor = Anchor.TOP_LEFT,
+            image_paths: Optional[List[str]] = None):
+        """Initialize a BackButton.
+
+        Args:
+            game (Game): Reference to the Game instance.
+            scene_class (Scene): The scene class to switch to when clicked.
+            size (Vector2, optional): Size of the button (width, height). Defaults to (120, 120).
+            pos (Point, optional): Position of the button. Defaults to (0, 0).
+            anchor (Anchor, optional): Anchor point for positioning. Defaults to Anchor.TOP_LEFT.
+            image_paths (Optional[List[str]], optional): Paths to button images (optional). Defaults to None.
+        """
+
+        super().__init__(game, scene_class, size, pos, anchor, image_paths)
+        self.arrow_color = "black"
+        self.arrow_polygon = ((100, 55), (100, 65), (40, 65), (40, 75), (15, 60), (40, 45), (40, 55))
+
+    def draw(self):
+        """Draw the button to the game's canvas."""
+        super().draw()
+        pg.draw.polygon(self.game.canvas, self.arrow_color, self.arrow_polygon)
+
+
+class ChooseLanguageButton(Button):
+    """A Button implementation for the language selection drop-down menu."""
+
+    def __init__(
+            self,
+            game: Game,
+            size: Vector2,
+            pos: Point,
+            anchor: Anchor = Anchor.CENTRE):
+        """Initialize a ChooseLanguageButton.
+
+        Args:
+            game (Game): Reference to the Game instance.
+            size (Vector2): Size of the button (width, height).
+            pos (Point): Position of the button.
+            anchor (Anchor, optional): Anchor point for positioning.. Defaults to Anchor.CENTRE.
+        """
+
+        super().__init__(game=game,
+                         size=size,
+                         pos=pos,
+                         anchor=anchor)
+
+        self.pos = pos
+        self.show_options = False
+        self.options = [(("en_US", "UTF-8"), "English"),
+                        (("ru_RU", "UTF-8"), "Русский")]
+
+        cur_locale = locale.getlocale()
+        self.cur_option = 0
+        while self.options[self.cur_option][0] != cur_locale:
+            self.cur_option += 1
+        self.text = Text(
+            game,
+            pos,
+            Anchor.CENTRE,
+            self.options[self.cur_option][1],
+            80)
+
+    def update(self):
+        """Switch locale if clicked."""
+        if self.mousedown:
+            self.cur_option = (self.cur_option + 1) % len(self.options)
+            locale.setlocale(locale.LC_ALL, self.options[self.cur_option][0])
+            self.text = Text(
+                self.game,
+                self.pos,
+                Anchor.CENTRE,
+                self.options[self.cur_option][1],
+                80)
+            self.mousedown = False
+            self.mousehold = False
+
+
 class ExitButton(Button):
     """A Button implementation that exits the game when clicked."""
 
@@ -427,3 +516,120 @@ class ExitButton(Button):
         """Exit game if clicked."""
         if self.mousedown:
             self.game.running = False
+
+
+class TextField:
+    """TextField class to accept user input."""
+
+    def __init__(
+            self,
+            game: Game,
+            size: Vector2,
+            pos: Point,
+            anchor: Anchor,
+            font_size: int = 40,
+            font_color: pgt.ColorLike = (0, 0, 0),
+            bg_color: pgt.ColorLike = (255, 255, 255),
+            border_color: pgt.ColorLike = (200, 200, 200),
+            border_width: int = 2,
+            max_length: int = 32,
+            placeholder: str = ""):
+        """Initialize TextField class.
+
+        Args:
+            game (Game): Reference to the Game instance.
+            size (Vector2): Size of the field (width, height).
+            pos (Point): Position of the field.
+            anchor (Anchor): Anchor point for positioning.
+            font_size (int, optional): Font size. Defaults to 40.
+            font_color (ColorLike, optional): Font color. Defaults to (0, 0, 0).
+            bg_color (ColorLike, optional): Background color. Defaults to (255, 255, 255).
+            border_color (ColorLike, optional): Border color. Defaults to (200, 200, 200).
+            border_width (int, optional): Border width. Defaults to 2.
+            max_length (int, optional): Maximum number of accepted characters. Defaults to 32.
+            placeholder (str, optional): Placeholder value to show in background, while the field is inactive.
+            Defaults to "".
+        """
+        self.game = game
+        self.size = size
+        self.pos = pos
+        self.anchor = anchor
+        self.font_size = font_size
+        self.font_color = font_color
+        self.bg_color = bg_color
+        self.border_color = border_color
+        self.border_width = border_width
+        self.max_length = max_length
+        self.placeholder = placeholder
+
+        self.font = pg.font.Font(None, font_size)
+        self.value = ""
+        self.active = False
+        if len(placeholder) > max_length:
+            print(_("Warning! Placeholder length is larger then max_length of the field!"))
+
+        self.rect = pg.Rect(0, 0, *size)
+        anchor_rect(self.rect, pos, anchor)
+
+        self.cursor_visible = True
+        self.cursor_counter = 0
+        self.cursor_switch_frames = 30
+
+    def check_event(self):
+        self.mousedown = False
+        self.mouseover = self.rect.collidepoint(pg.mouse.get_pos())
+
+        for event in self.game.events.get(pg.MOUSEBUTTONDOWN, []):
+            if event.button == 1:
+                if self.rect.collidepoint(event.pos):
+                    self.active = True
+                    self.mousedown = True
+                else:
+                    self.active = False
+
+        # If the field is active, allow player to enter text
+        if self.active:
+            for event in self.game.events.get(pg.KEYDOWN, []):
+                if event.key == pg.K_BACKSPACE:
+                    self.value = self.value[:-1]
+                elif event.key == pg.K_RETURN:
+                    self.active = False
+                elif event.unicode and len(self.value) < self.max_length and event.key != pg.K_TAB:
+                    self.value += event.unicode
+
+    def update(self):
+        if self.active:
+            self.cursor_counter += 1
+            if self.cursor_counter >= self.cursor_switch_frames:
+                self.cursor_counter = 0
+                self.cursor_visible = not self.cursor_visible
+        else:
+            self.cursor_visible = False
+
+    def draw(self):
+        # Field and border
+        pg.draw.rect(self.game.canvas, self.bg_color, self.rect)
+        pg.draw.rect(self.game.canvas, self.border_color, self.rect, self.border_width)
+
+        # Text inside
+        text = self.value if self.value else self.placeholder
+        color = self.font_color if self.value else (180, 180, 180)
+        text_surface = self.font.render(text, True, color)
+        text_rect = text_surface.get_rect()
+        text_rect.centery = self.rect.centery
+        text_rect.x = self.rect.x + 8  # postition text inside rect
+
+        # Position cursor
+        cursor_x = text_rect.right + 2
+        cursor_y1 = text_rect.top + 3
+        cursor_y2 = text_rect.bottom - 3
+
+        self.game.canvas.blit(text_surface, text_rect)
+
+        if self.active and self.cursor_visible:
+            pg.draw.line(self.game.canvas, self.font_color, (cursor_x, cursor_y1), (cursor_x, cursor_y2), 2)
+
+
+class ConnectButton(Button):
+    def update(self):
+        return super().update()
