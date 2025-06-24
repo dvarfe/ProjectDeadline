@@ -61,6 +61,8 @@ class Game():
         self.current_scene = scene_class(self)
         self.running: bool = True
         self.network = Network()
+        self.err = False
+        self.err_popup = None
 
     def run(self) -> None:
         """Run the main game loop until self.running becomes False."""
@@ -69,7 +71,29 @@ class Game():
             self.events = get_events_dict()
             if pg.QUIT in self.events.keys():
                 self.running = False
-            self.current_scene.run()
+            try:
+                if not self.err:
+                    self.current_scene.run()
+                else:
+                    self.err_popup.run()
+                    if self.err_popup.mousedown:
+                        self.err = False
+                        self.err_popup = None
+            except Exception as e:
+                err_text = Text(
+                    self,
+                    (0, 0),
+                    Anchor.CENTRE,
+                    str(e),
+                    30)
+                self.err_popup = ErrorPopUp(self,
+                                            (1000, 600),
+                                            (self.window_size[0] / 2, self.window_size[1] / 2),
+                                            Anchor.CENTRE,
+                                            None,
+                                            err_text)
+                self.err = True
+
         pg.quit()
 
     def blit_screen(self) -> None:
@@ -633,3 +657,120 @@ class TextField:
 class ConnectButton(Button):
     def update(self):
         return super().update()
+
+
+# class ErrorPopUp:
+
+#     def __init__(
+#             self,
+#             game: Game,
+#             size: Vector2,
+#             pos: Point,
+#             anchor: Anchor = Anchor.CENTRE,
+#             image_paths=None,
+#             text_str: str = ""):
+
+#         self.game = game
+#         self.size = size
+#         self.pos = pos
+#         self.anchor = anchor
+#         self.text = Text(
+#             game,
+#             (0, 0),
+#             Anchor.CENTRE,
+#             text_str,
+#             30)
+
+#         if image_paths:
+#             self.has_image = True
+
+#             image_idle = pg.image.load(image_paths[0])
+#             self.image_idle = pg.transform.scale(image_idle, self.size)
+
+#             image_hover = pg.image.load(image_paths[1])
+#             self.image_hover = pg.transform.scale(image_hover, self.size)
+
+#             image_clicked = pg.image.load(image_paths[2])
+#             self.image_clicked = pg.transform.scale(image_clicked, self.size)
+
+#             self.image = image_idle
+#         else:
+#             self.has_image = False
+
+#             self.color_idle = (170, 170, 170)
+#             self.color_hover = (120, 120, 120)
+#             self.color_clicked = (70, 70, 70)
+
+#             self.color = self.color_idle
+
+#         self.rect = pg.Rect(0, 0, size[0], size[1])
+#         anchor_rect(self.rect, pos, anchor)
+
+#         if len(text_str):
+#             self.text.update(pos=rect_anchor_pos(self.rect, Anchor.CENTRE))
+
+#         self.mouseover = False
+#         self.mousedown = False
+#         self.mousehold = False
+#         self.mouseup = False
+
+#     def run(self):
+#         self.check_event()
+#         self.draw()
+#         self.game.blit_screen()
+
+#     def draw(self):
+#         """Draw the button to the game's canvas."""
+
+#         if self.has_image:
+#             if self.mousehold:
+#                 self.image = self.image_clicked
+#             elif self.mouseover:
+#                 self.image = self.image_hover
+#             else:
+#                 self.image = self.image_idle
+
+#             self.game.canvas.blit(self.image, self.rect)
+#         else:
+#             if self.mousehold:
+#                 self.color = self.color_clicked
+#             elif self.mouseover:
+#                 self.color = self.color_hover
+#             else:
+#                 self.color = self.color_idle
+
+#             pg.draw.rect(self.game.canvas, self.color, self.rect)
+
+#         if self.text:
+#             self.text.draw()
+
+#     def check_event(self):
+#         """Check for mouse events related to the button (hover, click)."""
+
+#         self.mousedown = False
+#         self.mouseup = False
+#         if pg.MOUSEMOTION in self.game.events.keys():
+#             self.mouseover = self.rect.collidepoint(self.game.events[pg.MOUSEMOTION][-1].pos)
+
+#         if self.mouseover and pg.MOUSEBUTTONDOWN in self.game.events.keys():
+#             for event in self.game.events[pg.MOUSEBUTTONDOWN]:
+#                 if event.button == 1:
+#                     self.mousedown = True
+#                     self.mousehold = True
+#                     break
+
+#         if self.mousedown and pg.MOUSEBUTTONUP in self.game.events.keys():
+#             for event in self.game.events[pg.MOUSEBUTTONDOWN]:
+#                 if event.button == 1:
+#                     self.mouseup = True
+#                     self.hold = False
+#                     break
+
+class ErrorPopUp(Button):
+    def run(self):
+        self.check_event()
+        self.draw()
+        self.game.blit_screen()
+
+    def update(self):
+        pass

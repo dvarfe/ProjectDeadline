@@ -284,6 +284,9 @@ class ConnectScene(Scene):
                 print("Успех!")
             except Exception as e:
                 print("Ой-ё-ё-юшки, что-то пошло совсем не так!", e)
+                self.connect_button.mousedown = False
+                self.connect_button.mousehold = False
+                raise Exception(e)
             self.connect_button.mousedown = False
             self.connect_button.mousehold = False
 
