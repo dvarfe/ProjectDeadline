@@ -8,3 +8,6 @@ docs/build
 *.mo
 .coverage
 .mypy_cache
+*.egg-info
+requirements.txt
+dist
