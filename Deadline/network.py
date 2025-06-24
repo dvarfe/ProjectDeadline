@@ -136,7 +136,7 @@ class Network:
             text=True
         )
 
-        thread = threading.Thread(target=self._get_bore_output, args=(process), daemon=True)
+        thread = threading.Thread(target=self._get_bore_output, args=(process,), daemon=True)
         thread.start()
 
     def run_host(self, port: str, use_bore_flag: bool = False) -> None:
