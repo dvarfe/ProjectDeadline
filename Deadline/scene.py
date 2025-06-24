@@ -58,6 +58,7 @@ class MainMenu(Scene):
         button_text = Text(
             game,
             (0, 0),
+            (0, 0),
             Anchor.CENTRE,
             _("Host game"),
             80)
@@ -74,6 +75,7 @@ class MainMenu(Scene):
 
         button_text = Text(
             game,
+            (0, 0),
             (0, 0),
             Anchor.CENTRE,
             _("Connect"),
@@ -92,6 +94,7 @@ class MainMenu(Scene):
         button_text = Text(
             game,
             (0, 0),
+            (0, 0),
             Anchor.CENTRE,
             _("Settings"),
             80)
@@ -108,6 +111,7 @@ class MainMenu(Scene):
 
         button_text = Text(
             game,
+            (0, 0),
             (0, 0),
             Anchor.CENTRE,
             _("Exit"),
@@ -269,6 +273,39 @@ class SettingsScene(Scene):
                                                  (600, 120),
                                                  (self.game.window_size[0] / 2, self.game.window_size[1] / 16 * 9),
                                                  Anchor.CENTRE))
+
+    def run(self):
+        self.check_events()
+        self.update_scene()
+        self.draw_scene()
+
+    def check_events(self):
+        for button in self.buttons:
+            button.check_event()
+        if self.cur_locale != locale.getlocale():
+            self.cur_locale = locale.getlocale()
+            self.texts[0] = Text(
+                self.game,
+                (self.game.window_size[0] / 2, self.game.window_size[1] / 8),
+                Anchor.CENTRE,
+                _("Settings"),
+                150)
+
+    def update_scene(self):
+        for object in self.buttons + self.texts:
+            object.update()
+
+    def draw_scene(self):
+        self.game.canvas.fill("white")
+        for objects in self.buttons + self.texts:
+            objects.draw()
+        self.game.blit_screen()
+
+
+class GameScene(Scene):
+    def __init__(self, game):
+        super().__init__(game)
+        pg.display.set_caption(_('Deadline'))
 
     def run(self):
         self.check_events()

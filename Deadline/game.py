@@ -1,15 +1,14 @@
 import enum
 import abc
 import locale
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 import pygame as pg
-from pygame.typing import ColorLike
+import pygame.typing as pgt
 from .network import Network
 from Deadline.localization import _
 
-
 # Typing
-Vector2 = Tuple[int, int]
+Vector2 = tuple[int, int]
 Point = Vector2
 
 WINDOW_SIZE = (1920, 1080)
@@ -94,7 +93,7 @@ class Anchor(enum.Enum):
     BOTTOM_RIGHT = 5
 
 
-def anchor_rect(rect: pg.rect, pos: Vector2, anchor: Anchor) -> None:
+def anchor_rect(rect: pg.Rect, pos: Vector2, anchor: Anchor) -> None:
     """
     Position a rectangle relative to a given anchor point.
 
@@ -117,7 +116,7 @@ def anchor_rect(rect: pg.rect, pos: Vector2, anchor: Anchor) -> None:
             rect.bottomright = pos
 
 
-def rect_anchor_pos(rect: pg.rect, anchor: Anchor) -> Vector2:
+def rect_anchor_pos(rect: pg.Rect, anchor: Anchor) -> Vector2:
     """
     Get the position of a specific anchor point on a rectangle.
 
@@ -161,13 +160,13 @@ class Text():
 
     def __init__(
             self,
-            game:       Game,
-            pos:        Point,
-            anchor:     Anchor,
-            text:       str,
-            font_size:  int,
-            font_name:  str = DEFAULT_FONT,
-            color:      pg.color = (0, 0, 0)):
+            game: Game,
+            pos: Point,
+            anchor: Anchor,
+            text: str,
+            font_size: int,
+            font_name: str = DEFAULT_FONT,
+            color: pgt.ColorLike = pg.Color(0, 0, 0)):
         """Initialize a Text object.
 
         Args:
@@ -181,17 +180,16 @@ class Text():
         """
 
         self.game = game
-        self.rect = None
         self.update(pos, anchor, text, font_size, font_name, color)
 
     def update(
             self,
-            pos:        Point = None,
-            anchor:     Anchor = None,
-            text:       str = None,
-            font_size:  int = None,
-            font_name:  str = None,
-            color:      pg.color = None) -> None:
+            pos: Optional[Point] = None,
+            anchor: Optional[Anchor] = None,
+            text: Optional[str] = None,
+            font_size: Optional[int] = None,
+            font_name: Optional[str] = None,
+            color: Optional[pgt.ColorLike] = None) -> None:
         """Update the text properties.
 
         Any argument not provided will keep its current value.
@@ -206,30 +204,30 @@ class Text():
             color: New text color.
         """
 
-        update = font_size or font_name
+        update = bool(font_size) or bool(font_name)
         if update:
             if font_size:
                 self.font_size = font_size
             if font_name:
                 self.font_name = font_name
-            self.font = pg.font.Font(font_name, font_size)
+            self.font = pg.font.Font(self.font_name, self.font_size)
 
-        update = update or text or color
+        update = update or bool(text) or bool(color)
         if update:
             if text:
                 self.text = text
             if color:
                 self.color = color
-            self.text_surface = self.font.render(text, True, color)
+            self.text_surface = self.font.render(self.text, True, self.color)
 
-        update = update or pos or anchor
+        update = update or bool(pos) or bool(anchor)
         if update:
             if pos:
                 self.pos = pos
             if anchor:
                 self.anchor = anchor
             self.rect = self.text_surface.get_rect()
-            anchor_rect(self.rect, self. pos, self.anchor)
+            anchor_rect(self.rect, self.pos, self.anchor)
 
     def draw(self):
         """Draw the text surface to the game's canvas."""
@@ -344,10 +342,6 @@ class Button(abc.ABC):
         self.mouseup = False
         if pg.MOUSEMOTION in self.game.events.keys():
             self.mouseover = self.rect.collidepoint(self.game.events[pg.MOUSEMOTION][-1].pos)
-            # if self.mouseover:
-            #     self.color = (120, 120, 120)
-            # else:
-            #     self.color = (170, 170, 170)
 
         if self.mouseover and pg.MOUSEBUTTONDOWN in self.game.events.keys():
             for event in self.game.events[pg.MOUSEBUTTONDOWN]:
@@ -380,8 +374,8 @@ class SceneSwitchButton(Button):
             size: Vector2,
             pos: Point,
             anchor: Anchor = Anchor.CENTRE,
-            image_paths=None,
-            text: Text = None,
+            image_paths: Optional[List[str]] = None,
+            text: Optional[Text] = None,
             text_anchor: Anchor = Anchor.CENTRE):
         """Initialize a SceneSwitchButton.
 
@@ -534,9 +528,9 @@ class TextField:
             pos: Point,
             anchor: Anchor,
             font_size: int = 40,
-            font_color: ColorLike = (0, 0, 0),
-            bg_color: ColorLike = (255, 255, 255),
-            border_color: ColorLike = (200, 200, 200),
+            font_color: pgt.ColorLike = (0, 0, 0),
+            bg_color: pgt.ColorLike = (255, 255, 255),
+            border_color: pgt.ColorLike = (200, 200, 200),
             border_width: int = 2,
             max_length: int = 32,
             placeholder: str = ""):
