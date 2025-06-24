@@ -4,6 +4,7 @@ import locale
 from typing import Dict, List, Optional
 import pygame as pg
 import pygame.typing as pgt
+
 from .network import Network
 from Deadline.localization import _
 
@@ -41,8 +42,7 @@ class Game():
         default_font (str): The default font name.
         current_scene (Scene): The currently active scene.
         running (bool): Flag indicating if the game is running.
-        language (str): Language selected. RU or EN.
-        network (Network): class for network communication
+        network (Network): class for network communication.
     """
 
     def __init__(self, scene_class):
@@ -242,11 +242,9 @@ class Button(abc.ABC):
         size (Vector2): Size of the button (width, height).
         pos (Point): Position of the button.
         anchor (Anchor): Anchor point for positioning.
-        image_path (str): Path to button image (optional).
         text (Text): Text object for the button (optional).
         text_anchor (Anchor): Anchor point for the button text.
         mouseover (bool): Whether the mouse is over the button.
-        clicked (bool): Whether the button was clicked.
     """
 
     def __init__(
@@ -446,7 +444,7 @@ class ChooseLanguageButton(Button):
             game (Game): Reference to the Game instance.
             size (Vector2): Size of the button (width, height).
             pos (Point): Position of the button.
-            anchor (Anchor, optional): Anchor point for positioning.. Defaults to Anchor.CENTRE.
+            anchor (Anchor, optional): Anchor point for positioning. Defaults to Anchor.CENTRE.
         """
 
         super().__init__(game=game,
@@ -497,8 +495,7 @@ class ExitButton(Button):
             image_paths: Optional[List[str]] = None,
             text: Optional[Text] = None,
             text_anchor: Anchor = Anchor.CENTRE):
-        """
-        Initialize a ExitButton.
+        """Initialize an ExitButton.
 
         Args:
             game: Reference to the Game instance.
@@ -548,7 +545,7 @@ class TextField:
             border_width (int, optional): Border width. Defaults to 2.
             max_length (int, optional): Maximum number of accepted characters. Defaults to 32.
             placeholder (str, optional): Placeholder value to show in background, while the field is inactive.
-            Defaults to "".
+                Defaults to "".
         """
         self.game = game
         self.size = size
@@ -617,7 +614,7 @@ class TextField:
         text_surface = self.font.render(text, True, color)
         text_rect = text_surface.get_rect()
         text_rect.centery = self.rect.centery
-        text_rect.x = self.rect.x + 8  # postition text inside rect
+        text_rect.x = self.rect.x + 8  # Position text inside rect
 
         # Position cursor
         cursor_x = text_rect.right + 2
