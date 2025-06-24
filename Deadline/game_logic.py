@@ -16,18 +16,18 @@ class Effect:
                  period: Days, delay: Days, is_removable: bool,
                  init_event: callable, final_event: callable, everyday_event: callable, init_day: Day):
         """
-        An effect applied to the player
+        An effect applied to the player.
 
-        :param name: Effect name
-        :param description: Effect description
-        :param image: Effect image
-        :param period: Duration of the effect
-        :param delay: Delay before the effect starts
-        :param is_removable: Can the player remove the effect or not
-        :param init_event: An event that occurs at the beginning of the effect
-        :param final_event: An event that occurs at the end of the effect
-        :param everyday_event: An event that occurs every day while the effect is active
-        :param init_day: The day when the effect was applied
+        :param name: Effect name.
+        :param description: Effect description.
+        :param image: Effect image.
+        :param period: Duration of the effect.
+        :param delay: Delay before the effect starts.
+        :param is_removable: Can the player remove the effect or not.
+        :param init_event: An event that occurs at the beginning of the effect.
+        :param final_event: An event that occurs at the end of the effect.
+        :param everyday_event: An event that occurs every day while the effect is active.
+        :param init_day: The day when the effect was applied.
         """
         self.name = name
         self.description = description
@@ -46,16 +46,16 @@ class Task:
                  difficulty: Hours, award: Points, penalty: Points,
                  event_on_success: callable, event_on_fail: callable):
         """
-        A task that can be given to a player
+        A task that can be given to a player.
 
-        :param name: Task name
-        :param description: Task description
-        :param image: Task image
-        :param difficulty: The number of hours required to complete the task
-        :param award: The number of points awarded for completing the task
-        :param penalty: The number of points taken away if the task is failed
-        :param event_on_success: An event that occurs if the task is completed
-        :param event_on_fail: An event that occurs if the task is failed
+        :param name: Task name.
+        :param description: Task description.
+        :param image: Task image.
+        :param difficulty: The number of hours required to complete the task.
+        :param award: The number of points awarded for completing the task.
+        :param penalty: The number of points taken away if the task is failed.
+        :param event_on_success: An event that occurs if the task is completed.
+        :param event_on_fail: An event that occurs if the task is failed.
         """
         self.name = name
         self.description = description
@@ -71,11 +71,11 @@ class Card(abc.ABC):
     @abc.abstractmethod
     def __init__(self, name: str, description: str, image: Image):
         """
-        Playing card
+        Playing card.
 
-        :param name: Card name
-        :param description: Card description
-        :param image: Card image
+        :param name: Card name.
+        :param description: Card description.
+        :param image: Card image.
         """
         self.name = name
         self.description = description
@@ -84,7 +84,7 @@ class Card(abc.ABC):
     @abc.abstractmethod
     def get_info(self):
         """
-        Get card information
+        Get card information.
         """
         pass
 
@@ -93,16 +93,16 @@ class ActionCard(Card):
     def __init__(self, name: str, description: str, image: Image, cost: Hours,
                  action: callable, req_args: list[str], check_args: callable):
         """
-        Action card - one of the card types
+        Action card - one of the card types.
 
-        :param name: Card name
-        :param description: Card description
-        :param image: Card image
-        :param cost: The cost of the card in hours
-        :param action: Card action
-        :param req_args: A list of parameter names that the `action` function accepts
+        :param name: Card name.
+        :param description: Card description.
+        :param image: Card image.
+        :param cost: The cost of the card in hours.
+        :param action: Card action.
+        :param req_args: A list of parameter names that the `action` function accepts.
         :param check_args: A function for verifying the correctness of parameters
-            passed to the `action` function
+            passed to the `action` function.
         """
         super().__init__(name, description, image)
         self.cost = cost
@@ -116,7 +116,7 @@ class ActionCard(Card):
 
 class TaskTarget(enum.Enum):
     """
-    Targets for cards
+    Targets for cards.
     """
     ME = 1  # Player
     OPPONENT = 2  # Opponent
@@ -126,13 +126,13 @@ class TaskTarget(enum.Enum):
 class TaskCard(Card):
     def __init__(self, name: str, description: str, image: Image, task: Task, valid_targets: TaskTarget):
         """
-        Task card - one of the card types
+        Task card - one of the card types.
 
-        :param name: Card name
-        :param description: Card description
-        :param image: Card image
-        :param task: A task that is given when the card is played
-        :param valid_targets: Valid targets
+        :param name: Card name.
+        :param description: Card description.
+        :param image: Card image.
+        :param task: A task that is given when the card is played.
+        :param valid_targets: Valid targets.
         """
         super().__init__(name, description, image)
         self.task = task
@@ -148,17 +148,17 @@ class Deadline(Task):
                  event_on_success: callable, event_on_fail: callable,
                  init_day: Day):
         """
-        Player's deadline
+        Player's deadline.
 
-        :param name: Task name
-        :param description: Task description
-        :param image: Task image
-        :param difficulty: The number of hours required to complete the task
-        :param award: The number of points awarded for completing the task
-        :param penalty: The number of points taken away if the task is failed
-        :param event_on_success: An event that occurs if task is completed
-        :param event_on_fail: An event that occurs if task is failed
-        :param init_day: The day when the task was issued
+        :param name: Task name.
+        :param description: Task description.
+        :param image: Task image.
+        :param difficulty: The number of hours required to complete the task.
+        :param award: The number of points awarded for completing the task.
+        :param penalty: The number of points taken away if the task is failed.
+        :param event_on_success: An event that occurs if task is completed.
+        :param event_on_fail: An event that occurs if task is failed.
+        :param init_day: The day when the task was issued.
         """
         super().__init__(name, description, image, difficulty, award, penalty, event_on_success, event_on_fail)
         self.init_day = init_day
@@ -167,15 +167,15 @@ class Deadline(Task):
 
     def work(self, hours: Hours):
         """
-        Work on the task for `hours` hours
+        Work on the task for `hours` hours.
 
-        :param hours: How long to work on the task
+        :param hours: How long to work on the task.
         """
         pass
 
     def new_day(self):
         """
-        Update the deadline when a new day arrives
+        Update the deadline when a new day arrives.
         """
         pass
 
@@ -183,11 +183,11 @@ class Deadline(Task):
 class Player:
     def __init__(self, pid: PlayerID, name: str, hours_in_day: Hours):
         """
-        A player
+        A player.
 
-        :param pid: Player unique identifier
-        :param name: Player name
-        :param hours_in_day: Number of free hours per day
+        :param pid: Player unique identifier.
+        :param name: Player name.
+        :param hours_in_day: Number of free hours per day.
         """
         self.pid = pid
         self.name = name
@@ -201,13 +201,13 @@ class Player:
 
     def use_card(self):
         """
-        Play a card
+        Play a card.
         """
         pass
 
     def manage_time(self):
         """
-        Allocate time for tasks
+        Allocate time for tasks.
         """
         pass
 
@@ -215,12 +215,12 @@ class Player:
 class Game:
     def __init__(self, player_pid: PlayerID, player_name: str, opponent_pid: PlayerID, opponent_name: str):
         """
-        A game. Contains all the data of the current game
+        A game. Contains all the data of the current game.
 
-        :param player_pid: Player unique identifier
-        :param player_name: Player name
-        :param opponent_pid: Opponent unique identifier
-        :param opponent_name: Opponent name
+        :param player_pid: Player unique identifier.
+        :param player_name: Player name.
+        :param opponent_pid: Opponent unique identifier.
+        :param opponent_name: Opponent name.
         """
         self.WIN_THRESHOLD: Points  # The upper score threshold; when it is reached, the player wins
         self.DEFEAT_THRESHOLD: Points  # The lower score threshold; when it is reached, the player loses
@@ -244,24 +244,24 @@ class Game:
 
     def __load_data(self) -> tuple[Points, Points, Days, Hours, tuple[Task, ...], tuple[Effect, ...], tuple[Card, ...]]:
         """
-        Load initial game data
+        Load initial game data.
         """
         pass
 
     def __create_deck(self) -> list[Card]:
         """
-        Create a deck of cards
+        Create a deck of cards.
         """
         pass
 
     def get_new_card(self):
         """
-        Let player pick a new card from the deck
+        Let player pick a new card from the deck.
         """
         pass
 
     def get_targets(self):
         """
-        Get valid targets for an action card
+        Get valid targets for an action card.
         """
         pass
