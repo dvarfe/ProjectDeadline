@@ -1,22 +1,11 @@
 import enum
 import abc
 import locale
-import gettext
 from typing import Dict, List, Optional, Tuple
 import pygame as pg
 from pygame.typing import ColorLike
-
-_podir = "po"
-translation = gettext.translation("Deadline", _podir, fallback=True)
-
-LOCALES = {
-    ("ru_RU", "UTF-8"): gettext.translation("Deadline", _podir, ["ru_RU.UTF-8"]),
-    ("en_US", "UTF-8"): gettext.NullTranslations(),
-}
-
-
-def _(text):
-    return LOCALES[locale.getlocale()].gettext(text)
+from .network import Network
+from Deadline.localization import _
 
 
 # Typing
@@ -54,6 +43,7 @@ class Game():
         current_scene (Scene): The currently active scene.
         running (bool): Flag indicating if the game is running.
         language (str): Language selected. RU or EN.
+        network (Network): class for network communication
     """
 
     def __init__(self, scene_class):
@@ -71,6 +61,7 @@ class Game():
         self.default_font = DEFAULT_FONT
         self.current_scene = scene_class(self)
         self.running: bool = True
+        self.network = Network()
 
     def run(self) -> None:
         """Run the main game loop until self.running becomes False."""
@@ -643,3 +634,8 @@ class TextField:
 
         if self.active and self.cursor_visible:
             pg.draw.line(self.game.canvas, self.font_color, (cursor_x, cursor_y1), (cursor_x, cursor_y2), 2)
+
+
+class ConnectButton(Button):
+    def update(self):
+        return super().update()
