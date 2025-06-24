@@ -95,7 +95,7 @@ msgstr "Создать игру"
 
 #: Deadline/scene.py:224
 msgid "Waiting for connection on "
-msgstr "Ожидание подключения по"
+msgstr "Ожидание подключения по "
 
 #: Deadline/scene.py:250
 msgid "Deadline - Connect"
