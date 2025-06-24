@@ -155,6 +155,41 @@ class HostScene(Scene):
     def __init__(self, game):
         super().__init__(game)
         pg.display.set_caption(_('Deadline - Host game'))
+        self.buttons = []
+
+        self.buttons.append(BackButton(
+            game,
+            MainMenu))
+
+        connect_button_text = Text(
+            game,
+            (0, 0),
+            Anchor.CENTRE,
+            _("Host"),
+            80)
+
+        self.host_button = ConnectButton(game,
+                                         size=(600, 120),
+                                         pos=(self.game.window_size[0] / 32 * 14, self.game.window_size[1] / 16 * 7),
+                                         anchor=Anchor.CENTRE,
+                                         text=connect_button_text)
+
+        self.port_field = TextField(game,
+                                    size=(200, 120),
+                                    pos=(self.game.window_size[0] / 32 * 21, self.game.window_size[1] / 16 * 5),
+                                    anchor=Anchor.CENTRE,
+                                    max_length=5,
+                                    placeholder=_('Enter Port')
+                                    )
+
+        self.buttons += [self.host_button, self.port_field]
+        self.texts = []
+        self.texts.append(Text(
+            game,
+            (self.game.window_size[0] / 2, self.game.window_size[1] / 8),
+            Anchor.CENTRE,
+            _("Host Game"),
+            150))
 
     def run(self):
         self.check_events()
@@ -162,13 +197,28 @@ class HostScene(Scene):
         self.draw_scene()
 
     def check_events(self):
-        pass
+        for button in self.buttons:
+            button.check_event()
+        if self.host_button.mousedown:
+            try:
+                port = int(self.port_field.value)
+                self.game.network.run_host(port)
+                print("Успех!")
+            except Exception as e:
+                print("Ой-ё-ё-юшки, что-то пошло совсем не так!", e)
+            self.host_button.mousedown = False
+            self.host_button.mousehold = False
 
     def update_scene(self):
-        pass
+        for object in self.buttons + self.texts:
+            object.update()
+        if self.game.network.connection:
+            self.game.current_scene = GameScene(self.game)
 
     def draw_scene(self):
-        self.game.canvas.fill((0, 0, 0))
+        self.game.canvas.fill("white")
+        for object in self.buttons + self.texts:
+            object.draw()
         self.game.blit_screen()
 
 
@@ -228,7 +278,7 @@ class ConnectScene(Scene):
             button.check_event()
         if self.connect_button.mousedown:
             try:
-                host = int(self.ip_field.value)
+                host = self.ip_field.value
                 port = int(self.port_field.value)
                 self.game.network.connect_to_host(host, port)
                 print("Успех!")
@@ -240,6 +290,8 @@ class ConnectScene(Scene):
     def update_scene(self):
         for object in self.buttons + self.texts:
             object.update()
+        if self.game.network.connection:
+            self.game.current_scene = GameScene(self.game)
 
     def draw_scene(self):
         self.game.canvas.fill("white")
@@ -309,26 +361,14 @@ class GameScene(Scene):
         self.draw_scene()
 
     def check_events(self):
-        for button in self.buttons:
-            button.check_event()
-        if self.cur_locale != locale.getlocale():
-            self.cur_locale = locale.getlocale()
-            self.texts[0] = Text(
-                self.game,
-                (self.game.window_size[0] / 2, self.game.window_size[1] / 8),
-                Anchor.CENTRE,
-                _("Settings"),
-                150)
-
-    def update_scene(self):
-        for object in self.buttons + self.texts:
-            object.update()
+        pass
 
     def draw_scene(self):
-        self.game.canvas.fill("white")
-        for objects in self.buttons + self.texts:
-            objects.draw()
+        self.game.canvas.fill((0, 0, 0))
         self.game.blit_screen()
+
+    def update_scene(self):
+        pass
 
 
 class EmptyScene(Scene):
