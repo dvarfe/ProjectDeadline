@@ -80,6 +80,13 @@ class Card(abc.ABC):
         self.description = description
         self.image = image
 
+    @abc.abstractmethod
+    def get_info(self):
+        """
+        Get card information
+        """
+        pass
+
 
 class ActionCard(Card):
     def __init__(self, name: str, description: str, image: Image, cost: Hours,
@@ -101,6 +108,9 @@ class ActionCard(Card):
         self.action = action
         self.req_args = req_args
         self.check_args = check_args
+
+    def get_info(self):
+        pass
 
 
 class TaskTarget(enum.Enum):
@@ -126,6 +136,9 @@ class TaskCard(Card):
         super().__init__(name, description, image)
         self.task = task
         self.valid_targets = valid_targets
+
+    def get_info(self):
+        pass
 
 
 class Deadline(Task):
