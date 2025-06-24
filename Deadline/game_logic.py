@@ -1,6 +1,7 @@
 import abc
 import enum
 
+
 # Typing
 Day = int
 Days = int

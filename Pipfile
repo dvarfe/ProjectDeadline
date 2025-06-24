@@ -5,9 +5,17 @@ name = "pypi"
 
 [packages]
 flake8 = "*"
+ansicolors = "*"
+sphinx = "*"
+doit = "*"
+babel = "*"
+pygame-ce = "*"
 
 [dev-packages]
 pre-commit = "*"
+pydocstyle = "*"
+coverage = "*"
+build = "*"
 
 [requires]
-python_version = "3.12"
+python_version = "3.13"
