@@ -19,19 +19,85 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.17.0\n"
 
-#: Deadline/game_logic.py:360
+#: Deadline/game.py:569
+msgid "Warning! Placeholder length is larger then max_length of the field!"
+msgstr ""
+"Внимание! Длина информационного сообщения больше, чем допустимая длина "
+"ввода!"
+
+#: Deadline/network.py:104
 msgid "Bore failed: "
 msgstr "Ошибка запуска bore:"
 
-#: Deadline/game_logic.py:372
+#: Deadline/network.py:116
 msgid "Error reading bore output:"
 msgstr "Ошибка при парсинге вывода bore:"
 
-#: Deadline/game_logic.py:375
+#: Deadline/network.py:119
 msgid "Bore tunnel setup timed out"
 msgstr "Время установления соединения истекло"
 
-#: Deadline/game_logic.py:463
+#: Deadline/network.py:207
 msgid "Error checking for message:"
 msgstr "Ошибка при получении сообщения:"
+
+#: Deadline/network.py:258
+msgid "Error closing client socket:"
+msgstr "Ошибочное закрытие сокета клиента"
+
+#: Deadline/network.py:270
+msgid "Error closing server socket:"
+msgstr "Ошибочное закрытие сокета сервера"
+
+#: Deadline/scene.py:49
+msgid "Deadline - Main menu"
+msgstr "Deadline - Главное меню"
+
+#: Deadline/scene.py:55 Deadline/scene.py:356
+msgid "Deadline"
+msgstr "Deadline"
+
+#: Deadline/scene.py:62
+msgid "Host game"
+msgstr "Создать игру"
+
+#: Deadline/scene.py:79 Deadline/scene.py:239 Deadline/scene.py:268
+msgid "Connect"
+msgstr "Подключиться"
+
+#: Deadline/scene.py:96 Deadline/scene.py:314 Deadline/scene.py:339
+msgid "Settings"
+msgstr "Настройки"
+
+#: Deadline/scene.py:113
+msgid "Exit"
+msgstr "Выход"
+
+#: Deadline/scene.py:157
+msgid "Deadline - Host game"
+msgstr "Deadline - Создать игру"
+
+#: Deadline/scene.py:168
+msgid "Host"
+msgstr "Создать игру"
+
+#: Deadline/scene.py:182 Deadline/scene.py:259
+msgid "Enter Port"
+msgstr "Порт"
+
+#: Deadline/scene.py:191
+msgid "Host Game"
+msgstr "Создать игру"
+
+#: Deadline/scene.py:228
+msgid "Deadline - Connect"
+msgstr "Deadline - Подключиться"
+
+#: Deadline/scene.py:252
+msgid "Enter IP"
+msgstr "Введите IP"
+
+#: Deadline/scene.py:306
+msgid "Deadline - Settings"
+msgstr "Deadline - Настройки"
 
