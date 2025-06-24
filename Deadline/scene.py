@@ -58,7 +58,6 @@ class MainMenu(Scene):
         button_text = Text(
             game,
             (0, 0),
-            (0, 0),
             Anchor.CENTRE,
             _("Host game"),
             80)
@@ -75,7 +74,6 @@ class MainMenu(Scene):
 
         button_text = Text(
             game,
-            (0, 0),
             (0, 0),
             Anchor.CENTRE,
             _("Connect"),
@@ -94,7 +92,6 @@ class MainMenu(Scene):
         button_text = Text(
             game,
             (0, 0),
-            (0, 0),
             Anchor.CENTRE,
             _("Settings"),
             80)
@@ -111,7 +108,6 @@ class MainMenu(Scene):
 
         button_text = Text(
             game,
-            (0, 0),
             (0, 0),
             Anchor.CENTRE,
             _("Exit"),
