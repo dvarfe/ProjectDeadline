@@ -10,6 +10,7 @@ sphinx = "*"
 doit = "*"
 babel = "*"
 pygame-ce = "*"
+sphinx-rtd-theme = "*"
 
 [dev-packages]
 pre-commit = "*"
