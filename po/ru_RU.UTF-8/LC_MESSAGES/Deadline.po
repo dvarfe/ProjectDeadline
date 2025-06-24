@@ -19,7 +19,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.17.0\n"
 
-#: Deadline/game.py:569
+#: Deadline/game.py:593
 msgid "Warning! Placeholder length is larger then max_length of the field!"
 msgstr ""
 "Внимание! Длина информационного сообщения больше, чем допустимая длина "
@@ -53,7 +53,7 @@ msgstr "Ошибочное закрытие сокета сервера"
 msgid "Deadline - Main menu"
 msgstr "Deadline - Главное меню"
 
-#: Deadline/scene.py:55 Deadline/scene.py:356
+#: Deadline/scene.py:55 Deadline/scene.py:381
 msgid "Deadline"
 msgstr "Deadline"
 
@@ -61,11 +61,11 @@ msgstr "Deadline"
 msgid "Host game"
 msgstr "Создать игру"
 
-#: Deadline/scene.py:79 Deadline/scene.py:239 Deadline/scene.py:268
+#: Deadline/scene.py:79 Deadline/scene.py:261 Deadline/scene.py:290
 msgid "Connect"
 msgstr "Подключиться"
 
-#: Deadline/scene.py:96 Deadline/scene.py:314 Deadline/scene.py:339
+#: Deadline/scene.py:96 Deadline/scene.py:339 Deadline/scene.py:364
 msgid "Settings"
 msgstr "Настройки"
 
@@ -77,27 +77,35 @@ msgstr "Выход"
 msgid "Deadline - Host game"
 msgstr "Deadline - Создать игру"
 
-#: Deadline/scene.py:168
+#: Deadline/scene.py:169
+msgid "Use Bore for connection"
+msgstr "Использовать для подключения Bore"
+
+#: Deadline/scene.py:179
 msgid "Host"
 msgstr "Создать игру"
 
-#: Deadline/scene.py:182 Deadline/scene.py:259
+#: Deadline/scene.py:193 Deadline/scene.py:281
 msgid "Enter Port"
 msgstr "Порт"
 
-#: Deadline/scene.py:191
+#: Deadline/scene.py:202
 msgid "Host Game"
 msgstr "Создать игру"
 
-#: Deadline/scene.py:228
+#: Deadline/scene.py:224
+msgid "Waiting for connection on "
+msgstr "Ожидание подключения по"
+
+#: Deadline/scene.py:250
 msgid "Deadline - Connect"
 msgstr "Deadline - Подключиться"
 
-#: Deadline/scene.py:252
+#: Deadline/scene.py:274
 msgid "Enter IP"
 msgstr "Введите IP"
 
-#: Deadline/scene.py:306
+#: Deadline/scene.py:331
 msgid "Deadline - Settings"
 msgstr "Deadline - Настройки"
 
