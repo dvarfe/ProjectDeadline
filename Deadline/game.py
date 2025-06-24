@@ -61,6 +61,8 @@ class Game():
         self.current_scene = scene_class(self)
         self.running: bool = True
         self.network = Network()
+        self.err = False
+        self.err_popup = None
 
     def run(self) -> None:
         """Run the main game loop until self.running becomes False."""
@@ -69,7 +71,29 @@ class Game():
             self.events = get_events_dict()
             if pg.QUIT in self.events.keys():
                 self.running = False
-            self.current_scene.run()
+            try:
+                if not self.err:
+                    self.current_scene.run()
+                else:
+                    self.err_popup.run()
+                    if self.err_popup.mousedown:
+                        self.err = False
+                        self.err_popup = None
+            except Exception as e:
+                err_text = Text(
+                    self,
+                    (0, 0),
+                    Anchor.CENTRE,
+                    str(e),
+                    30)
+                self.err_popup = ErrorPopUp(self,
+                                            (1000, 600),
+                                            (self.window_size[0] / 2, self.window_size[1] / 2),
+                                            Anchor.CENTRE,
+                                            None,
+                                            err_text)
+                self.err = True
+
         pg.quit()
 
     def blit_screen(self) -> None:
@@ -633,3 +657,68 @@ class TextField:
 class ConnectButton(Button):
     def update(self):
         return super().update()
+
+
+class CheckBoxButton(Button):
+    """Checkbox button."""
+
+    def __init__(
+            self,
+            game: Game,
+            size: Vector2,
+            pos: Point,
+            anchor: Anchor = Anchor.CENTRE,
+            image_paths=None,
+            text: Optional[Text] = None,
+            text_anchor: Anchor = Anchor.CENTRE):
+        super().__init__(game,
+                         size,
+                         pos,
+                         anchor,
+                         image_paths,
+                         text,
+                         text_anchor)
+        self.clicked = False
+        self.tick_color = "black"
+        match anchor:
+            case Anchor.TOP_LEFT:
+                pos_top_left = pos
+            case  Anchor.TOP_RIGHT:
+                pos_top_left = (pos[0] - size[0], pos[1])
+            case Anchor.BOTTOM_LEFT:
+                pos_top_left = (pos[0], pos[1] - size[1])
+            case Anchor.BOTTOM_RIGHT:
+                pos_top_left = (pos[0] - size[0], pos[1] - size[1])
+            case Anchor.CENTRE:
+                pos_top_left = (pos[0] - size[0] // 2, pos[1] - size[1] // 2)
+
+        self.tick_polygon = (
+                            (pos_top_left[0] + size[0] // 10, pos_top_left[1] + size[1] // 10),
+                            (pos_top_left[0] + size[0] // 10 * 9, pos_top_left[1] + size[1] // 10),
+                            (pos_top_left[0] + size[0] // 10 * 9, pos_top_left[1] + size[1] // 10 * 9),
+                            (pos_top_left[0] + size[0] // 10, pos_top_left[1] + size[1] // 10 * 9),
+
+        )
+
+    def draw(self):
+        super().draw()
+        if self.clicked:
+            pg.draw.polygon(self.game.canvas, self.tick_color, self.tick_polygon)
+
+    def update(self):
+        if self.mousedown:
+            self.clicked = not self.clicked
+            self.mousedown = False
+            self.mousehold = False
+
+
+class ErrorPopUp(Button):
+    """Class representing error popup message."""
+
+    def run(self):
+        self.check_event()
+        self.draw()
+        self.game.blit_screen()
+
+    def update(self):
+        pass
