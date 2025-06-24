@@ -659,6 +659,59 @@ class ConnectButton(Button):
         return super().update()
 
 
+class CheckBoxButton(Button):
+    """Checkbox button."""
+
+    def __init__(
+            self,
+            game: Game,
+            size: Vector2,
+            pos: Point,
+            anchor: Anchor = Anchor.CENTRE,
+            image_paths=None,
+            text: Optional[Text] = None,
+            text_anchor: Anchor = Anchor.CENTRE):
+        super().__init__(game,
+                         size,
+                         pos,
+                         anchor,
+                         image_paths,
+                         text,
+                         text_anchor)
+        self.clicked = False
+        self.tick_color = "black"
+        match anchor:
+            case Anchor.TOP_LEFT:
+                pos_top_left = pos
+            case  Anchor.TOP_RIGHT:
+                pos_top_left = (pos[0] - size[0], pos[1])
+            case Anchor.BOTTOM_LEFT:
+                pos_top_left = (pos[0], pos[1] - size[1])
+            case Anchor.BOTTOM_RIGHT:
+                pos_top_left = (pos[0] - size[0], pos[1] - size[1])
+            case Anchor.CENTRE:
+                pos_top_left = (pos[0] - size[0] // 2, pos[1] - size[1] // 2)
+
+        self.tick_polygon = (
+                            (pos_top_left[0] + size[0] // 10, pos_top_left[1] + size[1] // 10),
+                            (pos_top_left[0] + size[0] // 10 * 9, pos_top_left[1] + size[1] // 10),
+                            (pos_top_left[0] + size[0] // 10 * 9, pos_top_left[1] + size[1] // 10 * 9),
+                            (pos_top_left[0] + size[0] // 10, pos_top_left[1] + size[1] // 10 * 9),
+
+        )
+
+    def draw(self):
+        super().draw()
+        if self.clicked:
+            pg.draw.polygon(self.game.canvas, self.tick_color, self.tick_polygon)
+
+    def update(self):
+        if self.mousedown:
+            self.clicked = not self.clicked
+            self.mousedown = False
+            self.mousehold = False
+
+
 class ErrorPopUp(Button):
     """Class representing error popup message."""
 

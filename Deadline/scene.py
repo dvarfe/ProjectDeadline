@@ -2,7 +2,7 @@ import abc
 import pygame as pg
 import locale
 from .game import Game, Text, Anchor, TextField, \
-    BackButton, ChooseLanguageButton, SceneSwitchButton, ExitButton, ConnectButton
+    BackButton, ChooseLanguageButton, SceneSwitchButton, ExitButton, ConnectButton, CheckBoxButton
 from .game import _
 
 
@@ -161,6 +161,17 @@ class HostScene(Scene):
             game,
             MainMenu))
 
+        checkbox_pos = self.game.window_size[0] / 32 * 11, self.game.window_size[1] / 16 * 8
+        checkbox_text = Text(
+            game,
+            (checkbox_pos[0] + 70, checkbox_pos[1] + 15),
+            Anchor.TOP_LEFT,
+            _("Use Bore for connection"),
+            30)
+        self.bore_checkbox = CheckBoxButton(game,
+                                            size=(60, 60),
+                                            pos=checkbox_pos,
+                                            anchor=Anchor.TOP_LEFT)
         connect_button_text = Text(
             game,
             (0, 0),
@@ -170,19 +181,19 @@ class HostScene(Scene):
 
         self.host_button = ConnectButton(game,
                                          size=(600, 120),
-                                         pos=(self.game.window_size[0] / 32 * 14, self.game.window_size[1] / 16 * 7),
+                                         pos=(self.game.window_size[0] / 32 * 16, self.game.window_size[1] / 16 * 7),
                                          anchor=Anchor.CENTRE,
                                          text=connect_button_text)
 
         self.port_field = TextField(game,
                                     size=(200, 120),
-                                    pos=(self.game.window_size[0] / 32 * 21, self.game.window_size[1] / 16 * 5),
+                                    pos=(self.game.window_size[0] / 32 * 16, self.game.window_size[1] / 16 * 5),
                                     anchor=Anchor.CENTRE,
                                     max_length=5,
                                     placeholder=_('Enter Port')
                                     )
 
-        self.buttons += [self.host_button, self.port_field]
+        self.buttons += [self.host_button, self.port_field, self.bore_checkbox]
         self.texts = []
         self.texts.append(Text(
             game,
@@ -190,6 +201,7 @@ class HostScene(Scene):
             Anchor.CENTRE,
             _("Host Game"),
             150))
+        self.texts.append(checkbox_text)
 
     def run(self):
         self.check_events()
@@ -202,12 +214,22 @@ class HostScene(Scene):
         if self.host_button.mousedown:
             try:
                 port = int(self.port_field.value)
-                self.game.network.run_host(port)
+                self.game.network.run_host(port, use_bore_flag=self.bore_checkbox.clicked)
                 print("Успех!")
             except Exception as e:
                 print("Ой-ё-ё-юшки, что-то пошло совсем не так!", e)
             self.host_button.mousedown = False
             self.host_button.mousehold = False
+        if self.game.network.external_port:
+            waiting_for_connection_msg = _("Waiting for connection on ") + \
+                str(self.game.network.external_ip) + ":" + str(self.game.network.external_port)
+            waiting_for_connection_text = Text(
+                self.game,
+                (self.game.window_size[0] / 2, self.game.window_size[1] / 4 * 3),
+                Anchor.CENTRE,
+                waiting_for_connection_msg,
+                40)
+            self.texts.append(waiting_for_connection_text)
 
     def update_scene(self):
         for object in self.buttons + self.texts:
