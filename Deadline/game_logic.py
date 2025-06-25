@@ -240,10 +240,10 @@ class Player:
         self.free_hours_today = hours_in_day
 
         self.score: Points = 0  # Player score
-        self.hand: list[Card] = []  # Player's cards
+        self.hand: list[CardID] = []  # Player's cards
         self.deadlines: list[Deadline] = []  # Player deadlines
-        self.effects: list[Effect] = []  # Effects applied to the player
-        self.delayed_effects: dict[Day, list[Effect]] = {}  # Delayed effects by the days when they start
+        self.effects: list[EffectID] = []  # Effects applied to the player
+        self.delayed_effects: dict[Day, list[EffectID]] = {}  # Delayed effects by the days when they start
 
     def __str__(self) -> str:
         return f'\nPlayer {self.name}\n' \
@@ -261,6 +261,14 @@ class Player:
                f'effects {self.effects} ' \
                f'delayed_effects {self.delayed_effects}'
 
+    def get_cards_from_deck(self, cards: list[CardID]):
+        """
+        Get new cards from deck.
+
+        :param cards: Cards ids.
+        """
+        self.hand += cards
+
     def use_card(self):
         """
         Play a card.
@@ -275,14 +283,16 @@ class Player:
 
 
 class Game:
-    def __init__(self, player_name: str, opponent_name: str):
+    def __init__(self, player_name: str, opponent_name: str, is_first: bool):
         """
         A game. Contains all the data of the current game.
 
         :param player_name: Player name.
         :param opponent_name: Opponent name.
+        :param is_first: 1 if the player plays first.
         """
         self.DECK_SIZE: int  # Number of cards in deck
+        self.HAND_SIZE: int  # Number of cards in players hand
         self.WIN_THRESHOLD: Points  # Upper score threshold; when it is reached, the player wins
         self.DEFEAT_THRESHOLD: Points  # Lower score threshold; when it is reached, the player loses
         self.DAYS_IN_TERM: Days  # Number of days in a term; the session starts after that number of days
@@ -292,14 +302,18 @@ class Game:
         self.ALL_CARDS: tuple[Card, ...]  # All cards in the game
         # Load game data
         self.__load_data()
+        self.__check_consistency()
 
         self.player: Player = Player(player_name, self.HOURS_IN_DAY_DEFAULT)  # Player
         self.opponent: Player = Player(opponent_name, self.HOURS_IN_DAY_DEFAULT)  # Opponent
 
+        self.is_first = is_first  # 1 if the player plays first
         self.day: Day = 1  # Day number
         self.have_exams: bool = False  # True when players have exams
         self.effects: list[EffectID] = []  # Effects affecting both players
         self.deck: list[CardID] = self.__create_deck()  # Deck of cards
+
+        self.__deal_cards()
 
     def __load_data(self):
         """
@@ -307,9 +321,15 @@ class Game:
         """
         with open(GAME_CONFIG_FN, 'r') as f:
             data = json.load(f)
+
+        self.HAND_SIZE = data['HAND_SIZE']
         self.DECK_SIZE = data['DECK_SIZE']
+        assert self.DECK_SIZE >= 2 * self.HAND_SIZE
+        assert self.HAND_SIZE > 0
         self.WIN_THRESHOLD = data['WIN_THRESHOLD']
         self.DEFEAT_THRESHOLD = data['DEFEAT_THRESHOLD']
+        assert self.WIN_THRESHOLD > self.DEFEAT_THRESHOLD
+        assert self.WIN_THRESHOLD > 0
         self.DAYS_IN_TERM = data['DAYS_IN_TERM']
         self.HOURS_IN_DAY_DEFAULT = data['HOURS_IN_DAY_DEFAULT']
         self.ALL_EFFECTS = [Effect(**dct) for dct in data['effects']]
@@ -318,6 +338,7 @@ class Game:
                          [ActionCard(**dct) for dct in data['action_cards']]
 
         """
+        print(self.HAND_SIZE)
         print(self.DECK_SIZE)
         print(self.WIN_THRESHOLD)
         print(self.DEFEAT_THRESHOLD)
@@ -328,11 +349,30 @@ class Game:
         print(self.ALL_CARDS)
         #"""
 
+    def __check_consistency(self):
+        """
+        Check the consistency of configurations between players.
+        """
+        pass
+
     def __create_deck(self) -> list[CardID]:
         """
         Create a deck of cards.
         """
         return random.choices([card for card in self.ALL_CARDS if not card.special], k=self.DECK_SIZE)
+
+    def __deal_cards(self):
+        """
+        Deal cards to players.
+        """
+        def deal_to_one_player(player: Player):
+            player.get_cards_from_deck(self.deck[:self.HAND_SIZE])
+            self.deck = self.deck[self.HAND_SIZE:]
+
+        if self.is_first:
+            deal_to_one_player(self.player), deal_to_one_player(self.opponent)
+        else:
+            deal_to_one_player(self.opponent), deal_to_one_player(self.player)
 
     def get_new_card(self):
         """
