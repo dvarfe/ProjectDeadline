@@ -140,9 +140,9 @@ class Card(abc.ABC):
         return f'{self.cid} "{self.name}"'
 
     @abc.abstractmethod
-    def get_info(self):
+    def apply(self, target):
         """
-        Get card information.
+        Apply card to target.
         """
         pass
 
@@ -165,8 +165,21 @@ class TaskCard(Card):
         super().__init__(cid, name, description, image, valid_target, special)
         self.tasks = tasks
 
-    def get_info(self):
-        pass
+    def apply(self, target: CardTarget):
+        """
+        Apply card to target.
+        """
+        match target:
+            case 'GLOBAL':
+                pass
+            case 'OPPONENT':
+                pass
+            case 'PLAYER':
+                pass
+            case 'ANY':
+                pass
+            case _:
+                pass
 
 
 class ActionCard(Card):
@@ -195,8 +208,21 @@ class ActionCard(Card):
         self.req_args = req_args
         self.check_args = check_args
 
-    def get_info(self):
-        pass
+    def apply(self, target):
+        """
+        Apply card to target.
+        """
+        match target:
+            case 'GLOBAL':
+                pass
+            case 'OPPONENT':
+                pass
+            case 'PLAYER':
+                pass
+            case 'ANY':
+                pass
+            case _:
+                pass
 
 
 class Deadline:
@@ -269,11 +295,14 @@ class Player:
         """
         self.hand += cards
 
-    def use_card(self):
+    def use_card(self, idx: int) -> str:
         """
-        Play a card.
+        Use a card.
+
+        :return: Card ID to use a card.
         """
-        pass
+        assert 0 <= idx < len(self.hand)
+        return self.hand.pop(idx)
 
     def manage_time(self):
         """
@@ -400,8 +429,27 @@ class Game:
         """
         self.player.get_cards_from_deck([self.deck.pop(0)])
 
+    def get_hand_info(self) -> list[CardID]:
+        """
+        Get list of card ids in player hand.
+        """
+        return self.player.hand
+
+    def get_card_info(self, cid: CardID) -> Card:
+        """
+        Get card info by card id.
+        """
+        return self.ALL_CARDS[cid]
+
     def get_targets(self):
         """
         Get valid targets for an action card.
         """
         pass
+
+    def use_card(self, card_idx_in_hand: int, target: CardTarget):
+        """
+        Use a card from hand.
+        """
+        cid = self.player.use_card(card_idx_in_hand)
+        self.ALL_CARDS[cid].apply(target)
