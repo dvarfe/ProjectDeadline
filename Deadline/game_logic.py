@@ -441,11 +441,23 @@ class Game:
         """
         return self.ALL_CARDS[cid]
 
-    def get_targets(self):
+    def get_card_type(self, cid: CardID) -> str:
+        """
+        Get card type: TaskCard or ActionCard.
+
+        :return: string 'TaskCard' or 'ActionCard'.
+        """
+        if isinstance(self.ALL_CARDS[cid], TaskCard):
+            return 'TaskCard'
+        if isinstance(self.ALL_CARDS[cid], ActionCard):
+            return 'ActionCard'
+        raise TypeError
+
+    def get_targets(self, cid: CardID) -> CardTarget:
         """
         Get valid targets for an action card.
         """
-        pass
+        return self.get_card_info(cid).valid_target
 
     def use_card(self, card_idx_in_hand: int, target: CardTarget):
         """
