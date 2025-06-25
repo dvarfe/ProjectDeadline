@@ -300,7 +300,7 @@ class Game:
         self.ALL_EFFECTS: tuple[Effect, ...]  # All effects in the game
         self.ALL_TASKS: tuple[Task, ...]  # All tasks in the game
         self.ALL_CARDS: tuple[Card, ...]  # All cards in the game
-        # Load game data
+        # Load basic game data
         self.__load_data()
         self.__check_consistency()
 
@@ -311,13 +311,14 @@ class Game:
         self.day: Day = 1  # Day number
         self.have_exams: bool = False  # True when players have exams
         self.effects: list[EffectID] = []  # Effects affecting both players
-        self.deck: list[CardID] = self.__create_deck()  # Deck of cards
+        self.deck: list[CardID]  # Deck of cards
 
+        self.__create_deck()
         self.__deal_cards()
 
     def __load_data(self):
         """
-        Load initial game data.
+        Load basic game data.
         """
         with open(GAME_CONFIG_FN, 'r') as f:
             data = json.load(f)
@@ -355,11 +356,16 @@ class Game:
         """
         pass
 
-    def __create_deck(self) -> list[CardID]:
+    def __create_deck(self):
         """
-        Create a deck of cards.
+        First player creates a deck of cards and share it with the second one.
         """
-        return random.choices([card for card in self.ALL_CARDS if not card.special], k=self.DECK_SIZE)
+        if self.is_first:
+            self.deck = random.choices([card for card in self.ALL_CARDS if not card.special], k=self.DECK_SIZE)
+            # todo: send deck
+        else:
+            # todo: receive deck
+            pass
 
     def __deal_cards(self):
         """
