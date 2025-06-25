@@ -1,6 +1,5 @@
 import os
 import abc
-import enum
 import json
 import random
 
@@ -15,7 +14,7 @@ Event = str
 EffectID = str
 TaskID = str
 CardID = str
-
+CardTarget = str  # GLOBAL, PLAYER, OPPONENT, ANY
 
 # Global constants
 GAME_CONFIG_FN = os.path.join('Deadline', 'game_config.json')
@@ -54,7 +53,7 @@ class Effect:
 class Task:
     def __init__(self, tid: TaskID, name: str, description: str, image: Image,
                  difficulty: Hours, deadline: Days, award: Points, penalty: Points,
-                 event_on_success: callable, event_on_fail: callable):
+                 events_on_success: list[Event], events_on_fail: list[Event]):
         """
         A task that can be given to a player.
 
@@ -66,8 +65,8 @@ class Task:
         :param deadline: Number of days to complete the task.
         :param award: Number of points awarded for completing the task.
         :param penalty: Number of points taken away if the task is failed.
-        :param event_on_success: An event that occurs if the task is completed.
-        :param event_on_fail: An event that occurs if the task is failed.
+        :param events_on_success: Events that occur if the task is completed.
+        :param events_on_fail: Events that occur if the task is failed.
         """
         self.tid = tid
         self.name = name
@@ -77,13 +76,13 @@ class Task:
         self.deadline = deadline
         self.award = award
         self.penalty = penalty
-        self.event_on_success = event_on_success
-        self.event_on_fail = event_on_fail
+        self.events_on_success = events_on_success
+        self.events_on_fail = events_on_fail
 
 
 class Card(abc.ABC):
     @abc.abstractmethod
-    def __init__(self, cid: CardID, name: str, description: str, image: Image):
+    def __init__(self, cid: CardID, name: str, description: str, image: Image, valid_target: CardTarget):
         """
         Playing card.
 
@@ -91,11 +90,13 @@ class Card(abc.ABC):
         :param name: Card name.
         :param description: Card description.
         :param image: Card image.
+        :param valid_target: Valid targets.
         """
         self.cid = cid
         self.name = name
         self.description = description
         self.image = image
+        self.valid_target = valid_target
 
     @abc.abstractmethod
     def get_info(self):
@@ -105,17 +106,9 @@ class Card(abc.ABC):
         pass
 
 
-class TaskTarget(enum.Enum):
-    """
-    Targets for cards.
-    """
-    ME = 1  # Player
-    OPPONENT = 2  # Opponent
-    BOTH = 3  # Player or his opponent
-
-
 class TaskCard(Card):
-    def __init__(self, cid: CardID, name: str, description: str, image: Image, task: Task, valid_targets: TaskTarget):
+    def __init__(self, cid: CardID, name: str, description: str, image: Image, valid_target: CardTarget,
+                 tasks: list[TaskID]):
         """
         Task card - one of the card types.
 
@@ -123,20 +116,20 @@ class TaskCard(Card):
         :param name: Card name.
         :param description: Card description.
         :param image: Card image.
-        :param task: A task that is given when the card is played.
-        :param valid_targets: Valid targets.
+        :param valid_target: Valid targets.
+        :param tasks: Tasks that are given when the card is played.
         """
-        super().__init__(cid, name, description, image)
-        self.task = task
-        self.valid_targets = valid_targets
+        super().__init__(cid, name, description, image, valid_target)
+        self.tasks = tasks
 
     def get_info(self):
         pass
 
 
 class ActionCard(Card):
-    def __init__(self, cid: CardID, name: str, description: str, image: Image, cost: Hours,
-                 action: callable, req_args: list[str], check_args: callable):
+    def __init__(self, cid: CardID, name: str, description: str, image: Image, valid_target: CardTarget,
+                 cost: Hours, action: list[Event | EffectID],
+                 req_args: list[list[str] | None], check_args: list[str | None]):
         """
         Action card - one of the card types.
 
@@ -144,13 +137,14 @@ class ActionCard(Card):
         :param name: Card name.
         :param description: Card description.
         :param image: Card image.
+        :param valid_target: Valid targets.
         :param cost: The cost of the card in hours.
         :param action: Card action.
-        :param req_args: A list of parameter names that the `action` function accepts.
-        :param check_args: A function for verifying the correctness of parameters
-            passed to the `action` function.
+        :param req_args: Lists of parameter names that the `action` functions accepts.
+        :param check_args: Functions for verifying the correctness of parameters
+            passed to the `action` functions (if `action` is Event).
         """
-        super().__init__(cid, name, description, image)
+        super().__init__(cid, name, description, image, valid_target)
         self.cost = cost
         self.action = action
         self.req_args = req_args
