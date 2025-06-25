@@ -333,10 +333,10 @@ class Game:
         assert self.WIN_THRESHOLD > 0
         self.DAYS_IN_TERM = data['DAYS_IN_TERM']
         self.HOURS_IN_DAY_DEFAULT = data['HOURS_IN_DAY_DEFAULT']
-        self.ALL_EFFECTS = [Effect(**dct) for dct in data['effects']]
-        self.ALL_TASKS = [Task(**dct) for dct in data['tasks']]
-        self.ALL_CARDS = [TaskCard(**dct) for dct in data['task_cards']] + \
-                         [ActionCard(**dct) for dct in data['action_cards']]
+        self.ALL_EFFECTS = {dct['eid']: Effect(**dct) for dct in data['effects']}
+        self.ALL_TASKS = {dct['tid']: Task(**dct) for dct in data['tasks']}
+        self.ALL_CARDS = {dct['cid']: TaskCard(**dct) for dct in data['task_cards']}
+        self.ALL_CARDS.update({dct['cid']: ActionCard(**dct) for dct in data['action_cards']})
 
         """
         print(self.HAND_SIZE)
@@ -360,12 +360,12 @@ class Game:
         """
         First player creates a deck of cards and share it with the second one.
         """
-        if self.is_first:
-            self.deck = random.choices([card for card in self.ALL_CARDS if not card.special], k=self.DECK_SIZE)
-            # todo: send deck
+        # if self.is_first:
+        if True:
+            self.deck = random.choices([k for k, v in self.ALL_CARDS.items() if not v.special], k=self.DECK_SIZE)
+            pass  # todo: send deck
         else:
-            # todo: receive deck
-            pass
+            pass  # todo: receive deck
 
     def __deal_cards(self):
         """
