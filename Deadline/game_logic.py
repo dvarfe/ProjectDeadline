@@ -10,7 +10,8 @@ Day = int
 Days = int
 Hours = int
 Points = int
-Image = ...
+Image = str
+Event = str
 EffectID = str
 TaskID = str
 CardID = str
@@ -23,7 +24,7 @@ GAME_CONFIG_FN = os.path.join('Deadline', 'game_config.json')
 class Effect:
     def __init__(self, eid: EffectID, name: str, description: str, image: Image,
                  period: Days, delay: Days, is_removable: bool,
-                 init_event: callable, final_event: callable, everyday_event: callable, init_day: Day):
+                 init_events: list[Event], final_events: list[Event], everyday_events: list[Event]):
         """
         An effect applied to the player.
 
@@ -34,10 +35,9 @@ class Effect:
         :param period: Duration of the effect.
         :param delay: Delay before the effect starts.
         :param is_removable: Can the player remove the effect or not.
-        :param init_event: An event that occurs at the beginning of the effect.
-        :param final_event: An event that occurs at the end of the effect.
-        :param everyday_event: An event that occurs every day while the effect is active.
-        :param init_day: The day when the effect was applied.
+        :param init_events: Events that occur at the beginning of the effect.
+        :param final_events: Events that occur at the end of the effect.
+        :param everyday_events: Events that occur every day while the effect is active.
         """
         self.eid = eid
         self.name = name
@@ -46,10 +46,9 @@ class Effect:
         self.period = period
         self.delay = delay
         self.is_removable = is_removable
-        self.init_event = init_event
-        self.final_event = final_event
-        self.everyday_event = everyday_event
-        self.init_day = init_day
+        self.init_events = init_events
+        self.final_events = final_events
+        self.everyday_events = everyday_events
 
 
 class Task:
