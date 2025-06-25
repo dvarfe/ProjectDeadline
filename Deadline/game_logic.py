@@ -10,7 +10,6 @@ Day = int
 Days = int
 Hours = int
 Points = int
-PlayerID = ...
 Image = ...
 EffectID = str
 CardID = str
@@ -100,31 +99,6 @@ class Card(abc.ABC):
         pass
 
 
-class ActionCard(Card):
-    def __init__(self, name: str, description: str, image: Image, cost: Hours,
-                 action: callable, req_args: list[str], check_args: callable):
-        """
-        Action card - one of the card types.
-
-        :param name: Card name.
-        :param description: Card description.
-        :param image: Card image.
-        :param cost: The cost of the card in hours.
-        :param action: Card action.
-        :param req_args: A list of parameter names that the `action` function accepts.
-        :param check_args: A function for verifying the correctness of parameters
-            passed to the `action` function.
-        """
-        super().__init__(name, description, image)
-        self.cost = cost
-        self.action = action
-        self.req_args = req_args
-        self.check_args = check_args
-
-    def get_info(self):
-        pass
-
-
 class TaskTarget(enum.Enum):
     """
     Targets for cards.
@@ -148,6 +122,31 @@ class TaskCard(Card):
         super().__init__(name, description, image)
         self.task = task
         self.valid_targets = valid_targets
+
+    def get_info(self):
+        pass
+
+
+class ActionCard(Card):
+    def __init__(self, name: str, description: str, image: Image, cost: Hours,
+                 action: callable, req_args: list[str], check_args: callable):
+        """
+        Action card - one of the card types.
+
+        :param name: Card name.
+        :param description: Card description.
+        :param image: Card image.
+        :param cost: The cost of the card in hours.
+        :param action: Card action.
+        :param req_args: A list of parameter names that the `action` function accepts.
+        :param check_args: A function for verifying the correctness of parameters
+            passed to the `action` function.
+        """
+        super().__init__(name, description, image)
+        self.cost = cost
+        self.action = action
+        self.req_args = req_args
+        self.check_args = check_args
 
     def get_info(self):
         pass
@@ -195,15 +194,13 @@ class Deadline(Task):
 
 
 class Player:
-    def __init__(self, pid: PlayerID, name: str, hours_in_day: Hours):
+    def __init__(self, name: str, hours_in_day: Hours):
         """
         A player.
 
-        :param pid: Player unique identifier.
         :param name: Player name.
         :param hours_in_day: Number of free hours per day.
         """
-        self.pid = pid
         self.name = name
         self.free_hours_today = hours_in_day
 
@@ -227,13 +224,11 @@ class Player:
 
 
 class Game:
-    def __init__(self, player_pid: PlayerID, player_name: str, opponent_pid: PlayerID, opponent_name: str):
+    def __init__(self, player_name: str, opponent_name: str):
         """
         A game. Contains all the data of the current game.
 
-        :param player_pid: Player unique identifier.
         :param player_name: Player name.
-        :param opponent_pid: Opponent unique identifier.
         :param opponent_name: Opponent name.
         """
         self.DECK_SIZE: int  # Number of cards in deck
@@ -247,8 +242,8 @@ class Game:
         # Load game data
         self.__load_data()
 
-        self.me: Player = Player(player_pid, player_name, self.HOURS_IN_DAY_DEFAULT)  # Player
-        self.opponent: Player = Player(opponent_pid, opponent_name, self.HOURS_IN_DAY_DEFAULT)  # Opponent
+        self.player: Player = Player(player_name, self.HOURS_IN_DAY_DEFAULT)  # Player
+        self.opponent: Player = Player(opponent_name, self.HOURS_IN_DAY_DEFAULT)  # Opponent
 
         self.day: Day = 1  # Day number
         self.have_exams: bool = False  # True when players have exams
