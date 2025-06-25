@@ -1,5 +1,7 @@
+import os
 import abc
 import enum
+import json
 
 
 # Typing
@@ -9,6 +11,9 @@ Hours = int
 Points = int
 PlayerID = ...
 Image = ...
+
+# Global constants
+GAME_CONFIG_FN = os.path.join('Deadline', 'game_config.json')
 
 
 class Effect:
@@ -227,17 +232,16 @@ class Game:
         :param opponent_pid: Opponent unique identifier.
         :param opponent_name: Opponent name.
         """
-        self.WIN_THRESHOLD: Points  # The upper score threshold; when it is reached, the player wins
-        self.DEFEAT_THRESHOLD: Points  # The lower score threshold; when it is reached, the player loses
-        self.DAYS_IN_TERM: Days  # The number of days in a term; the session starts after that number of days
+        self.DECK_SIZE: int  # Number of cards in deck
+        self.WIN_THRESHOLD: Points  # Upper score threshold; when it is reached, the player wins
+        self.DEFEAT_THRESHOLD: Points  # Lower score threshold; when it is reached, the player loses
+        self.DAYS_IN_TERM: Days  # Number of days in a term; the session starts after that number of days
         self.HOURS_IN_DAY_DEFAULT: Hours  # Number of free hours per day with no effects
-        self.ALL_TASKS: tuple[Task, ...]  # All tasks in the game
         self.ALL_EFFECTS: tuple[Effect, ...]  # All effects in the game
+        self.ALL_TASKS: tuple[Task, ...]  # All tasks in the game
         self.ALL_CARDS: tuple[Card, ...]  # All cards in the game
-
         # Load game data
-        self.WIN_THRESHOLD, self.DEFEAT_THRESHOLD, self.DAYS_IN_TERM, self.HOURS_IN_DAY_DEFAULT, \
-            self.ALL_TASKS, self.ALL_EFFECTS, self.ALL_CARDS = self.__load_data()
+        self.__load_data()
 
         self.me: Player = Player(player_pid, player_name, self.HOURS_IN_DAY_DEFAULT)  # Player
         self.opponent: Player = Player(opponent_pid, opponent_name, self.HOURS_IN_DAY_DEFAULT)  # Opponent
@@ -247,11 +251,32 @@ class Game:
         self.effects: list[Effect] = []  # Effects affecting both players
         self.deck: list[Card] = self.__create_deck()  # Deck of cards
 
-    def __load_data(self) -> tuple[Points, Points, Days, Hours, tuple[Task, ...], tuple[Effect, ...], tuple[Card, ...]]:
+    def __load_data(self):
         """
         Load initial game data.
         """
-        pass
+        with open(GAME_CONFIG_FN, 'r') as f:
+            data = json.load(f)
+        self.DECK_SIZE = data['DECK_SIZE']
+        self.WIN_THRESHOLD = data['WIN_THRESHOLD']
+        self.DEFEAT_THRESHOLD = data['DEFEAT_THRESHOLD']
+        self.DAYS_IN_TERM = data['DAYS_IN_TERM']
+        self.HOURS_IN_DAY_DEFAULT = data['HOURS_IN_DAY_DEFAULT']
+        self.ALL_EFFECTS = [Effect(**dct) for dct in data['effects']]
+        self.ALL_TASKS = [Task(**dct) for dct in data['tasks']]
+        self.ALL_CARDS = [TaskCard(**dct) for dct in data['task_cards']] + \
+                         [ActionCard(**dct) for dct in data['action_cards']]
+
+        """
+        print(self.DECK_SIZE)
+        print(self.WIN_THRESHOLD)
+        print(self.DEFEAT_THRESHOLD)
+        print(self.DAYS_IN_TERM)
+        print(self.HOURS_IN_DAY_DEFAULT)
+        print(self.ALL_EFFECTS)
+        print(self.ALL_TASKS)
+        print(self.ALL_CARDS)
+        #"""
 
     def __create_deck(self) -> list[Card]:
         """
