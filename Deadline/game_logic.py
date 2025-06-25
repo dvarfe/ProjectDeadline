@@ -161,28 +161,16 @@ class ActionCard(Card):
         pass
 
 
-class Deadline(Task):
-    def __init__(self, name: str, description: str, image: Image,
-                 difficulty: Hours, deadline: Days, award: Points, penalty: Points,
-                 event_on_success: callable, event_on_fail: callable,
-                 init_day: Day):
+class Deadline:
+    def __init__(self, task: TaskID, init_day: Day, deadline: Days):
         """
         Player's deadline.
 
-        :param name: Task name.
-        :param description: Task description.
-        :param image: Task image.
-        :param difficulty: Number of hours required to complete the task.
+        :param task: Task id.
         :param deadline: Number of days to complete the task.
-        :param award: Number of points awarded for completing the task.
-        :param penalty: Number of points taken away if the task is failed.
-        :param event_on_success: An event that occurs if task is completed.
-        :param event_on_fail: An event that occurs if task is failed.
         :param init_day: The day when the task was issued.
         """
-        super().__init__(name, description, image,
-                         difficulty, deadline, award, penalty,
-                         event_on_success, event_on_fail)
+        self.task = task
         self.init_day = init_day
         self.deadline: Day = init_day + deadline  # The day before which the task must be completed
         self.progress: Hours = 0  # How many hours the player has already worked on the task.
