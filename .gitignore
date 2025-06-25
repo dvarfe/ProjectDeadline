@@ -12,3 +12,5 @@ docs/build
 requirements.txt
 dist
 build
+*.idea
+
