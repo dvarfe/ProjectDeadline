@@ -12,6 +12,7 @@ Hours = int
 Points = int
 Image = ...
 EffectID = str
+TaskID = str
 CardID = str
 
 
@@ -20,12 +21,13 @@ GAME_CONFIG_FN = os.path.join('Deadline', 'game_config.json')
 
 
 class Effect:
-    def __init__(self, name: str, description: str, image: Image,
+    def __init__(self, eid: EffectID, name: str, description: str, image: Image,
                  period: Days, delay: Days, is_removable: bool,
                  init_event: callable, final_event: callable, everyday_event: callable, init_day: Day):
         """
         An effect applied to the player.
 
+        :param eid: Effect id.
         :param name: Effect name.
         :param description: Effect description.
         :param image: Effect image.
@@ -37,6 +39,7 @@ class Effect:
         :param everyday_event: An event that occurs every day while the effect is active.
         :param init_day: The day when the effect was applied.
         """
+        self.eid = eid
         self.name = name
         self.description = description
         self.image = image
@@ -50,12 +53,13 @@ class Effect:
 
 
 class Task:
-    def __init__(self, name: str, description: str, image: Image,
+    def __init__(self, tid: TaskID, name: str, description: str, image: Image,
                  difficulty: Hours, deadline: Days, award: Points, penalty: Points,
                  event_on_success: callable, event_on_fail: callable):
         """
         A task that can be given to a player.
 
+        :param tid: Task id.
         :param name: Task name.
         :param description: Task description.
         :param image: Task image.
@@ -66,6 +70,7 @@ class Task:
         :param event_on_success: An event that occurs if the task is completed.
         :param event_on_fail: An event that occurs if the task is failed.
         """
+        self.tid = tid
         self.name = name
         self.description = description
         self.image = image
@@ -79,14 +84,16 @@ class Task:
 
 class Card(abc.ABC):
     @abc.abstractmethod
-    def __init__(self, name: str, description: str, image: Image):
+    def __init__(self, cid: CardID, name: str, description: str, image: Image):
         """
         Playing card.
 
+        :param cid: Card id.
         :param name: Card name.
         :param description: Card description.
         :param image: Card image.
         """
+        self.cid = cid
         self.name = name
         self.description = description
         self.image = image
@@ -109,17 +116,18 @@ class TaskTarget(enum.Enum):
 
 
 class TaskCard(Card):
-    def __init__(self, name: str, description: str, image: Image, task: Task, valid_targets: TaskTarget):
+    def __init__(self, cid: CardID, name: str, description: str, image: Image, task: Task, valid_targets: TaskTarget):
         """
         Task card - one of the card types.
 
+        :param cid: Card id.
         :param name: Card name.
         :param description: Card description.
         :param image: Card image.
         :param task: A task that is given when the card is played.
         :param valid_targets: Valid targets.
         """
-        super().__init__(name, description, image)
+        super().__init__(cid, name, description, image)
         self.task = task
         self.valid_targets = valid_targets
 
@@ -128,11 +136,12 @@ class TaskCard(Card):
 
 
 class ActionCard(Card):
-    def __init__(self, name: str, description: str, image: Image, cost: Hours,
+    def __init__(self, cid: CardID, name: str, description: str, image: Image, cost: Hours,
                  action: callable, req_args: list[str], check_args: callable):
         """
         Action card - one of the card types.
 
+        :param cid: Card id.
         :param name: Card name.
         :param description: Card description.
         :param image: Card image.
@@ -142,7 +151,7 @@ class ActionCard(Card):
         :param check_args: A function for verifying the correctness of parameters
             passed to the `action` function.
         """
-        super().__init__(name, description, image)
+        super().__init__(cid, name, description, image)
         self.cost = cost
         self.action = action
         self.req_args = req_args
