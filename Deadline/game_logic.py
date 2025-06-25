@@ -43,7 +43,7 @@ class Effect:
 
 class Task:
     def __init__(self, name: str, description: str, image: Image,
-                 difficulty: Hours, award: Points, penalty: Points,
+                 difficulty: Hours, deadline: Days, award: Points, penalty: Points,
                  event_on_success: callable, event_on_fail: callable):
         """
         A task that can be given to a player.
@@ -51,9 +51,10 @@ class Task:
         :param name: Task name.
         :param description: Task description.
         :param image: Task image.
-        :param difficulty: The number of hours required to complete the task.
-        :param award: The number of points awarded for completing the task.
-        :param penalty: The number of points taken away if the task is failed.
+        :param difficulty: Number of hours required to complete the task.
+        :param deadline: Number of days to complete the task.
+        :param award: Number of points awarded for completing the task.
+        :param penalty: Number of points taken away if the task is failed.
         :param event_on_success: An event that occurs if the task is completed.
         :param event_on_fail: An event that occurs if the task is failed.
         """
@@ -61,6 +62,7 @@ class Task:
         self.description = description
         self.image = image
         self.difficulty = difficulty
+        self.deadline = deadline
         self.award = award
         self.penalty = penalty
         self.event_on_success = event_on_success
@@ -144,7 +146,7 @@ class TaskCard(Card):
 
 class Deadline(Task):
     def __init__(self, name: str, description: str, image: Image,
-                 difficulty: Hours, award: Points, penalty: Points,
+                 difficulty: Hours, deadline: Days, award: Points, penalty: Points,
                  event_on_success: callable, event_on_fail: callable,
                  init_day: Day):
         """
@@ -153,16 +155,19 @@ class Deadline(Task):
         :param name: Task name.
         :param description: Task description.
         :param image: Task image.
-        :param difficulty: The number of hours required to complete the task.
-        :param award: The number of points awarded for completing the task.
-        :param penalty: The number of points taken away if the task is failed.
+        :param difficulty: Number of hours required to complete the task.
+        :param deadline: Number of days to complete the task.
+        :param award: Number of points awarded for completing the task.
+        :param penalty: Number of points taken away if the task is failed.
         :param event_on_success: An event that occurs if task is completed.
         :param event_on_fail: An event that occurs if task is failed.
         :param init_day: The day when the task was issued.
         """
-        super().__init__(name, description, image, difficulty, award, penalty, event_on_success, event_on_fail)
+        super().__init__(name, description, image,
+                         difficulty, deadline, award, penalty,
+                         event_on_success, event_on_fail)
         self.init_day = init_day
-        self.deadline: Day = init_day + difficulty  # The day before which the task must be completed
+        self.deadline: Day = init_day + deadline  # The day before which the task must be completed
         self.progress: Hours = 0  # How many hours the player has already worked on the task.
 
     def work(self, hours: Hours):
