@@ -374,11 +374,25 @@ class Game:
         else:
             deal_to_one_player(self.opponent), deal_to_one_player(self.player)
 
-    def get_new_card(self):
+    def can_take_card(self) -> dict:
         """
-        Let player pick a new card from the deck.
+        Whether the player can take a card from the deck.
+
+        :return: dict with keys `res` and optionally `msg`.
+            `res` is main result (bool).
+            `msg` is used in case of a False response to indicate the reason.
         """
-        pass
+        if len(self.deck) == 0:
+            return {'res': False, 'msg': 'No more cards in deck!'}
+        if len(self.player.hand) >= self.HAND_SIZE:
+            return {'res': False, 'msg': 'Cards limit is reached!'}
+        return {'res': True}
+
+    def take_card(self):
+        """
+        Let the player pick a new card from the deck.
+        """
+        self.player.get_cards_from_deck([self.deck.pop(0)])
 
     def get_targets(self):
         """
