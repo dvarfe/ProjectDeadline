@@ -110,7 +110,7 @@ class Task:
 
 class Card(abc.ABC):
     @abc.abstractmethod
-    def __init__(self, cid: CardID, name: str, description: str, image: Image, valid_target: CardTarget):
+    def __init__(self, cid: CardID, name: str, description: str, image: Image, valid_target: CardTarget, special: bool):
         """
         Playing card.
 
@@ -119,18 +119,22 @@ class Card(abc.ABC):
         :param description: Card description.
         :param image: Card image.
         :param valid_target: Valid targets.
+        :param special: Can the card be in the deck or not.
+            If the card is special, then it can only be obtained as a result of the event.
         """
         self.cid = cid
         self.name = name
         self.description = description
         self.image = image
         self.valid_target = valid_target
+        self.special = special
 
     def __str__(self) -> str:
         return f'\nCard #{self.cid}: {self.name}\n' \
                f'    description = "{self.description}"\n' \
                f'    image = {self.image}\n' \
-               f'    valid_target = {self.valid_target}\n'
+               f'    valid_target = {self.valid_target}\n' \
+               f'    special = {self.special}'
 
     def __repr__(self) -> str:
         return f'{self.cid} "{self.name}"'
@@ -144,7 +148,7 @@ class Card(abc.ABC):
 
 
 class TaskCard(Card):
-    def __init__(self, cid: CardID, name: str, description: str, image: Image, valid_target: CardTarget,
+    def __init__(self, cid: CardID, name: str, description: str, image: Image, valid_target: CardTarget, special: bool,
                  tasks: list[TaskID]):
         """
         Task card - one of the card types.
@@ -154,9 +158,11 @@ class TaskCard(Card):
         :param description: Card description.
         :param image: Card image.
         :param valid_target: Valid targets.
+        :param special: Can the card be in the deck or not.
+            If the card is special, then it can only be obtained as a result of the event.
         :param tasks: Tasks that are given when the card is played.
         """
-        super().__init__(cid, name, description, image, valid_target)
+        super().__init__(cid, name, description, image, valid_target, special)
         self.tasks = tasks
 
     def get_info(self):
@@ -164,7 +170,7 @@ class TaskCard(Card):
 
 
 class ActionCard(Card):
-    def __init__(self, cid: CardID, name: str, description: str, image: Image, valid_target: CardTarget,
+    def __init__(self, cid: CardID, name: str, description: str, image: Image, valid_target: CardTarget, special: bool,
                  cost: Hours, action: list[Event | EffectID],
                  req_args: list[list[str] | None], check_args: list[str | None]):
         """
@@ -175,13 +181,15 @@ class ActionCard(Card):
         :param description: Card description.
         :param image: Card image.
         :param valid_target: Valid targets.
+        :param special: Can the card be in the deck or not.
+            If the card is special, then it can only be obtained as a result of the event.
         :param cost: The cost of the card in hours.
         :param action: Card action.
         :param req_args: Lists of parameter names that the `action` functions accepts.
         :param check_args: Functions for verifying the correctness of parameters
             passed to the `action` functions (if `action` is Event).
         """
-        super().__init__(cid, name, description, image, valid_target)
+        super().__init__(cid, name, description, image, valid_target, special)
         self.cost = cost
         self.action = action
         self.req_args = req_args
@@ -324,7 +332,7 @@ class Game:
         """
         Create a deck of cards.
         """
-        return random.choices(self.ALL_CARDS, k=self.DECK_SIZE)
+        return random.choices([card for card in self.ALL_CARDS if not card.special], k=self.DECK_SIZE)
 
     def get_new_card(self):
         """
