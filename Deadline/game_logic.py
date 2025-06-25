@@ -2,6 +2,7 @@ import os
 import abc
 import enum
 import json
+import random
 
 
 # Typing
@@ -11,6 +12,9 @@ Hours = int
 Points = int
 PlayerID = ...
 Image = ...
+EffectID = str
+CardID = str
+
 
 # Global constants
 GAME_CONFIG_FN = os.path.join('Deadline', 'game_config.json')
@@ -248,8 +252,8 @@ class Game:
 
         self.day: Day = 1  # Day number
         self.have_exams: bool = False  # True when players have exams
-        self.effects: list[Effect] = []  # Effects affecting both players
-        self.deck: list[Card] = self.__create_deck()  # Deck of cards
+        self.effects: list[EffectID] = []  # Effects affecting both players
+        self.deck: list[CardID] = self.__create_deck()  # Deck of cards
 
     def __load_data(self):
         """
@@ -278,11 +282,11 @@ class Game:
         print(self.ALL_CARDS)
         #"""
 
-    def __create_deck(self) -> list[Card]:
+    def __create_deck(self) -> list[CardID]:
         """
         Create a deck of cards.
         """
-        pass
+        return random.choices(self.ALL_CARDS, k=self.DECK_SIZE)
 
     def get_new_card(self):
         """
