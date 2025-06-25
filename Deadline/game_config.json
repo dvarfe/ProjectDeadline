@@ -1,0 +1,120 @@
+{
+  "DECK_SIZE": 50,
+  "WIN_THRESHOLD": 200,
+  "DEFEAT_THRESHOLD": -200,
+  "DAYS_IN_TERM": 30,
+  "HOURS_IN_DAY_DEFAULT": 16,
+  "effects": [
+    {
+      "eid": "e0",
+      "name": "Кофе",
+      "description": "Выпить кружку кофе",
+      "image": "coffee.png",
+      "period": 1,
+      "delay": 0,
+      "is_removable": false,
+      "init_events": [
+        "player.free_hours_today += 6"
+      ],
+      "final_events": [
+        "player.free_hours_today -= 6"
+      ],
+      "everyday_events": []
+    }
+  ],
+  "tasks": [
+    {
+      "tid": "t0",
+      "name": "Матан",
+      "description": "Обычное задание по матану",
+      "image": "math_hw.png",
+      "difficulty": 3,
+      "deadline": 3,
+      "award": 3,
+      "penalty": -6,
+      "events_on_success": [],
+      "events_on_fail": []
+    },
+    {
+      "tid": "t1",
+      "name": "ML",
+      "description": "Research-задание по ML",
+      "image": "cs_hw.png",
+      "difficulty": 5,
+      "deadline": 7,
+      "award": 5,
+      "penalty": -5,
+      "events_on_success": [
+        "player.get_card( \"tc2\" )"
+      ],
+      "events_on_fail": []
+    },
+    {
+      "tid": "t2",
+      "name": "Кросс-проверка",
+      "description": "Нужно проверить 3 чужих решения домашки по ML",
+      "image": "cs_hw.png",
+      "difficulty": 1,
+      "deadline": 7,
+      "award": 0,
+      "penalty": -5,
+      "events_on_success": [],
+      "events_on_fail": []
+    }
+  ],
+  "task_cards": [
+    {
+      "cid": "tc0",
+      "name": "Матан",
+      "description": "Обычное задание по матану",
+      "image": "math_hw.png",
+      "valid_target": "OPPONENT",
+      "special": false,
+      "tasks": [
+        "t0"
+      ]
+    },
+    {
+      "cid": "tc1",
+      "name": "ML",
+      "description": "Research-задание по ML",
+      "image": "cs_hw.png",
+      "valid_target": "OPPONENT",
+      "special": false,
+      "tasks": [
+        "t1"
+      ]
+    },
+    {
+      "cid": "tc2",
+      "name": "Кросс-проверка",
+      "description": "Нужно проверить 3 чужих решения домашки по ML",
+      "image": "cs_hw.png",
+      "valid_target": "PLAYER",
+      "special": true,
+      "tasks": [
+        "t2"
+      ]
+    }
+  ],
+  "action_cards": [
+    {
+      "cid": "ac0",
+      "name": "Кофе",
+      "description": "Выпить кружку кофе",
+      "image": "coffee.png",
+      "valid_target": "PLAYER",
+      "special": false,
+      "cost": 0,
+      "action": [
+        "e0"
+      ],
+      "req_args": [
+        null
+      ],
+      "check_args": [
+        null
+      ]
+    }
+  ]
+}
