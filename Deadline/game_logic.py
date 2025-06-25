@@ -49,6 +49,20 @@ class Effect:
         self.final_events = final_events
         self.everyday_events = everyday_events
 
+    def __str__(self) -> str:
+        return f'\nEffect #{self.eid}: {self.name}\n' \
+               f'    description = "{self.description}"\n' \
+               f'    image = {self.image}\n' \
+               f'    period = {self.period}\n' \
+               f'    delay = {self.delay}\n' \
+               f'    is_removable = {self.is_removable}\n' \
+               f'    init_events = {self.init_events}\n' \
+               f'    final_events = {self.final_events}\n' \
+               f'    everyday_events = {self.everyday_events}'
+
+    def __repr__(self) -> str:
+        return f'{self.eid} "{self.name}"'
+
 
 class Task:
     def __init__(self, tid: TaskID, name: str, description: str, image: Image,
@@ -79,6 +93,20 @@ class Task:
         self.events_on_success = events_on_success
         self.events_on_fail = events_on_fail
 
+    def __str__(self) -> str:
+        return f'\nTask #{self.tid}: {self.name}\n' \
+               f'    description = "{self.description}"\n' \
+               f'    image = {self.image}\n' \
+               f'    difficulty = {self.difficulty}\n' \
+               f'    deadline = {self.deadline}\n' \
+               f'    award = {self.award}\n' \
+               f'    penalty = {self.penalty}\n' \
+               f'    events_on_success = {self.events_on_success}\n' \
+               f'    events_on_fail = {self.events_on_fail}'
+
+    def __repr__(self) -> str:
+        return f'{self.tid} "{self.name}"'
+
 
 class Card(abc.ABC):
     @abc.abstractmethod
@@ -97,6 +125,15 @@ class Card(abc.ABC):
         self.description = description
         self.image = image
         self.valid_target = valid_target
+
+    def __str__(self) -> str:
+        return f'\nCard #{self.cid}: {self.name}\n' \
+               f'    description = "{self.description}"\n' \
+               f'    image = {self.image}\n' \
+               f'    valid_target = {self.valid_target}\n'
+
+    def __repr__(self) -> str:
+        return f'{self.cid} "{self.name}"'
 
     @abc.abstractmethod
     def get_info(self):
@@ -199,6 +236,22 @@ class Player:
         self.deadlines: list[Deadline] = []  # Player deadlines
         self.effects: list[Effect] = []  # Effects applied to the player
         self.delayed_effects: dict[Day, list[Effect]] = {}  # Delayed effects by the days when they start
+
+    def __str__(self) -> str:
+        return f'\nPlayer {self.name}\n' \
+               f'    free_hours_today = {self.free_hours_today}\n' \
+               f'    score = {self.score}\n' \
+               f'    hand = {self.hand}\n' \
+               f'    deadlines = {self.deadlines}\n' \
+               f'    effects = {self.effects}\n' \
+               f'    delayed_effects = {self.delayed_effects}'
+
+    def __repr__(self) -> str:
+        return f'Player {self.name}: ' \
+               f'hand "{self.hand}" ' \
+               f'deadlines {self.deadlines} ' \
+               f'effects {self.effects} ' \
+               f'delayed_effects {self.delayed_effects}'
 
     def use_card(self):
         """
