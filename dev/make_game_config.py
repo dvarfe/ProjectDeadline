@@ -37,7 +37,7 @@ def task(tid, name, description, image, difficulty, deadline, award, penalty, ev
     }
 
 
-def task_card(cid, name, description, image, valid_target, special, tasks):
+def task_card(cid, name, description, image, valid_target, special, task):
     """
     Make task card dict.
     """
@@ -48,7 +48,7 @@ def task_card(cid, name, description, image, valid_target, special, tasks):
         'image': image,
         'valid_target': valid_target,
         'special': special,
-        'tasks': tasks,
+        'task': task,
     }
 
 

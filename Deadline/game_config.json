@@ -71,7 +71,7 @@
       "image": "math_hw.png",
       "valid_target": "OPPONENT",
       "special": false,
-      "tasks": [
+      "task": [
         "t0"
       ]
     },
@@ -82,7 +82,7 @@
       "image": "cs_hw.png",
       "valid_target": "OPPONENT",
       "special": false,
-      "tasks": [
+      "task": [
         "t1"
       ]
     },
@@ -93,7 +93,7 @@
       "image": "cs_hw.png",
       "valid_target": "PLAYER",
       "special": true,
-      "tasks": [
+      "task": [
         "t2"
       ]
     }
