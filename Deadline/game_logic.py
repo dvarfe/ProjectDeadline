@@ -491,7 +491,7 @@ class Game:
         Whether a player can take a card from the deck.
 
         :param actor_pid: ID of player who wants to take a card.
-        :return: dict with keys `res` and optionally `msg`.
+        :return: Dict with keys `res` and optionally `msg`.
             `res` corresponds to main result (bool).
             `msg` is used in case of a False response to indicate the reason.
         """
@@ -507,18 +507,26 @@ class Game:
     def opponent_can_take_card(self) -> dict[str, any]:
         return self.__can_take_card(self.__opponent_pid)
 
-    def can_use_card(self, cid: CardID) -> dict[str, any]:
+    def __can_use_card(self, actor_pid: PlayerID, cid: CardID) -> dict[str, any]:
         """
         Whether the player can use a card from the deck.
 
+        :param actor_pid: ID of player who wants to use a card.
         :param cid: Card ID.
-        :return: dict with keys `res` and optionally `msg`.
+        :return: Dict with keys `res` and optionally `msg`.
             `res` corresponds to main result (bool).
             `msg` is used in case of a False response to indicate the reason.
         """
-        if self.get_card_type(cid) == 'ActionCard' and self.__ALL_CARDS[cid].cost > self.__player.free_hours_today:
+        if self.get_card_type(cid) == 'ActionCard' and \
+                self.__ALL_CARDS[cid].cost > self.__players[actor_pid].free_hours_today:
             return {'res': False, 'msg': 'Not enough free time!'}
         return {'res': True}
+
+    def player_can_use_card(self, cid: CardID) -> dict[str, any]:
+        return self.__can_use_card(self.__player_pid, cid)
+
+    def opponent_can_use_card(self, cid: CardID) -> dict[str, any]:
+        return self.__can_use_card(self.__opponent_pid, cid)
 
     """ Actions """
 
@@ -528,7 +536,8 @@ class Game:
 
         :param actor_pid: ID of player who takes a card.
         """
-        assert self.__can_take_card(actor_pid)
+        assert self.__can_take_card(actor_pid)['res']
+
         self.__players[actor_pid].take_cards_from_deck([self.__deck.pop(0)])
 
     def player_takes_card(self):
@@ -548,6 +557,8 @@ class Game:
         :param target_cid: Target card ID (if card is applied to a specific player card).
         """
         cid = self.__players[actor_pid].use_card(card_idx_in_hand)
+        assert self.__can_use_card(actor_pid, cid)['res']
+
         card = self.__ALL_CARDS[cid]
         if card.valid_target == CardTarget.GLOBAL:
             if self.get_card_type(cid) != 'ActionCard':

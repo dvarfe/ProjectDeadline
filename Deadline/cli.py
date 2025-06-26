@@ -54,17 +54,21 @@ def game():
         match cmd:
             case 'G':  # Get new card
                 can_take_card = game_data[i].player_can_take_card()
-                if can_take_card['res']:
-                    game_data[i].player_takes_card()
-                    game_data[1-i].opponent_takes_card()
-                else:
+                if not can_take_card['res']:
                     print(can_take_card['msg'])
+                    continue
+                game_data[i].player_takes_card()
+                game_data[1-i].opponent_takes_card()
             case 'U':  # Use card
                 idx = int(input('Enter card idx: '))
                 if not 0 <= idx < len(game_data[i].get_game_info()['player']['hand']):
                     print('Incorrect index!')
                     continue
                 cid = game_data[i].card_idx_to_cid(idx)
+                can_use_card = game_data[i].player_can_use_card(cid)
+                if not can_use_card['res']:
+                    print(can_use_card['msg'])
+                    continue
                 match game_data[i].get_card_targets(cid):
                     case CardTarget.ANY:
                         target = input('Enter player or opponent: ')
