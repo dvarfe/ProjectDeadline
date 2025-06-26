@@ -312,7 +312,7 @@ class Game:
         :param player_name: Player name.
         :param opponent_name: Opponent name.
         :param is_first: 1 if the player plays first.
-        :network: object for network communication
+        :network: Object for network communication.
         """
         self.DECK_SIZE: int  # Number of cards in deck
         self.HAND_SIZE: int  # Number of cards in players hand
@@ -327,6 +327,8 @@ class Game:
         self.__load_data()
         self.__check_consistency()
 
+        self.network = network
+
         # Initialize players
         self.is_first = is_first  # 1 if the player plays first
         player_pid, opponent_pid = (1, 0) if self.is_first else (0, 1)
@@ -339,8 +341,6 @@ class Game:
         self.effects: list[EffectID] = []  # Effects affecting both players
 
         self.deck: list[CardID]  # Deck of cards
-
-        self.network = network
 
         self.__create_deck()
         self.__deal_cards()
@@ -390,15 +390,12 @@ class Game:
         First player creates a deck of cards and share it with the second one.
         """
         if self.is_first:
-            # if True:
             self.deck = random.choices([k for k, v in self.ALL_CARDS.items() if not v.special], k=self.DECK_SIZE)
             self.network.send_deck(self.deck)
         else:
             while len(self.network.events_dict['create_deck']) == 0:
                 pass  # Это плохой цикл, он повесит нам игру, если у кого-то плохой интернет.
-            cards = self.network.events_dict['create_deck'][0]
-            self.network.events_dict['create_deck'].pop(0)
-            self.deck = [Card(card) for card in cards]
+            self.deck = self.network.events_dict['create_deck'].pop(0)
 
     def __deal_cards(self):
         """
