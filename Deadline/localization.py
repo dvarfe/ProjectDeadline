@@ -1,7 +1,8 @@
 import gettext
 import locale
+import os
 
-_podir = "po"
+_podir = os.path.join(os.path.dirname(__file__), "po")
 translation = gettext.translation("Deadline", _podir, fallback=True)
 
 LOCALES = {

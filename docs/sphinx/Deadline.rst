@@ -12,6 +12,21 @@ Deadline.game\_logic module
    :show-inheritance:
    :undoc-members:
 
+Deadline.game module
+---------------------------
+.. automodule:: Deadline.game
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+Deadline.network module
+---------------------------
+
+.. automodule:: Deadline.network
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
 Module contents
 ---------------
 
