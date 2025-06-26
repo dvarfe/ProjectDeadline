@@ -3,11 +3,15 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Deadline documentation
-======================
+Welcome to Deadline documentation! 
+Deadline is a card game about time management under the onslaught of endless tasks.
+
+===================================================================================
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 1
    :caption: Contents:
 
+   Rules
+   GUI
    API

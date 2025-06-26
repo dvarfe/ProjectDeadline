@@ -15,7 +15,7 @@ def task_build_docs():
     """Make HTML documentation."""
     return {
         'actions': ['sphinx-build -M html docs/sphinx docs/build'],
-        'task_dep': ['run_autodoc']
+        'task_dep': ['run_autodoc', 'mo']
     }
 
 
