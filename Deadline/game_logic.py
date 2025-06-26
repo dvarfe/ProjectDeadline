@@ -211,8 +211,8 @@ class Deadline:
         Player's deadline.
 
         :param task: Task id.
-        :param deadline: Number of days to complete the task.
         :param init_day: The day when the task was issued.
+        :param deadline: Number of days to complete the task.
         """
         self.task = task
         self.init_day = init_day
@@ -428,6 +428,8 @@ class Game:
     def get_hand_info(self) -> list[CardID]:
         """
         Get list of card ids in player hand.
+
+        :return: List of card ids.
         """
         return self.player.hand
 
@@ -457,6 +459,7 @@ class Game:
         Get valid targets for an action card.
 
         :param cid: Card id.
+        :return: Valid card targets.
         """
         return self.get_card_info(cid).valid_target
 
