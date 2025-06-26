@@ -245,8 +245,14 @@ class Network:
             self._recv_buffer += data
             msg_count = self._recv_buffer.count(b"\n")
             valid_messages = self._recv_buffer.split(b"\n", msg_count)
+            if self._recv_buffer[-1] == b'\n':
+                self._recv_buffer = ''
+            else:
+                self._recv_buffer = valid_messages[-1]
+                valid_messages = valid_messages[:-1:]
             for msg in valid_messages:
-                self.add_event(msg.decode())
+                if len(msg):
+                    self.add_event(msg.decode())
 
         except BlockingIOError:
             return None

@@ -66,50 +66,79 @@ class TestNetwork(unittest.TestCase):
 
     def test_03_send_msg(self):
         """
-        Test message sending and receiving between two Network objects.
+        Test message sending, receiving and buffer handling between two Network objects.
 
-        This test validates the core messaging functionality of the Network class:
-        1. Establishes a connection between host and client
-        2. Tests sending a message from client to host and other way
-        3. Verifies that messages are received correctly using check_for_message()
+        This test validates:
+        1. Message sending/receiving in both directions
+        2. Partial message reception and buffering
+        3. Multiple messages handling
+        4. Message parsing into events
         """
         TIMEOUT = 30
         host_network = Network()
         client_network = Network()
         host_network.run_host(0, use_bore_flag=False)
         start_time = time.time()
+
+        # Wait for host to be ready
         while time.time() - start_time < TIMEOUT:
             if host_network.external_port is not None:
                 external_port = host_network.server_socket.getsockname()[1]
                 break
         else:
-            raise Exception()
+            self.fail("Host setup timeout")
 
+        # Connect client
         client_network.connect_to_host('localhost', external_port)
 
+        # Wait for connection
         start_time = time.time()
         while time.time() - start_time < TIMEOUT:
             if client_network.connection and host_network.connection:
                 break
         else:
-            raise Exception("Connection timeout")
+            self.fail("Connection timeout")
 
-        test_message = "Hello from client!"
+        test_message = "test_msg,123\n"
         client_network.send_msg(test_message)
         time.sleep(0.1)
 
-        received_data = host_network.check_for_message()
-        self.assertEqual(received_data, test_message)
+        host_network.check_for_message()
+        self.assertEqual(len(host_network.get_active_events()), 1)
+        self.assertEqual(host_network.events_dict["test_msg"][0], ["123"])
 
-        response_message = "Hello from host!"
-        host_network.send_msg(response_message)
+        partial_msg1 = "partial,msg"
+        partial_msg2 = "_part2,456\n"
+        client_network.send_msg(partial_msg1)
         time.sleep(0.1)
-        received_response = client_network.check_for_message()
-        self.assertEqual(received_response, response_message)
+        host_network.check_for_message()
+        self.assertEqual(len(host_network.get_active_events()), 1)
+
+        client_network.send_msg(partial_msg2)
+        time.sleep(0.1)
+        host_network.check_for_message()
+        self.assertEqual(len(host_network.get_active_events()), 2)
+        self.assertEqual(host_network.events_dict["partial"][0], ["msg_part2", "456"])
+
+        multi_msg = "msg1,1\nmsg2,2,3\nmsg3\n"
+        client_network.send_msg(multi_msg)
+        time.sleep(0.1)
+        host_network.check_for_message()
+
+        self.assertEqual(len(host_network.get_active_events()), 5)
+        self.assertEqual(host_network.events_dict["msg1"][0], ["1"])
+        self.assertEqual(host_network.events_dict["msg2"][0], ["2", "3"])
+        self.assertEqual(host_network.events_dict["msg3"][0], [])
+
+        host_msg = "host_msg,789\n"
+        host_network.send_msg(host_msg)
+        time.sleep(0.1)
+        client_network.check_for_message()
+        self.assertEqual(len(client_network.get_active_events()), 1)
+        self.assertEqual(client_network.events_dict["host_msg"][0], ["789"])
 
         client_network.close_all_connections()
         host_network.close_all_connections()
 
-
-if __name__ == '__main__':
-    unittest.main()
+        if __name__ == '__main__':
+            unittest.main()
