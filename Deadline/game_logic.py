@@ -3,6 +3,7 @@ import abc
 import json
 import random
 
+from .network import Network
 
 # Typing
 Day = int
@@ -51,14 +52,14 @@ class Effect:
 
     def __str__(self) -> str:
         return f'\nEffect #{self.eid}: {self.name}\n' \
-               f'    description = "{self.description}"\n' \
-               f'    image = {self.image}\n' \
-               f'    period = {self.period}\n' \
-               f'    delay = {self.delay}\n' \
-               f'    is_removable = {self.is_removable}\n' \
-               f'    init_events = {self.init_events}\n' \
-               f'    final_events = {self.final_events}\n' \
-               f'    everyday_events = {self.everyday_events}'
+            f'    description = "{self.description}"\n' \
+            f'    image = {self.image}\n' \
+            f'    period = {self.period}\n' \
+            f'    delay = {self.delay}\n' \
+            f'    is_removable = {self.is_removable}\n' \
+            f'    init_events = {self.init_events}\n' \
+            f'    final_events = {self.final_events}\n' \
+            f'    everyday_events = {self.everyday_events}'
 
     def __repr__(self) -> str:
         return f'{self.eid} "{self.name}"'
@@ -95,14 +96,14 @@ class Task:
 
     def __str__(self) -> str:
         return f'\nTask #{self.tid}: {self.name}\n' \
-               f'    description = "{self.description}"\n' \
-               f'    image = {self.image}\n' \
-               f'    difficulty = {self.difficulty}\n' \
-               f'    deadline = {self.deadline}\n' \
-               f'    award = {self.award}\n' \
-               f'    penalty = {self.penalty}\n' \
-               f'    events_on_success = {self.events_on_success}\n' \
-               f'    events_on_fail = {self.events_on_fail}'
+            f'    description = "{self.description}"\n' \
+            f'    image = {self.image}\n' \
+            f'    difficulty = {self.difficulty}\n' \
+            f'    deadline = {self.deadline}\n' \
+            f'    award = {self.award}\n' \
+            f'    penalty = {self.penalty}\n' \
+            f'    events_on_success = {self.events_on_success}\n' \
+            f'    events_on_fail = {self.events_on_fail}'
 
     def __repr__(self) -> str:
         return f'{self.tid} "{self.name}"'
@@ -131,10 +132,10 @@ class Card(abc.ABC):
 
     def __str__(self) -> str:
         return f'\nCard #{self.cid}: {self.name}\n' \
-               f'    description = "{self.description}"\n' \
-               f'    image = {self.image}\n' \
-               f'    valid_target = {self.valid_target}\n' \
-               f'    special = {self.special}'
+            f'    description = "{self.description}"\n' \
+            f'    image = {self.image}\n' \
+            f'    valid_target = {self.valid_target}\n' \
+            f'    special = {self.special}'
 
     def __repr__(self) -> str:
         return f'{self.cid} "{self.name}"'
@@ -273,19 +274,19 @@ class Player:
 
     def __str__(self) -> str:
         return f'\nPlayer {self.name}\n' \
-               f'    free_hours_today = {self.free_hours_today}\n' \
-               f'    score = {self.score}\n' \
-               f'    hand = {self.hand}\n' \
-               f'    deadlines = {self.deadlines}\n' \
-               f'    effects = {self.effects}\n' \
-               f'    delayed_effects = {self.delayed_effects}'
+            f'    free_hours_today = {self.free_hours_today}\n' \
+            f'    score = {self.score}\n' \
+            f'    hand = {self.hand}\n' \
+            f'    deadlines = {self.deadlines}\n' \
+            f'    effects = {self.effects}\n' \
+            f'    delayed_effects = {self.delayed_effects}'
 
     def __repr__(self) -> str:
         return f'Player {self.name}: ' \
-               f'hand "{self.hand}" ' \
-               f'deadlines {self.deadlines} ' \
-               f'effects {self.effects} ' \
-               f'delayed_effects {self.delayed_effects}'
+            f'hand "{self.hand}" ' \
+            f'deadlines {self.deadlines} ' \
+            f'effects {self.effects} ' \
+            f'delayed_effects {self.delayed_effects}'
 
     def get_cards_from_deck(self, cards: list[CardID]):
         """
@@ -312,13 +313,14 @@ class Player:
 
 
 class Game:
-    def __init__(self, player_name: str, opponent_name: str, is_first: bool):
+    def __init__(self, player_name: str, opponent_name: str, is_first: bool, network: Network):
         """
         A game. Contains all the data of the current game.
 
         :param player_name: Player name.
         :param opponent_name: Opponent name.
         :param is_first: 1 if the player plays first.
+        :network: object for network communication
         """
         self.DECK_SIZE: int  # Number of cards in deck
         self.HAND_SIZE: int  # Number of cards in players hand
@@ -341,6 +343,8 @@ class Game:
         self.have_exams: bool = False  # True when players have exams
         self.effects: list[EffectID] = []  # Effects affecting both players
         self.deck: list[CardID]  # Deck of cards
+
+        self.network = network
 
         self.__create_deck()
         self.__deal_cards()
@@ -389,12 +393,16 @@ class Game:
         """
         First player creates a deck of cards and share it with the second one.
         """
-        # if self.is_first:
-        if True:
+        if self.is_first:
+            # if True:
             self.deck = random.choices([k for k, v in self.ALL_CARDS.items() if not v.special], k=self.DECK_SIZE)
-            pass  # todo: send deck
+            self.network.send_deck(self.deck)
         else:
-            pass  # todo: receive deck
+            while len(self.network.events_dict['create_deck']) == 0:
+                pass  # Это плохой цикл, он повесит нам игру, если у кого-то плохой интернет.
+            cards = self.network.events_dict['create_deck'][0]
+            self.network.events_dict['create_deck'].pop(0)
+            self.deck = [Card(card) for card in cards]
 
     def __deal_cards(self):
         """
