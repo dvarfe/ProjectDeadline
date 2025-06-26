@@ -1,9 +1,10 @@
 import abc
 import pygame as pg
 import locale
-from .game import Game, Text, Anchor, TextField, \
-    BackButton, ChooseLanguageButton, SceneSwitchButton, ExitButton, ConnectButton, CheckBoxButton
+from .game import Game, Text, Anchor, TextField, BackButton, ChooseLanguageButton, \
+    SceneSwitchButton, ExitButton, ConnectButton, CheckBoxButton, Card
 from .game import _
+import Deadline.game_logic as gl
 
 
 class Scene(abc.ABC):
@@ -43,10 +44,16 @@ class Scene(abc.ABC):
         pass
 
 
+STICKYNOTE_BUTTON_IMAGES_PATHS = ["./textures/button_idle.png",
+                                  "./textures/button_hover.png", "./textures/button_pressed.png"]
+
+
 class MainMenu(Scene):
     def __init__(self, game):
         super().__init__(game)
         pg.display.set_caption(_('Deadline - Main menu'))
+
+        self.stickynote_button_images = list(map(pg.image.load, STICKYNOTE_BUTTON_IMAGES_PATHS))
 
         self.title = Text(
             game,
@@ -65,10 +72,10 @@ class MainMenu(Scene):
         self.button_host_game = SceneSwitchButton(
             game,
             HostScene,
-            (600, 120),
-            (self.game.window_size[0] // 2, self.game.window_size[1] // 16 * 5),
+            (600, 325),
+            (self.game.window_size[0] // 3, self.game.window_size[1] // 16 * 6),
             Anchor.CENTRE,
-            None,
+            self.stickynote_button_images,
             button_text,
             Anchor.CENTRE)
 
@@ -82,10 +89,10 @@ class MainMenu(Scene):
         self.button_connect = SceneSwitchButton(
             game,
             ConnectScene,
-            (600, 120),
-            (self.game.window_size[0] // 2, self.game.window_size[1] // 16 * 7),
+            (600, 325),
+            (self.game.window_size[0] // 3, self.game.window_size[1] // 16 * 12),
             Anchor.CENTRE,
-            None,
+            self.stickynote_button_images,
             button_text,
             Anchor.CENTRE)
 
@@ -99,10 +106,10 @@ class MainMenu(Scene):
         self.button_settings = SceneSwitchButton(
             game,
             SettingsScene,
-            (600, 120),
-            (self.game.window_size[0] // 2, self.game.window_size[1] // 16 * 9),
+            (600, 325),
+            (self.game.window_size[0] // 3 * 2, self.game.window_size[1] // 16 * 6),
             Anchor.CENTRE,
-            None,
+            self.stickynote_button_images,
             button_text,
             Anchor.CENTRE)
 
@@ -115,10 +122,10 @@ class MainMenu(Scene):
 
         self.button_exit = ExitButton(
             game,
-            (600, 120),
-            (self.game.window_size[0] // 2, self.game.window_size[1] // 16 * 11),
+            (600, 325),
+            (self.game.window_size[0] // 3 * 2, self.game.window_size[1] // 16 * 12),
             Anchor.CENTRE,
-            None,
+            self.stickynote_button_images,
             button_text,
             Anchor.CENTRE)
 
@@ -381,6 +388,22 @@ class GameScene(Scene):
         super().__init__(game)
         pg.display.set_caption(_('Deadline'))
 
+        # example scene
+        self.game_obj = gl.Game("Player1", "Player2", True, self.game.network)
+
+        self.cardtypes_images = \
+            {"TaskCard": pg.image.load("./textures/card_task.png"),
+             "ActionCard": pg.image.load("./textures/card_action.png")}
+
+        self.example = Card(
+            game,
+            self.game_obj,
+            self.game_obj.get_card_info(self.game_obj.__player.hand[0]),
+            self.cardtypes_images,
+            350,
+            (self.game.window_size[0] // 2, self.game.window_size[1] // 2),
+            Anchor.CENTRE)
+
     def run(self):
         self.check_events()
         self.update_scene()
@@ -390,7 +413,8 @@ class GameScene(Scene):
         pass
 
     def draw_scene(self):
-        self.game.canvas.fill((0, 0, 0))
+        self.game.canvas.fill((255, 255, 255))
+        self.example.draw()
         self.game.blit_screen()
 
     def update_scene(self):

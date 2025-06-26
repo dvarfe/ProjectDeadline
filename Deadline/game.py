@@ -5,8 +5,9 @@ from typing import Dict, List, Optional
 import pygame as pg
 import pygame.typing as pgt
 
-from .network import Network
+from Deadline.network import Network
 from Deadline.localization import _
+import Deadline.game_logic as gl
 
 # Typing
 Vector2 = tuple[int, int]
@@ -88,7 +89,7 @@ class Game():
                     30)
                 self.err_popup = ErrorPopUp(self,
                                             (1000, 600),
-                                            (self.window_size[0] / 2, self.window_size[1] / 2),
+                                            (self.window_size[0] // 2, self.window_size[1] // 2),
                                             Anchor.CENTRE,
                                             None,
                                             err_text)
@@ -204,9 +205,9 @@ class Text():
         """
 
         self.game = game
-        self.update(pos, anchor, text, font_size, font_name, color)
+        self.change(pos, anchor, text, font_size, font_name, color)
 
-    def update(
+    def change(
             self,
             pos: Optional[Point] = None,
             anchor: Optional[Anchor] = None,
@@ -228,30 +229,33 @@ class Text():
             color: New text color.
         """
 
-        update = bool(font_size) or bool(font_name)
-        if update:
+        change = bool(font_size) or bool(font_name)
+        if change:
             if font_size:
                 self.font_size = font_size
             if font_name:
                 self.font_name = font_name
             self.font = pg.font.Font(self.font_name, self.font_size)
 
-        update = update or bool(text) or bool(color)
-        if update:
+        change = change or bool(text) or bool(color)
+        if change:
             if text:
                 self.text = text
             if color:
                 self.color = color
             self.text_surface = self.font.render(self.text, True, self.color)
 
-        update = update or bool(pos) or bool(anchor)
-        if update:
+        change = change or bool(pos) or bool(anchor)
+        if change:
             if pos:
                 self.pos = pos
             if anchor:
                 self.anchor = anchor
             self.rect = self.text_surface.get_rect()
             anchor_rect(self.rect, self.pos, self.anchor)
+
+    def update(self):
+        pass
 
     def draw(self):
         """Draw the text surface to the game's canvas."""
@@ -266,6 +270,7 @@ class Button(abc.ABC):
         size (Vector2): Size of the button (width, height).
         pos (Point): Position of the button.
         anchor (Anchor): Anchor point for positioning.
+        images (List[Image])
         text (Text): Text object for the button (optional).
         text_anchor (Anchor): Anchor point for the button text.
         mouseover (bool): Whether the mouse is over the button.
@@ -277,7 +282,7 @@ class Button(abc.ABC):
             size: Vector2,
             pos: Point,
             anchor: Anchor = Anchor.CENTRE,
-            image_paths=None,
+            images: Optional[List[pg.Surface]] = None,
             text: Optional[Text] = None,
             text_anchor: Anchor = Anchor.CENTRE):
         """Initialize a Button instance.
@@ -287,55 +292,77 @@ class Button(abc.ABC):
             size: Size of the button (width, height).
             pos: Position of the button.
             anchor: Anchor point for positioning.
-            image_paths: Paths to button images (optional).
+            image: Button textures for idle, hover and pressed states (optional).
             text: Text object for the button (optional).
             text_anchor: Anchor point for the button text.
         """
 
         self.game = game
-        self.size = size
-        self.pos = pos
-        self.anchor = anchor
-        self.text = text
-        self.text_anchor = text_anchor
-
-        if image_paths:
-            self.has_image = True
-
-            image_idle = pg.image.load(image_paths[0])
-            self.image_idle = pg.transform.scale(image_idle, self.size)
-
-            image_hover = pg.image.load(image_paths[1])
-            self.image_hover = pg.transform.scale(image_hover, self.size)
-
-            image_clicked = pg.image.load(image_paths[2])
-            self.image_clicked = pg.transform.scale(image_clicked, self.size)
-
-            self.image = image_idle
-        else:
-            self.has_image = False
-
-            self.color_idle = (170, 170, 170)
-            self.color_hover = (120, 120, 120)
-            self.color_clicked = (70, 70, 70)
-
-            self.color = self.color_idle
-
-        self.rect = pg.Rect(0, 0, size[0], size[1])
-        anchor_rect(self.rect, pos, anchor)
-
-        if self.text:
-            self.text.update(pos=rect_anchor_pos(self.rect, text_anchor))
 
         self.mouseover = False
         self.mousedown = False
         self.mousehold = False
         self.mouseup = False
 
+        if not images:
+            self.images = None
+            self.color_idle = (170, 170, 170)
+            self.color_hover = (120, 120, 120)
+            self.color_clicked = (70, 70, 70)
+
+            self.color = self.color_idle
+
+        if not text:
+            self.text = None
+
+        self.change(size, pos, anchor, images, text, text_anchor)
+
+    def change(
+            self,
+            size: Optional[Vector2] = None,
+            pos: Optional[Point] = None,
+            anchor: Optional[Anchor] = None,
+            images: Optional[List[pg.Surface]] = None,
+            text: Optional[Text] = None,
+            text_anchor: Optional[Anchor] = None):
+
+        change = bool(size)
+        if change:
+            self.size = size
+            self.rect = pg.Rect(0, 0, self.size[0], self.size[1])
+
+        if images:
+            self.images = images
+            change = True
+
+        if change and self.images:
+            self.image_idle = pg.transform.scale(images[0], self.size)
+            self.image_hover = pg.transform.scale(images[1], self.size)
+            self.image_clicked = pg.transform.scale(images[2], self.size)
+            self.image = self.image_idle
+
+        change = bool(pos) or bool(anchor)
+        if change:
+            if pos:
+                self.pos = pos
+            if anchor:
+                self.anchor = anchor
+            anchor_rect(self.rect, self.pos, self.anchor)
+
+        change = bool(text) or bool(text_anchor)
+        if change:
+            if text:
+                self.text = text
+            if text_anchor:
+                self.text_anchor = text_anchor
+
+        if change and self.text:
+            self.text.change(pos=rect_anchor_pos(self.rect, self.text_anchor))
+
     def draw(self):
         """Draw the button to the game's canvas."""
 
-        if self.has_image:
+        if self.images:
             if self.mousehold:
                 self.image = self.image_clicked
             elif self.mouseover:
@@ -396,7 +423,7 @@ class SceneSwitchButton(Button):
             size: Vector2,
             pos: Point,
             anchor: Anchor = Anchor.CENTRE,
-            image_paths: Optional[List[str]] = None,
+            images: Optional[List[pg.Surface]] = None,
             text: Optional[Text] = None,
             text_anchor: Anchor = Anchor.CENTRE):
         """Initialize a SceneSwitchButton.
@@ -412,7 +439,7 @@ class SceneSwitchButton(Button):
             text_anchor: Anchor point for the button text.
         """
 
-        Button.__init__(self, game, size, pos, anchor, image_paths, text, text_anchor)
+        Button.__init__(self, game, size, pos, anchor, images, text, text_anchor)
         self.scene_class = scene_class
 
     def update(self):
@@ -431,7 +458,7 @@ class BackButton(SceneSwitchButton):
             size: Vector2 = (120, 120),
             pos: Point = (0, 0),
             anchor: Anchor = Anchor.TOP_LEFT,
-            image_paths: Optional[List[str]] = None):
+            images: Optional[List[pg.Surface]] = None):
         """Initialize a BackButton.
 
         Args:
@@ -443,7 +470,7 @@ class BackButton(SceneSwitchButton):
             image_paths (Optional[List[str]], optional): Paths to button images (optional). Defaults to None.
         """
 
-        super().__init__(game, scene_class, size, pos, anchor, image_paths)
+        super().__init__(game, scene_class, size, pos, anchor, images)
         self.arrow_color = "black"
         self.arrow_polygon = ((100, 55), (100, 65), (40, 65), (40, 75), (15, 60), (40, 45), (40, 55))
 
@@ -516,7 +543,7 @@ class ExitButton(Button):
             size: Vector2,
             pos: Point,
             anchor: Anchor = Anchor.CENTRE,
-            image_paths: Optional[List[str]] = None,
+            images: Optional[List[pg.Surface]] = None,
             text: Optional[Text] = None,
             text_anchor: Anchor = Anchor.CENTRE):
         """Initialize an ExitButton.
@@ -531,7 +558,7 @@ class ExitButton(Button):
             text_anchor: Anchor point for the button text.
         """
 
-        Button.__init__(self, game, size, pos, anchor, image_paths, text, text_anchor)
+        Button.__init__(self, game, size, pos, anchor, images, text, text_anchor)
 
     def update(self):
         """Exit game if clicked."""
@@ -665,14 +692,14 @@ class CheckBoxButton(Button):
             size: Vector2,
             pos: Point,
             anchor: Anchor = Anchor.CENTRE,
-            image_paths=None,
+            images: Optional[List[pg.Surface]] = None,
             text: Optional[Text] = None,
             text_anchor: Anchor = Anchor.CENTRE):
         super().__init__(game,
                          size,
                          pos,
                          anchor,
-                         image_paths,
+                         images,
                          text,
                          text_anchor)
         self.clicked = False
@@ -719,3 +746,133 @@ class ErrorPopUp(Button):
 
     def update(self):
         pass
+
+
+CARD_TEXTURE_SIZE = (700, 1000)
+CARD_IMAGE_SIZE = (474, 360)
+CARD_IMAGE_OFFSET = (101, 154)
+CARD_NAME_CENTRE_OFFSET = (340, 560)
+CARD_DESCRIPTION_CENTRE_OFFSET = (340, 685)
+CARD_CLOCK_CENTRE_OFFSET = (590, 140)
+CARD_AWARD_CENTRE_OFFSET = (90, 910)
+CARD_PENALTY_CENTRE_OFFSET = (215, 910)
+CARD_PROGGRESS_CENTRE_OFFSET = (510, 910)
+
+
+def get_size_ratio(x: Vector2, y: Vector2):
+    return (x[0] / y[0], x[1] / y[1])
+
+
+CARD_WIDTH_TO_HEIGHT_RATIO = CARD_TEXTURE_SIZE[0] / CARD_TEXTURE_SIZE[1]
+CARD_IMAGE_RATIO = get_size_ratio(CARD_IMAGE_SIZE, CARD_TEXTURE_SIZE)
+CARD_IMAGE_OFFSET_RATIO = get_size_ratio(CARD_IMAGE_OFFSET, CARD_TEXTURE_SIZE)
+CARD_NAME_CENTRE_OFFSET_RATIO = get_size_ratio(CARD_NAME_CENTRE_OFFSET, CARD_TEXTURE_SIZE)
+CARD_DESCRIPTION_CENTRE_OFFSET_RATIO = get_size_ratio(CARD_DESCRIPTION_CENTRE_OFFSET, CARD_TEXTURE_SIZE)
+CARD_CLOCK_CENTRE_OFFSET_RATIO = get_size_ratio(CARD_CLOCK_CENTRE_OFFSET, CARD_TEXTURE_SIZE)
+CARD_AWARD_CENTRE_OFFSET_RATIO = get_size_ratio(CARD_AWARD_CENTRE_OFFSET, CARD_TEXTURE_SIZE)
+CARD_PENALTY_CENTRE_OFFSET_RATIO = get_size_ratio(CARD_PENALTY_CENTRE_OFFSET, CARD_TEXTURE_SIZE)
+CARD_PROGGRESS_CENTRE_OFFSET_RATIO = get_size_ratio(CARD_PROGGRESS_CENTRE_OFFSET, CARD_TEXTURE_SIZE)
+
+
+class Card():
+    def __init__(
+            self,
+            game: Game,
+            game_obj: gl.Game,
+            card_info: gl.Game.Card,
+            card_type_images: Dict[str, pg.Surface],
+            height: int,
+            pos: Point,
+            anchor: Anchor = Anchor.CENTRE):
+
+        self.game = game
+        self.game_obj = game_obj
+        self.card_info = card_info
+        self.card_type_images = card_type_images
+        self.card_image = pg.image.load(card_info.image)
+        self.size = (round(height * CARD_WIDTH_TO_HEIGHT_RATIO), height)
+        self.pos = pos
+        self.anchor = anchor
+
+        match self.game_obj.get_card_type(self.card_info.cid):
+            case "TaskCard":
+                self.card_type = "TaskCard"
+            case "ActionCard":
+                self.card_type = "ActionCard"
+
+        self.card_type_image = self.card_type_images[self.card_type]
+
+        self.rect = pg.Rect(0, 0, self.size[0], self.size[1])
+        self.rect_image = pg.Rect(0, 0, round(self.size[0] * CARD_IMAGE_RATIO[0]),
+                                  round(self.size[1] * CARD_IMAGE_RATIO[1]))
+        anchor_rect(self.rect, self.pos, self.anchor)
+        image_pos = rect_anchor_pos(self.rect, Anchor.TOP_LEFT)
+        image_pos = (image_pos[0] + round(self.size[0] * CARD_IMAGE_OFFSET_RATIO[0]),
+                     image_pos[1] + round(self.size[1] * CARD_IMAGE_OFFSET_RATIO[1]))
+        anchor_rect(self.rect_image, image_pos, Anchor.TOP_LEFT)
+
+        self.surface_card_type_image = pg.transform.scale(self.card_type_image, self.size)
+        self.surface_card_image = pg.transform.scale(self.card_image, self.rect_image.size)
+
+        self.name_text = Text(
+            game,
+            (self.rect.topleft[0] + round(CARD_NAME_CENTRE_OFFSET_RATIO[0] * self.size[0]),
+             self.rect.topleft[1] + round(CARD_NAME_CENTRE_OFFSET_RATIO[1] * self.size[1])),
+            Anchor.CENTRE,
+            _(card_info.name),
+            self.size[0] // 10)
+
+        self.description_text = Text(
+            game,
+            (self.rect.topleft[0] + round(CARD_DESCRIPTION_CENTRE_OFFSET_RATIO[0] * self.size[0]),
+             self.rect.topleft[1] + round(CARD_DESCRIPTION_CENTRE_OFFSET_RATIO[1] * self.size[1])),
+            Anchor.CENTRE,
+            _(self.card_info.description),
+            self.size[0] // 15)
+
+        if self.card_type == "TaskCard":
+            self.clock_text = Text(
+                self.game,
+                (self.rect.topleft[0] + round(CARD_CLOCK_CENTRE_OFFSET_RATIO[0] * self.size[0]),
+                 self.rect.topleft[1] + round(CARD_CLOCK_CENTRE_OFFSET_RATIO[1] * self.size[1])),
+                Anchor.CENTRE,
+                _(str(self.game_obj.get_task_info(self.card_info.task).deadline)),
+                self.size[0] // 8)
+
+            self.award_text = Text(
+                self.game,
+                (self.rect.topleft[0] + round(CARD_AWARD_CENTRE_OFFSET_RATIO[0] * self.size[0]),
+                 self.rect.topleft[1] + round(CARD_AWARD_CENTRE_OFFSET_RATIO[1] * self.size[1])),
+                Anchor.CENTRE,
+                _(str(self.game_obj.get_task_info(self.card_info.task).award)),
+                self.size[0] // 8)
+
+            self.penalty_text = Text(
+                self.game,
+                (self.rect.topleft[0] + round(CARD_PENALTY_CENTRE_OFFSET_RATIO[0] * self.size[0]),
+                 self.rect.topleft[1] + round(CARD_PENALTY_CENTRE_OFFSET_RATIO[1] * self.size[1])),
+                Anchor.CENTRE,
+                _(str(self.game_obj.get_task_info(self.card_info.task).penalty)),
+                self.size[0] // 8)
+
+            self.progress_text = Text(
+                self.game,
+                (self.rect.topleft[0] + round(CARD_PROGGRESS_CENTRE_OFFSET_RATIO[0] * self.size[0]),
+                 self.rect.topleft[1] + round(CARD_PROGGRESS_CENTRE_OFFSET_RATIO[1] * self.size[1])),
+                Anchor.CENTRE,
+                _("0 / " + str(self.game_obj.get_task_info(self.card_info.task).difficulty)),
+                self.size[0] // 8)
+
+    def update(self):
+        pass
+
+    def draw(self):
+        self.game.canvas.blit(self.surface_card_image, self.rect_image)
+        self.game.canvas.blit(self.surface_card_type_image, self.rect)
+        self.name_text.draw()
+        if self.card_type == "TaskCard":
+            self.clock_text.draw()
+            self.award_text.draw()
+            self.penalty_text.draw()
+            self.progress_text.draw()
+        self.description_text.draw()
