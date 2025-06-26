@@ -10,18 +10,34 @@ class MockNetwork:
 
 
 def print_game_info(game_data: GameData):
-    print()
-    print()
-    print()
-
-    print(f'day {game_data.day} {"exams" if game_data.have_exams else ""}')
-
-    print(game_data.player)
-    print(game_data.opponent)
+    data = game_data.get_game_info()
+    pl = data['player']
+    op = data['opponent']
+    gl = data['global']
 
     print()
-    print(f'cards in deck: {game_data.deck}')
-    print(f'global effects: {game_data.effects}')
+    print()
+    print()
+    print(f'day {gl["day"]} {"exams" if gl["have exams"] else ""}')
+
+    print(f'\nPlayer {pl["name"]}\n'
+          f'    free_hours_today = {pl["free time"]}\n'
+          f'    score = {pl["score"]}\n'
+          f'    hand = {pl["hand"]}\n'
+          f'    deadlines = {pl["deadlines"]}\n'
+          f'    effects = {pl["effects"]}\n'
+          f'    delayed_effects = {pl["delayed effects"]}')
+    print(f'\nOpponent {op["name"]}\n'
+          f'    free_hours_today = {op["free time"]}\n'
+          f'    score = {op["score"]}\n'
+          f'    hand size = {op["hand size"]}\n'
+          f'    deadlines = {op["deadlines"]}\n'
+          f'    effects = {op["effects"]}\n'
+          f'    delayed_effects = {op["delayed effects"]}')
+
+    print()
+    print(f'cards in deck: {gl["deck size"]}')
+    print(f'global effects: {gl["effects"]}')
 
 
 def game():
