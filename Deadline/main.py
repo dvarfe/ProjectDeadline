@@ -13,11 +13,17 @@ def get_args():
 
 
 def main_gui():
+    """
+    GUI mode for players.
+    """
     g = Game(MainMenu)
     g.run()
 
 
 def main_cli():
+    """
+    CLI mode for debugging.
+    """
     game_cli()
 
 
