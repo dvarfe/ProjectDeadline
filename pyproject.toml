@@ -12,11 +12,13 @@ authors = [
 ]
 
 keywords = ["game", "multiplayer", "card"]
+
 classifiers = [
     "Development Status :: 1 - Planning",
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
 ]
+
 dependencies = ["pygame-ce", "ansicolors"]
 
 [project.urls]
@@ -24,6 +26,7 @@ repository = "https://github.com/Anenokil/PythonProject-PreciousSource"
 
 [project.gui-scripts]
 Deadline = "Deadline.main:main_gui"
+
 
 [build-system]
 requires = [
