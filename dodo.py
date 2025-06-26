@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 import glob
+from doit.tools import create_folder
+PODEST = "Deadline/po"
 
 
 def task_gitclean():
@@ -43,7 +45,7 @@ def task_pot():
 def task_po():
     """Update translations."""
     return {
-        'actions': ['pybabel update --ignore-pot-creation-date -D Deadline -d po -i Deadline.pot'],
+        'actions': [f'pybabel update --ignore-pot-creation-date -D Deadline -d {PODEST} -i Deadline.pot'],
         'file_dep': ['Deadline.pot'],
     }
 
@@ -52,10 +54,11 @@ def task_mo():
     """Compile translations."""
     return {
         'actions': [
-            'pybabel compile -D Deadline -d po'
+            (create_folder, [f'{PODEST}/u_RU.UTF-8/LC_MESSAGES']),
+            f'pybabel compile -D Deadline -d {PODEST}'
         ],
-        'file_dep': ['po/ru_RU.UTF-8/LC_MESSAGES/Deadline.po'],
-        'targets': ['po/ru_RU.UTF-8/LC_MESSAGES/Deadline.mo'],
+        'file_dep': [f'{PODEST}/ru_RU.UTF-8/LC_MESSAGES/Deadline.po'],
+        'targets': [f'{PODEST}/ru_RU.UTF-8/LC_MESSAGES/Deadline.mo'],
     }
 
 
