@@ -1,6 +1,14 @@
 from .game_logic import Game as GameData
 
 
+class MockNetwork:
+    def __init__(self):
+        self.events_dict = {'create_deck': []}
+
+    def send_deck(self, deck: list):
+        self.events_dict['create_deck'].append(deck)
+
+
 def print_game_info(game_data: GameData):
     print()
     print()
@@ -19,8 +27,9 @@ def print_game_info(game_data: GameData):
 def game():
     player1 = 'Alex'
     player2 = 'Bob'
-    game_data1 = GameData(player1, player2, True)
-    game_data2 = GameData(player2, player1, False)
+    network = MockNetwork()
+    game_data1 = GameData(player1, player2, True, network)
+    game_data2 = GameData(player2, player1, False, network)
     game_data = [game_data1, game_data2]
     i = 0
 
@@ -40,10 +49,8 @@ def game():
             case 'T':  # Time management
                 pass
             case 'S':  # Skip a turn
-                pass
+                i = 1 - i
             case 'E':  # Exit
                 break
             case _:  # Missclick
                 continue
-
-        i = 1 - i
