@@ -161,7 +161,7 @@ class Card(abc.ABC):
 
 class TaskCard(Card):
     def __init__(self, cid: CardID, name: str, description: str, image: Image,
-                 valid_target: CardTarget | str, special: bool, tasks: list[TaskID]):
+                 valid_target: CardTarget | str, special: bool, task: TaskID):
         """
         Task card - one of the card types.
 
@@ -172,16 +172,16 @@ class TaskCard(Card):
         :param valid_target: Valid targets.
         :param special: Can the card be in the deck or not.
             If the card is special, then it can only be obtained as a result of the event.
-        :param tasks: Tasks that are given when the card is played.
+        :param task: Task that are given when the card is played.
         """
         super().__init__(cid, name, description, image, valid_target, special)
-        self.tasks = tasks
+        self.task = task
 
 
 class ActionCard(Card):
     def __init__(self, cid: CardID, name: str, description: str, image: Image,
-                 valid_target: CardTarget | str, special: bool, cost: Hours, action: list[EffectID],
-                 req_args: list[list[str] | None], check_args: list[str | None]):
+                 valid_target: CardTarget | str, special: bool, cost: Hours, action: EffectID,
+                 req_args: list[str] | None, check_args: str | None):
         """
         Action card - one of the card types.
 
@@ -194,9 +194,9 @@ class ActionCard(Card):
             If the card is special, then it can only be obtained as a result of the event.
         :param cost: The cost of the card in hours.
         :param action: Card action.
-        :param req_args: Lists of parameter names that the `action` functions accepts.
-        :param check_args: Functions for verifying the correctness of parameters
-            passed to the `action` functions (if `action` is Event).
+        :param req_args: Names of `action` function parameters.
+        :param check_args: Function for verifying the correctness of parameters
+            passed to the `action` function.
         """
         super().__init__(cid, name, description, image, valid_target, special)
         self.cost = cost
@@ -487,7 +487,9 @@ class Game:
             if self.get_card_type(cid) != 'ActionCard':
                 raise TypeError
             self.player.spend_time(card.cost)
-            self.effects += card.action
+            self.effects.append(card.action)
         else:
-            for effect, args, check_func in zip(card.action, card.req_args, card.check_args):
-                self.players[target_pid].effects.add((effect, args, check_func))
+            if self.get_card_type(cid) == 'ActionCard':
+                self.players[target_pid].effects.append((card.action, card.req_args, card.check_args))
+            else:
+                self.players[target_pid].deadlines.append(card.task)
