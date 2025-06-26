@@ -1,5 +1,6 @@
 import os
 import abc
+import enum
 import json
 import random
 
@@ -14,10 +15,26 @@ Event = str
 EffectID = str
 TaskID = str
 CardID = str
-CardTarget = str  # GLOBAL, PLAYER, OPPONENT, ANY
+PlayerID = int
 
 # Global constants
 GAME_CONFIG_FN = os.path.join('Deadline', 'game_config.json')
+
+
+class CardTarget(enum.Enum):
+    """
+    Kinds of card targets.
+    """
+    GLOBAL = 0  # Affects everyone
+    PLAYER = 1  # Affects the player himself
+    OPPONENT = 2  # Affects the opponent
+    ANY = 3  # Affects one of the players
+
+
+str_to_card_target = {'GLOBAL': CardTarget.GLOBAL,
+                      'PLAYER': CardTarget.PLAYER,
+                      'OPPONENT': CardTarget.OPPONENT,
+                      'ANY': CardTarget.ANY}
 
 
 class Effect:
@@ -110,7 +127,8 @@ class Task:
 
 class Card(abc.ABC):
     @abc.abstractmethod
-    def __init__(self, cid: CardID, name: str, description: str, image: Image, valid_target: CardTarget, special: bool):
+    def __init__(self, cid: CardID, name: str, description: str, image: Image,
+                 valid_target: CardTarget | str, special: bool):
         """
         Playing card.
 
@@ -126,7 +144,7 @@ class Card(abc.ABC):
         self.name = name
         self.description = description
         self.image = image
-        self.valid_target = valid_target
+        self.valid_target = str_to_card_target[valid_target] if isinstance(valid_target, str) else valid_target
         self.special = special
 
     def __str__(self) -> str:
@@ -139,17 +157,10 @@ class Card(abc.ABC):
     def __repr__(self) -> str:
         return f'{self.cid} "{self.name}"'
 
-    @abc.abstractmethod
-    def apply(self, target):
-        """
-        Apply card to target.
-        """
-        pass
-
 
 class TaskCard(Card):
-    def __init__(self, cid: CardID, name: str, description: str, image: Image, valid_target: CardTarget, special: bool,
-                 tasks: list[TaskID]):
+    def __init__(self, cid: CardID, name: str, description: str, image: Image,
+                 valid_target: CardTarget | str, special: bool, tasks: list[TaskID]):
         """
         Task card - one of the card types.
 
@@ -165,26 +176,10 @@ class TaskCard(Card):
         super().__init__(cid, name, description, image, valid_target, special)
         self.tasks = tasks
 
-    def apply(self, target: CardTarget):
-        """
-        Apply card to target.
-        """
-        match target:
-            case 'GLOBAL':
-                pass
-            case 'OPPONENT':
-                pass
-            case 'PLAYER':
-                pass
-            case 'ANY':
-                pass
-            case _:
-                pass
-
 
 class ActionCard(Card):
-    def __init__(self, cid: CardID, name: str, description: str, image: Image, valid_target: CardTarget, special: bool,
-                 cost: Hours, action: list[Event | EffectID],
+    def __init__(self, cid: CardID, name: str, description: str, image: Image,
+                 valid_target: CardTarget | str, special: bool, cost: Hours, action: list[EffectID],
                  req_args: list[list[str] | None], check_args: list[str | None]):
         """
         Action card - one of the card types.
@@ -207,22 +202,6 @@ class ActionCard(Card):
         self.action = action
         self.req_args = req_args
         self.check_args = check_args
-
-    def apply(self, target):
-        """
-        Apply card to target.
-        """
-        match target:
-            case 'GLOBAL':
-                pass
-            case 'OPPONENT':
-                pass
-            case 'PLAYER':
-                pass
-            case 'ANY':
-                pass
-            case _:
-                pass
 
 
 class Deadline:
@@ -255,13 +234,15 @@ class Deadline:
 
 
 class Player:
-    def __init__(self, name: str, hours_in_day: Hours):
+    def __init__(self, pid: PlayerID, name: str, hours_in_day: Hours):
         """
         A player.
 
+        :param pid: Player id.
         :param name: Player name.
         :param hours_in_day: Number of free hours per day.
         """
+        self.pid = pid
         self.name = name
         self.free_hours_today = hours_in_day
 
@@ -272,7 +253,7 @@ class Player:
         self.delayed_effects: dict[Day, list[EffectID]] = {}  # Delayed effects by the days when they start
 
     def __str__(self) -> str:
-        return f'\nPlayer {self.name}\n' \
+        return f'\nPlayer #{self.pid}: {self.name}\n' \
                f'    free_hours_today = {self.free_hours_today}\n' \
                f'    score = {self.score}\n' \
                f'    hand = {self.hand}\n' \
@@ -287,7 +268,7 @@ class Player:
                f'effects {self.effects} ' \
                f'delayed_effects {self.delayed_effects}'
 
-    def get_cards_from_deck(self, cards: list[CardID]):
+    def take_cards_from_deck(self, cards: list[CardID]):
         """
         Get new cards from deck.
 
@@ -303,6 +284,17 @@ class Player:
         """
         assert 0 <= idx < len(self.hand)
         return self.hand.pop(idx)
+
+    def spend_time(self, h: Hours):
+        """
+        Spend `h` hours for something.
+
+        :param h: Number of hours to spend.
+        """
+        self.free_hours_today -= h
+
+    def apply_effect(self, action, req_args, check_args):
+        pass
 
     def manage_time(self):
         """
@@ -333,13 +325,17 @@ class Game:
         self.__load_data()
         self.__check_consistency()
 
-        self.player: Player = Player(player_name, self.HOURS_IN_DAY_DEFAULT)  # Player
-        self.opponent: Player = Player(opponent_name, self.HOURS_IN_DAY_DEFAULT)  # Opponent
-
+        # Initialize players
         self.is_first = is_first  # 1 if the player plays first
+        player_pid, opponent_pid = (1, 0) if self.is_first else (0, 1)
+        self.player = Player(player_pid, player_name, self.HOURS_IN_DAY_DEFAULT)
+        self.opponent = Player(opponent_pid, opponent_name, self.HOURS_IN_DAY_DEFAULT)
+        self.players = {player_pid: self.player, opponent_pid: self.opponent}
+
         self.day: Day = 1  # Day number
         self.have_exams: bool = False  # True when players have exams
         self.effects: list[EffectID] = []  # Effects affecting both players
+
         self.deck: list[CardID]  # Deck of cards
 
         self.__create_deck()
@@ -400,14 +396,9 @@ class Game:
         """
         Deal cards to players.
         """
-        def deal_to_one_player(player: Player):
-            player.get_cards_from_deck(self.deck[:self.HAND_SIZE])
-            self.deck = self.deck[self.HAND_SIZE:]
-
-        if self.is_first:
-            deal_to_one_player(self.player), deal_to_one_player(self.opponent)
-        else:
-            deal_to_one_player(self.opponent), deal_to_one_player(self.player)
+        self.players[1].take_cards_from_deck(self.deck[:self.HAND_SIZE])
+        self.players[0].take_cards_from_deck(self.deck[self.HAND_SIZE:2*self.HAND_SIZE])
+        self.deck = self.deck[2*self.HAND_SIZE:]
 
     def can_take_card(self) -> dict:
         """
@@ -427,7 +418,7 @@ class Game:
         """
         Let the player pick a new card from the deck.
         """
-        self.player.get_cards_from_deck([self.deck.pop(0)])
+        self.player.take_cards_from_deck([self.deck.pop(0)])
 
     def get_hand_info(self) -> list[CardID]:
         """
@@ -438,6 +429,8 @@ class Game:
     def get_card_info(self, cid: CardID) -> Card:
         """
         Get card info by card id.
+
+        :param cid: Card id.
         """
         return self.ALL_CARDS[cid]
 
@@ -445,6 +438,7 @@ class Game:
         """
         Get card type: TaskCard or ActionCard.
 
+        :param cid: Card id.
         :return: string 'TaskCard' or 'ActionCard'.
         """
         if isinstance(self.ALL_CARDS[cid], TaskCard):
@@ -453,15 +447,42 @@ class Game:
             return 'ActionCard'
         raise TypeError
 
-    def get_targets(self, cid: CardID) -> CardTarget:
+    def get_card_targets(self, cid: CardID) -> CardTarget:
         """
         Get valid targets for an action card.
+
+        :param cid: Card id.
         """
         return self.get_card_info(cid).valid_target
 
-    def use_card(self, card_idx_in_hand: int, target: CardTarget):
+    def can_use_card(self, cid: CardID) -> dict:
+        """
+        Whether the player can use a card from the deck.
+
+        :param cid: Card id.
+        :return: dict with keys `res` and optionally `msg`.
+            `res` is main result (bool).
+            `msg` is used in case of a False response to indicate the reason.
+        """
+        if self.get_card_type(cid) == 'ActionCard' and self.ALL_CARDS[cid].cost > self.player.free_hours_today:
+            return {'res': False, 'msg': 'Not enough free time!'}
+        return {'res': True}
+
+    def use_card(self, card_idx_in_hand: int, target_pid: PlayerID = None, target_cid: CardID = None):
         """
         Use a card from hand.
+
+        :param card_idx_in_hand: Card index in hand.
+        :param target_pid: Target player id (if card is applied to a player).
+        :param target_cid: Target card id (if card is applied to a specific player card).
         """
         cid = self.player.use_card(card_idx_in_hand)
-        self.ALL_CARDS[cid].apply(target)
+        card = self.ALL_CARDS[cid]
+        if card.valid_target == CardTarget.GLOBAL:
+            if self.get_card_type(cid) != 'ActionCard':
+                raise TypeError
+            self.player.spend_time(card.cost)
+            self.effects += card.action
+        else:
+            for effect, args, check_func in zip(card.action, card.req_args, card.check_args):
+                self.players[target_pid].effects.add((effect, args, check_func))
