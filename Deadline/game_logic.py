@@ -46,7 +46,7 @@ class Game:
             """
             An effect applied to the player.
 
-            :param eid: Effect id.
+            :param eid: Effect ID.
             :param name: Effect name.
             :param description: Effect description.
             :param image: Effect image.
@@ -89,7 +89,7 @@ class Game:
             """
             A task that can be given to a player.
 
-            :param tid: Task id.
+            :param tid: Task ID.
             :param name: Task name.
             :param description: Task description.
             :param image: Task image.
@@ -132,7 +132,7 @@ class Game:
             """
             Playing card.
 
-            :param cid: Card id.
+            :param cid: Card ID.
             :param name: Card name.
             :param description: Card description.
             :param image: Card image.
@@ -163,7 +163,7 @@ class Game:
             """
             Task card - one of the card types.
 
-            :param cid: Card id.
+            :param cid: Card ID.
             :param name: Card name.
             :param description: Card description.
             :param image: Card image.
@@ -182,7 +182,7 @@ class Game:
             """
             Action card - one of the card types.
 
-            :param cid: Card id.
+            :param cid: Card ID.
             :param name: Card name.
             :param description: Card description.
             :param image: Card image.
@@ -206,7 +206,7 @@ class Game:
             """
             Player's deadline.
 
-            :param task: Task id.
+            :param task: Task ID.
             :param init_day: The day when the task was issued.
             :param deadline: Number of days to complete the task.
             """
@@ -234,7 +234,7 @@ class Game:
             """
             A player.
 
-            :param pid: Player id.
+            :param pid: Player ID.
             :param name: Player name.
             :param hours_in_day: Number of free hours per day.
             """
@@ -324,10 +324,10 @@ class Game:
 
         # Initialize players
         self.__is_first = is_first  # 1 if the player plays first
-        player_pid, opponent_pid = (1, 0) if self.__is_first else (0, 1)
-        self.__player = Game.Player(player_pid, player_name, self.__HOURS_IN_DAY_DEFAULT)
-        self.__opponent = Game.Player(opponent_pid, opponent_name, self.__HOURS_IN_DAY_DEFAULT)
-        self.__players = {player_pid: self.__player, opponent_pid: self.__opponent}
+        self.__player_pid, self.__opponent_pid = (1, 0) if self.__is_first else (0, 1)
+        self.__player = Game.Player(self.__player_pid, player_name, self.__HOURS_IN_DAY_DEFAULT)
+        self.__opponent = Game.Player(self.__opponent_pid, opponent_name, self.__HOURS_IN_DAY_DEFAULT)
+        self.__players = {self.__player_pid: self.__player, self.__opponent_pid: self.__opponent}
 
         self.__day: Day = 1  # Day number
         self.__have_exams: bool = False  # True when players have exams
@@ -360,18 +360,6 @@ class Game:
         self.__ALL_CARDS = {dct['cid']: Game.TaskCard(**dct) for dct in data['task_cards']}
         self.__ALL_CARDS.update({dct['cid']: Game.ActionCard(**dct) for dct in data['action_cards']})
 
-        """
-        print(self.__HAND_SIZE)
-        print(self.__DECK_SIZE)
-        print(self.__WIN_THRESHOLD)
-        print(self.__DEFEAT_THRESHOLD)
-        print(self.__DAYS_IN_TERM)
-        print(self.__HOURS_IN_DAY_DEFAULT)
-        print(self.__ALL_EFFECTS)
-        print(self.__ALL_TASKS)
-        print(self.__ALL_CARDS)
-        #"""
-
     def __check_consistency(self):
         """
         Check the consistency of configurations between players.
@@ -386,16 +374,19 @@ class Game:
             self.__deck = random.choices([k for k, v in self.__ALL_CARDS.items() if not v.special], k=self.__DECK_SIZE)
             self.__network.send_deck(self.__deck)
         else:
-            while len(self.__network.events_dict['create_deck']) == 0:
-                pass  # Это плохой цикл, он повесит нам игру, если у кого-то плохой интернет.
+            while len(self.__network.events_dict['create_deck']) == 0:  # todo: мб уйти от активного ожидания
+                pass
             self.__deck = self.__network.events_dict['create_deck'].pop(0)
 
     def __deal_cards(self):
         """
         Deal cards to players.
         """
+        # Deal cards to the first player
         self.__players[1].take_cards_from_deck(self.__deck[:self.__HAND_SIZE])
+        # Deal cards to the second player
         self.__players[0].take_cards_from_deck(self.__deck[self.__HAND_SIZE:2*self.__HAND_SIZE])
+        # Remove dealt cards from the deck
         self.__deck = self.__deck[2*self.__HAND_SIZE:]
 
     """ Getters """
@@ -405,7 +396,7 @@ class Game:
         Get all game information.
 
         :return: Dict with keys 'player', 'opponent', 'global'.
-            'player' corresponds to dict with keys 'name', 'score', 'free time',
+            'player' corresponds to dict with keys 'pid', 'name', 'score', 'free time',
                 'deadlines', 'effects', 'delayed effects' and 'hand'.
             'opponent' corresponds to the same dict; but instead of `hand` key,
                 there is `hand size` key.
@@ -413,6 +404,7 @@ class Game:
         """
         return {
             'player': {
+                'pid': self.__player.pid,
                 'name': self.__player.name,
                 'score': self.__player.score,
                 'free time': self.__player.free_hours_today,
@@ -422,13 +414,14 @@ class Game:
                 'hand': self.__player.hand,
             },
             'opponent': {
+                'pid': self.__opponent.pid,
                 'name': self.__opponent.name,
                 'score': self.__opponent.score,
                 'free time': self.__opponent.free_hours_today,
                 'deadlines': self.__opponent.deadlines,
                 'effects': self.__opponent.effects,
                 'delayed effects': self.__opponent.delayed_effects,
-                'hand size': len(self.__player.hand),
+                'hand size': len(self.__opponent.hand),
             },
             'global': {
                 'day': self.__day,
@@ -440,25 +433,25 @@ class Game:
 
     def get_effect_info(self, eid: EffectID) -> Effect:
         """
-        Get effect info by effect id.
+        Get effect info by effect ID.
 
-        :param eid: Effect id.
+        :param eid: Effect ID.
         """
         return self.__ALL_EFFECTS[eid]
 
     def get_task_info(self, tid: TaskID) -> Task:
         """
-        Get task info by task id.
+        Get task info by task ID.
 
-        :param tid: Task id.
+        :param tid: Task ID.
         """
         return self.__ALL_TASKS[tid]
 
     def get_card_info(self, cid: CardID) -> Card:
         """
-        Get card info by card id.
+        Get card info by card ID.
 
-        :param cid: Card id.
+        :param cid: Card ID.
         """
         return self.__ALL_CARDS[cid]
 
@@ -466,7 +459,7 @@ class Game:
         """
         Get card type: TaskCard or ActionCard.
 
-        :param cid: Card id.
+        :param cid: Card ID.
         :return: string 'TaskCard' or 'ActionCard'.
         """
         if isinstance(self.__ALL_CARDS[cid], Game.TaskCard):
@@ -479,12 +472,21 @@ class Game:
         """
         Get valid targets for an action card.
 
-        :param cid: Card id.
+        :param cid: Card ID.
         :return: Valid card targets.
         """
         return self.get_card_info(cid).valid_target
 
-    def can_take_card(self) -> dict:
+    def card_idx_to_cid(self, card_idx_in_hand: int) -> CardID:
+        """
+        Get card ID by card index in players hand.
+
+        :param card_idx_in_hand: Card index in hand.
+        :return: Card ID.
+        """
+        return self.__player.hand[card_idx_in_hand]
+
+    def can_take_card(self) -> dict[str, any]:
         """
         Whether the player can take a card from the deck.
 
@@ -498,11 +500,11 @@ class Game:
             return {'res': False, 'msg': 'Cards limit is reached!'}
         return {'res': True}
 
-    def can_use_card(self, cid: CardID) -> dict:
+    def can_use_card(self, cid: CardID) -> dict[str, any]:
         """
         Whether the player can use a card from the deck.
 
-        :param cid: Card id.
+        :param cid: Card ID.
         :return: dict with keys `res` and optionally `msg`.
             `res` corresponds to main result (bool).
             `msg` is used in case of a False response to indicate the reason.
@@ -513,29 +515,48 @@ class Game:
 
     """ Actions """
 
-    def take_card(self):
+    def __take_card(self, actor_pid: PlayerID):
         """
-        Let the player pick a new card from the deck.
-        """
-        self.__player.take_cards_from_deck([self.__deck.pop(0)])
+        Let the player pick a card from the deck.
 
-    def use_card(self, card_idx_in_hand: int, target_pid: PlayerID = None, target_cid: CardID = None):
+        :param actor_pid: ID of player who takes a card.
+        """
+        assert self.can_take_card()
+
+        self.__players[actor_pid].take_cards_from_deck([self.__deck.pop(0)])
+
+    def player_takes_card(self):
+        self.__take_card(self.__player_pid)
+
+    def opponent_takes_card(self):
+        self.__take_card(self.__opponent_pid)
+
+    def __use_card(self, actor_pid: PlayerID, card_idx_in_hand: int,
+                   target_pid: PlayerID | None, target_cid: CardID | None):
         """
         Use a card from hand.
 
-        :param card_idx_in_hand: Card index in hand.
-        :param target_pid: Target player id (if card is applied to a player).
-        :param target_cid: Target card id (if card is applied to a specific player card).
+        :param actor_pid: ID of player who uses a card.
+        :param card_idx_in_hand: Card index in players hand.
+        :param target_pid: Target player ID (if card is applied to a player).
+        :param target_cid: Target card ID (if card is applied to a specific player card).
         """
-        cid = self.__player.use_card(card_idx_in_hand)
+        cid = self.__players[actor_pid].use_card(card_idx_in_hand)
         card = self.__ALL_CARDS[cid]
         if card.valid_target == CardTarget.GLOBAL:
             if self.get_card_type(cid) != 'ActionCard':
                 raise TypeError
-            self.__player.spend_time(card.cost)
+            self.__players[actor_pid].spend_time(card.cost)
             self.__effects.append(card.action)
         else:
             if self.get_card_type(cid) == 'ActionCard':
+                self.__players[actor_pid].spend_time(card.cost)
                 self.__players[target_pid].effects.append((card.action, card.req_args, card.check_args))
             else:
                 self.__players[target_pid].deadlines.append(card.task)
+
+    def player_uses_card(self, card_idx_in_hand: int, target_pid: PlayerID = None, target_cid: CardID = None):
+        self.__use_card(self.__player_pid, card_idx_in_hand, target_pid, target_cid)
+
+    def opponent_uses_card(self, card_idx_in_hand: int, target_pid: PlayerID = None, target_cid: CardID = None):
+        self.__use_card(self.__opponent_pid, card_idx_in_hand, target_pid, target_cid)
