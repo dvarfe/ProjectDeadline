@@ -259,6 +259,14 @@ class Network:
         except Exception as e:
             raise Exception(_("Error checking for message:") + str(e))
 
+    def send_use_card(self, cid, player_pid, target_idx):
+        msg = f'use_card,{cid},{player_pid},{target_idx}\n'
+        self.send_msg(msg)
+
+    def send_work(self, task_idx, hours):
+        msg = f'work,{task_idx},{hours}\n'
+        self.send_msg(msg)
+
     def get_active_events(self) -> List[str]:
         """Returns list of received events
 
