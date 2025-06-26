@@ -19,33 +19,33 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.17.0\n"
 
-#: Deadline/game.py:593
+#: Deadline/game.py:590
 msgid "Warning! Placeholder length is larger then max_length of the field!"
 msgstr ""
 "Внимание! Длина информационного сообщения больше, чем допустимая длина "
 "ввода!"
 
-#: Deadline/network.py:104
+#: Deadline/network.py:136
 msgid "Bore failed: "
 msgstr "Ошибка запуска bore:"
 
-#: Deadline/network.py:116
+#: Deadline/network.py:148
 msgid "Error reading bore output:"
 msgstr "Ошибка при парсинге вывода bore:"
 
-#: Deadline/network.py:119
+#: Deadline/network.py:151
 msgid "Bore tunnel setup timed out"
 msgstr "Время установления соединения истекло"
 
-#: Deadline/network.py:207
+#: Deadline/network.py:254
 msgid "Error checking for message:"
 msgstr "Ошибка при получении сообщения:"
 
-#: Deadline/network.py:258
+#: Deadline/network.py:286
 msgid "Error closing client socket:"
 msgstr "Ошибочное закрытие сокета клиента"
 
-#: Deadline/network.py:270
+#: Deadline/network.py:298
 msgid "Error closing server socket:"
 msgstr "Ошибочное закрытие сокета сервера"
 
@@ -95,7 +95,7 @@ msgstr "Создать игру"
 
 #: Deadline/scene.py:224
 msgid "Waiting for connection on "
-msgstr "Ожидание подключения по"
+msgstr "Ожидание подключения по "
 
 #: Deadline/scene.py:250
 msgid "Deadline - Connect"

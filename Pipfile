@@ -4,14 +4,15 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-flake8 = "*"
 ansicolors = "*"
-sphinx = "*"
-doit = "*"
-babel = "*"
 pygame-ce = "*"
 
 [dev-packages]
+flake8 = "*"
+sphinx = "*"
+doit = "*"
+babel = "*"
+sphinx-rtd-theme = "*"
 pre-commit = "*"
 pydocstyle = "*"
 coverage = "*"

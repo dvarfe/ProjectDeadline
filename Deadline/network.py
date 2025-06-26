@@ -3,7 +3,7 @@ import threading
 import subprocess
 import time
 import re
-from typing import List, Optional
+from typing import List,  Dict
 
 from colors import strip_color
 
@@ -17,6 +17,32 @@ class Network:
     This class provides functionality for both hosting and connecting to multiplayer
     game sessions.
 
+    Messages follow a format: [Action_name][,params]*\n
+
+            Supported Actions:
+                quit
+                    - Indicates the player has left the game
+
+                draw [first_player_flag]
+                    - Used at game start to determine move order
+                    - Params:
+                        first_player_flag (int):
+                            1 - opponent moves first
+                            0 - player moves first
+
+                work [task_idx] [hours]
+                    - Player works on specified task
+                    - Params:
+                        task_idx (int): index of task in task list
+                        hours (int): duration of work in hours
+
+                use_card [card_id] [player_pid] [target_idx]
+                    - Player uses a card
+                    - Params:
+                        card_id (int): ID of the card being used
+                        player_pid (int): target player ID
+                        target_idx (int): Index of target card (-1 if no target)
+
     Attributes:
         server_socket (socket.socket): Server socket for hosting connections
         socket (socket.socket): Client socket for peer-to-peer communication
@@ -25,6 +51,7 @@ class Network:
         external_port (int): External port number for the connection
         TIMEOUT (int): Timeout value in seconds for connection attempts
         buffer_size (int): Buffer size in bytes for receiving messages
+        events_dict (str): Queue of messages that were received, but not processed
     """
 
     def __init__(self, buffer_size: int = 1024):
@@ -42,6 +69,11 @@ class Network:
         self.external_port = None
         self.TIMEOUT = 30
         self.buffer_size = buffer_size
+        self._recv_buffer = b""
+        self.events_dict: Dict[str, List[List[str]]] = {
+            "quit": [],
+            "create_deck": []
+        }
 
     def connect_to_host(self, host: str, port: str):
         """
@@ -186,7 +218,16 @@ class Network:
             except BlockingIOError:
                 pass
 
-    def check_for_message(self) -> Optional[str]:
+    def send_deck(self, deck) -> None:
+        """Send created to oppennt.
+
+        Args:
+            deck (List[Card]): deck of cards
+        """
+        msg = 'create_deck,' + ','.join([card.cid for card in deck])
+        self.send_msg(msg)
+
+    def check_for_message(self) -> None:
         """
         Check for incoming messages without blocking.
 
@@ -196,56 +237,57 @@ class Network:
         if not self.socket:
             return None
         try:
+
             data = self.socket.recv(self.buffer_size)
-            if data:
-                return data.decode()
-            else:
+            if not data:
                 return None
+
+            self._recv_buffer += data
+            msg_count = self._recv_buffer.count(b"\n")
+            valid_messages = self._recv_buffer.split(b"\n", msg_count)
+            if self._recv_buffer[-1] == b'\n':
+                self._recv_buffer = ''
+            else:
+                self._recv_buffer = valid_messages[-1]
+                valid_messages = valid_messages[:-1:]
+            for msg in valid_messages:
+                if len(msg):
+                    self.add_event(msg.decode())
+
         except BlockingIOError:
             return None
         except Exception as e:
             raise Exception(_("Error checking for message:") + str(e))
 
-    def parse_msg(self):
+    def send_use_card(self, cid, player_pid, target_idx):
+        msg = f'use_card,{cid},{player_pid},{target_idx}\n'
+        self.send_msg(msg)
+
+    def send_work(self, task_idx, hours):
+        msg = f'work,{task_idx},{hours}\n'
+        self.send_msg(msg)
+
+    def get_active_events(self) -> List[str]:
+        """Returns list of received events
+
+        Returns:
+            List[str]: list of active events
         """
-        Parses incoming messages from the opponent.
+        self.check_for_message()
+        return [key for key in self.events_dict if len(self.events_dict[key])]
 
-            Messages follow a format: [Action_name][,params]*\n
+    def add_event(self, msg: str) -> None:
+        """Add Event to events dict.
 
-            Supported Actions:
-                quit
-                    - Indicates the player has left the game
-
-                draw [first_player_flag]
-                    - Used at game start to determine move order
-                    - Params:
-                        first_player_flag (int):
-                            1 - opponent moves first
-                            0 - player moves first
-
-                work [task_idx] [hours]
-                    - Player works on specified task
-                    - Params:
-                        task_idx (int): index of task in task list
-                        hours (int): duration of work in hours
-
-                use_card [card_id] [player_pid] [target_idx]
-                    - Player uses a card
-                    - Params:
-                        card_id (int): ID of the card being used
-                        player_pid (int): target player ID
-                        target_idx (int): Index of target card (-1 if no target)
+        Args:
+            msg (str): Message containing event info.
         """
-        pass
-
-    def get_messages(self) -> List[str]:
-        msgs = self.check_for_message()
-        msg_list = []
-        if msgs is not None:
-            msgs = msgs.split('\n')
-            for msg in msgs:
-                msg_list.append(self.parse_msg(msg))
-        return msg_list
+        msg_split = msg.split(',')
+        event = msg_split[0]
+        args = []
+        if len(msg_split) > 1:
+            args = msg_split[1:]
+        self.events_dict[event] = self.events_dict.get(event, []) + [args]
 
     def close_client_socket(self):
         """
