@@ -87,7 +87,12 @@ def game():
                 game_data[i].player_uses_card(idx, target_pid, None)
                 game_data[1-i].opponent_uses_card(idx, target_pid, None)
             case 'T':  # Time management
-                pass
+                idx = int(input('Enter deadline idx: '))
+                if not 0 <= idx < len(game_data[i].get_game_info()['player']['deadlines']):
+                    print('Incorrect index!')
+                    continue
+                game_data[i].player_spends_time(idx, 1)
+                game_data[1-i].opponent_spends_time(idx, 1)
             case 'S':  # Skip a turn
                 i = 1 - i
             case 'E':  # Exit

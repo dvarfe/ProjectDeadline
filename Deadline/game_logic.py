@@ -206,32 +206,55 @@ class ActionCard(Card):
 
 
 class Deadline:
-    def __init__(self, task: TaskID, init_day: Day, deadline: Days):
+    def __init__(self, task: Task, init_day: Day):
         """
         Player's deadline.
 
-        :param task: Task ID.
+        :param task: Task.
         :param init_day: The day when the task was issued.
-        :param deadline: Number of days to complete the task.
         """
         self.task = task
         self.init_day = init_day
-        self.deadline: Day = init_day + deadline  # The day before which the task must be completed
+        self.deadline: Day = init_day + self.task.deadline  # The day before which the task must be completed
         self.progress: Hours = 0  # How many hours the player has already worked on the task.
 
-    def work(self, hours: Hours):
+    def get_rem(self) -> Hours:
+        """
+        Get remaining time in hours.
+        """
+        return self.task.difficulty - self.progress
+
+    def work(self, hours: Hours) -> bool:
         """
         Work on the task for `hours` hours.
 
         :param hours: How long to work on the task.
+        :return: True if task is completed; otherwise False.
         """
-        pass
+        assert hours <= self.get_rem()
+
+        self.progress += hours
+        return self.get_rem() == 0
 
     def new_day(self):
         """
         Update the deadline when a new day arrives.
         """
         pass
+
+    def __str__(self) -> str:
+        return f'\nDeadline #{self.tid}: {self.name}\n' \
+               f'    description = "{self.description}"\n' \
+               f'    image = {self.image}\n' \
+               f'    difficulty = {self.difficulty}\n' \
+               f'    deadline = {self.deadline}\n' \
+               f'    award = {self.award}\n' \
+               f'    penalty = {self.penalty}\n' \
+               f'    events_on_success = {self.events_on_success}\n' \
+               f'    events_on_fail = {self.events_on_fail}'
+
+    def __repr__(self) -> str:
+        return f'{self.task.tid} ({self.progress}/{self.task.difficulty})'
 
 
 class Player:
@@ -284,23 +307,30 @@ class Player:
         :return: Card ID to use a card.
         """
         assert 0 <= idx < len(self.hand)
+
         return self.hand.pop(idx)
 
-    def spend_time(self, h: Hours):
+    def spend_time(self, hours: Hours):
         """
-        Spend `h` hours for something.
+        Spend `hours` hours for something.
 
-        :param h: Number of hours to spend.
+        :param hours: Number of hours to spend.
         """
-        self.free_hours_today -= h
+        assert hours <= self.free_hours_today
+
+        self.free_hours_today -= hours
+
+    def work(self, deadline_idx: int, hours: Hours):
+        """
+        Work on the task for `hours` hours.
+
+        :param deadline_idx: Index of target deadline in deadline list.
+        :param hours: How long to work on the task.
+        """
+        self.spend_time(hours)
+        self.deadlines[deadline_idx].work(hours)
 
     def apply_effect(self, action, req_args, check_args):
-        pass
-
-    def manage_time(self):
-        """
-        Allocate time for tasks.
-        """
         pass
 
 
@@ -535,6 +565,27 @@ class Game:
     def opponent_can_use_card(self, cid: CardID) -> dict[str, any]:
         return self.__can_use_card(self.__opponent_pid, cid)
 
+    def __can_spend_time(self, actor_pid: PlayerID, target_deadline_idx: int, hours: Hours) -> dict[str, any]:
+        """
+        Spend time for something.
+
+        :param actor_pid: ID of player who uses a card.
+        :param target_deadline_idx: Index of target deadline in deadline list.
+        :param hours: Number of hours to spend.
+        :return: Dict with keys `res` and optionally `msg`.
+            `res` corresponds to main result (bool).
+            `msg` is used in case of a False response to indicate the reason.
+        """
+        if hours > self.__players[actor_pid].deadlines[target_deadline_idx].get_rem():
+            return {'res': False, 'msg': 'You are trying to spend too much time!'}
+        return {'res': True}
+
+    def player_can_spend_time(self, target_deadline_idx: int, hours: Hours) -> dict[str, any]:
+        return self.__can_spend_time(self.__player_pid, target_deadline_idx, hours)
+
+    def opponent_can_spend_time(self, target_deadline_idx: int, hours: Hours) -> dict[str, any]:
+        return self.__can_spend_time(self.__opponent_pid, target_deadline_idx, hours)
+
     """ Actions """
 
     def __take_card(self, actor_pid: PlayerID):
@@ -577,10 +628,32 @@ class Game:
                 self.__players[actor_pid].spend_time(card.cost)
                 self.__players[target_pid].effects.append((card.action, card.req_args, card.check_args))
             else:
-                self.__players[target_pid].deadlines.append(card.task)
+                self.__players[target_pid].deadlines.append(Deadline(self.__ALL_TASKS[card.task], self.__day))
 
     def player_uses_card(self, card_idx_in_hand: int, target_pid: PlayerID = None, target_cid: CardID = None):
         self.__use_card(self.__player_pid, card_idx_in_hand, target_pid, target_cid)
 
     def opponent_uses_card(self, card_idx_in_hand: int, target_pid: PlayerID = None, target_cid: CardID = None):
         self.__use_card(self.__opponent_pid, card_idx_in_hand, target_pid, target_cid)
+
+    def __spend_time(self, actor_pid: PlayerID, target_deadline_idx: int, hours: Hours) -> bool:
+        """
+        Spend time for something.
+
+        :param actor_pid: ID of player who uses a card.
+        :param target_deadline_idx: Index of target deadline in deadline list.
+        :param hours: Number of hours to spend.
+        :return: True if task is completed; otherwise False.
+        """
+        assert self.__can_spend_time(actor_pid, target_deadline_idx, hours)
+
+        is_done = self.__players[actor_pid].deadlines[target_deadline_idx].work(hours)
+        if is_done:
+            self.__players[actor_pid].deadlines.pop(target_deadline_idx)
+        return is_done
+
+    def player_spends_time(self, target_deadline_idx: int, hours: Hours = 1) -> bool:
+        return self.__spend_time(self.__player_pid, target_deadline_idx, hours)
+
+    def opponent_spends_time(self, target_deadline_idx: int, hours: Hours = 1) -> bool:
+        return self.__spend_time(self.__opponent_pid, target_deadline_idx, hours)
