@@ -486,19 +486,26 @@ class Game:
         """
         return self.__player.hand[card_idx_in_hand]
 
-    def can_take_card(self) -> dict[str, any]:
+    def __can_take_card(self, actor_pid: PlayerID) -> dict[str, any]:
         """
-        Whether the player can take a card from the deck.
+        Whether a player can take a card from the deck.
 
+        :param actor_pid: ID of player who wants to take a card.
         :return: dict with keys `res` and optionally `msg`.
             `res` corresponds to main result (bool).
             `msg` is used in case of a False response to indicate the reason.
         """
         if len(self.__deck) == 0:
             return {'res': False, 'msg': 'No more cards in deck!'}
-        if len(self.__player.hand) >= self.__HAND_SIZE:
+        if len(self.__players[actor_pid].hand) >= self.__HAND_SIZE:
             return {'res': False, 'msg': 'Cards limit is reached!'}
         return {'res': True}
+
+    def player_can_take_card(self) -> dict[str, any]:
+        return self.__can_take_card(self.__player_pid)
+
+    def opponent_can_take_card(self) -> dict[str, any]:
+        return self.__can_take_card(self.__opponent_pid)
 
     def can_use_card(self, cid: CardID) -> dict[str, any]:
         """
@@ -521,8 +528,7 @@ class Game:
 
         :param actor_pid: ID of player who takes a card.
         """
-        assert self.can_take_card()
-
+        assert self.__can_take_card(actor_pid)
         self.__players[actor_pid].take_cards_from_deck([self.__deck.pop(0)])
 
     def player_takes_card(self):

@@ -53,7 +53,7 @@ def game():
         cmd = input()
         match cmd:
             case 'G':  # Get new card
-                can_take_card = game_data[i].can_take_card()
+                can_take_card = game_data[i].player_can_take_card()
                 if can_take_card['res']:
                     game_data[i].player_takes_card()
                     game_data[1-i].opponent_takes_card()
