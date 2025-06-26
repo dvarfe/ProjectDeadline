@@ -222,9 +222,9 @@ class Network:
         """Send created to oppennt.
 
         Args:
-            deck (List[Card]): deck of cards
+            deck (List[CardID]): deck of cards
         """
-        msg = 'create_deck,' + ','.join([card.cid for card in deck])
+        msg = 'create_deck,' + ','.join(deck)
         self.send_msg(msg)
 
     def check_for_message(self) -> None:

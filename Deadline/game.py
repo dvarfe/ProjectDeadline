@@ -779,7 +779,7 @@ class Card():
             self,
             game: Game,
             game_obj: gl.Game,
-            card_info: gl.Game.Card,
+            card_info: gl.Card,
             card_type_images: Dict[str, pg.Surface],
             height: int,
             pos: Point,
