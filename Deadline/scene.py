@@ -9,20 +9,25 @@ from .game import _
 class Scene(abc.ABC):
     """
     Abstract base class representing a game scene/screen.
-
     All game scenes should inherit from this class and implement the abstract methods.
 
-    Attributes:
+    Attributes
         game (Game): Reference to the main Game instance.
+
     """
 
     def __init__(self, game: Game):
+        """Initialize scene.
+
+        Args:
+            game (Game): Game instance
+
+        """
         self.game = game
 
     @abc.abstractmethod
     def run(self):
-        """Main scene loop method that coordinates event checking, updating and drawing."""
-
+        """Run main scene loop method that coordinates event checking, updating and drawing."""
         self.check_events()
         self.update_scene()
         self.draw_scene()
@@ -44,7 +49,20 @@ class Scene(abc.ABC):
 
 
 class MainMenu(Scene):
+    """Main Menu scene.
+
+    Args:
+        Scene (Scene): Scene.
+
+    """
+
     def __init__(self, game):
+        """Initialize Main Menu scene.
+
+        Args:
+            game (Game): Game instance.
+
+        """
         super().__init__(game)
         pg.display.set_caption(_('Deadline - Main menu'))
 
@@ -123,23 +141,27 @@ class MainMenu(Scene):
             Anchor.CENTRE)
 
     def run(self):
+        """Run main scene loop method that coordinates event checking, updating and drawing."""
         self.check_events()
         self.update_scene()
         self.draw_scene()
 
     def check_events(self):
+        """Process input events for all UI buttons."""
         self.button_host_game.check_event()
         self.button_connect.check_event()
         self.button_settings.check_event()
         self.button_exit.check_event()
 
     def update_scene(self):
+        """Update the scene state (game logic, animations, etc.)."""
         self.button_host_game.update()
         self.button_connect.update()
         self.button_settings.update()
         self.button_exit.update()
 
     def draw_scene(self):
+        """Render the main menu: background, title, and buttons."""
         self.game.canvas.fill((255, 255, 255))
 
         self.title.draw()
@@ -152,7 +174,22 @@ class MainMenu(Scene):
 
 
 class HostScene(Scene):
+    """Scene for hosting a multiplayer game session.
+
+    This scene provides UI elements for:
+    - Setting up connection parameters (port number)
+    - Choosing connection method (Bore or direct)
+    - Starting the game host
+    - Returning to main menu
+    """
+
     def __init__(self, game):
+        """Initialize the host game scene.
+
+        Args:
+            game (Game): Reference to the main game instance.
+
+        """
         super().__init__(game)
         pg.display.set_caption(_('Deadline - Host game'))
         self.buttons = []
@@ -204,11 +241,13 @@ class HostScene(Scene):
         self.texts.append(checkbox_text)
 
     def run(self):
+        """Execute one frame of the scene logic."""
         self.check_events()
         self.update_scene()
         self.draw_scene()
 
     def check_events(self):
+        """Process input events for all UI buttons."""
         for button in self.buttons:
             button.check_event()
         if self.host_button.mousedown:
@@ -232,12 +271,14 @@ class HostScene(Scene):
             self.texts.append(waiting_for_connection_text)
 
     def update_scene(self):
+        """Update the scene state (game logic, animations, etc.)."""
         for object in self.buttons + self.texts:
             object.update()
         if self.game.network.connection:
             self.game.current_scene = GameScene(self.game)
 
     def draw_scene(self):
+        """Render the main menu: background, title, and buttons."""
         self.game.canvas.fill("white")
         for object in self.buttons + self.texts:
             object.draw()
@@ -245,7 +286,21 @@ class HostScene(Scene):
 
 
 class ConnectScene(Scene):
+    """Scene for connecting to a multiplayer game session.
+
+    Provides UI elements for:
+    - Entering server connection details (IP and port)
+    - Establishing connection
+    - Returning to main menu
+    """
+
     def __init__(self, game):
+        """Initialize the connection scene.
+
+        Args:
+            game (Game): Reference to the main game instance.
+
+        """
         super().__init__(game)
         pg.display.set_caption(_('Deadline - Connect'))
         self.buttons = []
@@ -291,11 +346,13 @@ class ConnectScene(Scene):
             150))
 
     def run(self):
+        """Execute one frame of the scene logic."""
         self.check_events()
         self.update_scene()
         self.draw_scene()
 
     def check_events(self):
+        """Process input events for all UI buttons."""
         for button in self.buttons:
             button.check_event()
         if self.connect_button.mousedown:
@@ -313,12 +370,14 @@ class ConnectScene(Scene):
             self.connect_button.mousehold = False
 
     def update_scene(self):
+        """Update the scene state (game logic, animations, etc.)."""
         for object in self.buttons + self.texts:
             object.update()
         if self.game.network.connection:
             self.game.current_scene = GameScene(self.game)
 
     def draw_scene(self):
+        """Render the main menu: background, title, and buttons."""
         self.game.canvas.fill("white")
         for object in self.buttons + self.texts:
             object.draw()
@@ -326,7 +385,25 @@ class ConnectScene(Scene):
 
 
 class SettingsScene(Scene):
+    """Game settings configuration scene.
+
+    Provides interface for:
+    - Changing game language/regional settings
+    - Returning to main menu
+    """
+
     def __init__(self, game):
+        """Initialize settings scene with UI elements.
+
+        Args:
+            game (Game): Reference to the main game instance.
+
+        Attributes
+            buttons (list): Collection of interactive UI buttons
+            texts (list): Collection of text elements
+            cur_locale (tuple): Current locale settings (language, encoding)
+
+        """
         super().__init__(game)
         pg.display.set_caption(_('Deadline - Settings'))
         self.buttons = []
@@ -348,11 +425,13 @@ class SettingsScene(Scene):
                                                  Anchor.CENTRE))
 
     def run(self):
+        """Execute one frame of the scene logic."""
         self.check_events()
         self.update_scene()
         self.draw_scene()
 
     def check_events(self):
+        """Process input events for all UI buttons."""
         for button in self.buttons:
             button.check_event()
         if self.cur_locale != locale.getlocale():
@@ -365,10 +444,12 @@ class SettingsScene(Scene):
                 150)
 
     def update_scene(self):
+        """Update the scene state (game logic, animations, etc.)."""
         for object in self.buttons + self.texts:
             object.update()
 
     def draw_scene(self):
+        """Render the main menu: background, title, and buttons."""
         self.game.canvas.fill("white")
         for objects in self.buttons + self.texts:
             objects.draw()
@@ -376,42 +457,64 @@ class SettingsScene(Scene):
 
 
 class GameScene(Scene):
+    """Main gameplay scene handling core game rendering and logic."""
+
     def __init__(self, game):
+        """Initialize the game scene.
+
+        Args:
+            game (Game): Reference to the main game controller instance.
+        """
         super().__init__(game)
         pg.display.set_caption(_('Deadline'))
 
     def run(self):
+        """Execute one frame of game loop processing."""
         self.check_events()
         self.update_scene()
         self.draw_scene()
 
     def check_events(self):
+        """Process input events for all UI buttons."""
         pass
 
     def draw_scene(self):
+        """Render the main menu: background, title, and buttons."""
         self.game.canvas.fill((0, 0, 0))
         self.game.blit_screen()
 
     def update_scene(self):
+        """Update the scene state(game logic, animations, etc.)."""
         pass
 
 
 class EmptyScene(Scene):
+    """Placeholder scene used for testing and transitions."""
+
     def __init__(self, game):
+        """Initialize an empty placeholder scene.
+
+        Args:
+            game (Game): Reference to the main game controller instance.
+        """
         pg.display.set_caption('Empty')
         super().__init__(game)
 
     def run(self):
+        """Execute one frame of scene processing."""
         self.check_events()
         self.update_scene()
         self.draw_scene()
 
     def check_events(self):
+        """Process input events for all UI buttons."""
         pass
 
     def update_scene(self):
+        """Update the scene state(game logic, animations, etc.)."""
         pass
 
     def draw_scene(self):
+        """Render the main menu: background, title, and buttons."""
         self.game.canvas.fill((0, 0, 0))
         self.game.blit_screen()

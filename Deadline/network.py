@@ -11,7 +11,7 @@ from .localization import _
 
 
 class Network:
-    """
+    r"""
     A class for handling network connections between game clients.
 
     This class provides functionality for both hosting and connecting to multiplayer
@@ -43,7 +43,7 @@ class Network:
                         player_pid (int): target player ID
                         target_idx (int): Index of target card (-1 if no target)
 
-    Attributes:
+    Attributes
         server_socket (socket.socket): Server socket for hosting connections
         socket (socket.socket): Client socket for peer-to-peer communication
         connection (bool): Flag indicating if a connection is established
@@ -52,6 +52,7 @@ class Network:
         TIMEOUT (int): Timeout value in seconds for connection attempts
         buffer_size (int): Buffer size in bytes for receiving messages
         events_dict (str): Queue of messages that were received, but not processed
+
     """
 
     def __init__(self, buffer_size: int = 1024):
@@ -61,6 +62,7 @@ class Network:
         Args:
             buffer_size (int, optional): Size of the buffer for receiving messages.
                                        Defaults to 1024 bytes.
+
         """
         self.server_socket = None
         self.socket = None
@@ -86,8 +88,9 @@ class Network:
             host (str): Host IP address or hostname to connect to
             port (str): Port number on the host to connect to
 
-        Raises:
+        Raises
             Exception: Raised when connection fails for any reason
+
         """
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.setblocking(False)
@@ -124,8 +127,9 @@ class Network:
         Args:
             process (subprocess.Popen): The bore tunnel subprocess to monitor
 
-        Raises:
+        Raise
             ValueError: If bore tunnel fails, times out, or encounters errors
+
         """
         start_time = time.time()
 
@@ -160,6 +164,7 @@ class Network:
 
         Args:
             local_port (int): The local port number to tunnel
+
         """
         process = subprocess.Popen(
             ["bore", "local", str(local_port), "--to", "bore.pub"],
@@ -185,6 +190,7 @@ class Network:
 
         Note:
             When use_bore_flag is True, the method sets up external access via bore.pub so bore should be installed.
+
         """
         if not use_bore_flag:
             external_ip = "0.0.0.0"
@@ -210,6 +216,7 @@ class Network:
 
         Args:
             msg (str): The message string to send to the connected peer
+
         """
         while True:
             try:
@@ -223,6 +230,7 @@ class Network:
 
         Args:
             deck (List[Card]): deck of cards
+
         """
         msg = 'create_deck,' + ','.join([card.cid for card in deck])
         self.send_msg(msg)
@@ -231,8 +239,9 @@ class Network:
         """
         Check for incoming messages without blocking.
 
-        Raises:
+        Raise
             Exception: If an error occurs while checking for messages
+
         """
         if not self.socket:
             return None
@@ -260,18 +269,34 @@ class Network:
             raise Exception(_("Error checking for message:") + str(e))
 
     def send_use_card(self, cid, player_pid, target_idx):
+        """Send to opponent info about played card.
+
+        Args:
+            cid (CardID): Played Card ID.
+            player_pid (PlayerID): Target player.
+            target_idx(int): Index of target on table.
+
+        """
         msg = f'use_card,{cid},{player_pid},{target_idx}\n'
         self.send_msg(msg)
 
     def send_work(self, task_idx, hours):
+        """Send to opponent info about amount of hours spent working on task.
+
+        Args:
+            task_idx (int): Task index in task list.
+            hours (int): Hours spent.
+
+        """
         msg = f'work,{task_idx},{hours}\n'
         self.send_msg(msg)
 
     def get_active_events(self) -> List[str]:
-        """Returns list of received events
+        """Return list of received events.
 
-        Returns:
+        Returns
             List[str]: list of active events
+
         """
         self.check_for_message()
         return [key for key in self.events_dict if len(self.events_dict[key])]
@@ -281,6 +306,7 @@ class Network:
 
         Args:
             msg (str): Message containing event info.
+
         """
         msg_split = msg.split(',')
         event = msg_split[0]
@@ -290,9 +316,7 @@ class Network:
         self.events_dict[event] = self.events_dict.get(event, []) + [args]
 
     def close_client_socket(self):
-        """
-        Close the client/peer socket connection.
-        """
+        """Close the client/peer socket connection."""
         if self.socket:
             try:
                 self.socket.close()
@@ -302,9 +326,7 @@ class Network:
             self.connection = False
 
     def close_server_socket(self):
-        """
-        Close the server socket.
-        """
+        """Close the server socket."""
         if self.server_socket:
             try:
                 self.server_socket.close()
@@ -313,16 +335,12 @@ class Network:
             self.server_socket = None
 
     def close_all_connections(self):
-        """
-        Close all network connections and reset network state.
-        """
+        """Close all network connections and reset network state."""
         self.close_client_socket()
         self.close_server_socket()
         self.external_ip = None
         self.external_port = None
 
     def __del__(self):
-        """
-        Destructor to ensure proper cleanup of network resources.
-        """
+        """Destructor to ensure proper cleanup of network resources."""
         self.close_all_connections()
