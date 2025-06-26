@@ -3,7 +3,7 @@ import threading
 import subprocess
 import time
 import re
-from typing import List, Optional, Dict
+from typing import List,  Dict
 
 from colors import strip_color
 
@@ -227,7 +227,7 @@ class Network:
         msg = 'create_deck,' + ','.join([card.cid for card in deck])
         self.send_msg(msg)
 
-    def check_for_message(self) -> Optional[str]:
+    def check_for_message(self) -> None:
         """
         Check for incoming messages without blocking.
 
@@ -252,6 +252,15 @@ class Network:
             return None
         except Exception as e:
             raise Exception(_("Error checking for message:") + str(e))
+
+    def get_active_events(self) -> List[str]:
+        """Returns list of received events
+
+        Returns:
+            List[str]: list of active events
+        """
+        self.check_for_message()
+        return [key for key in self.events_dict if len(self.events_dict[key])]
 
     def add_event(self, msg: str) -> None:
         """Add Event to events dict.
