@@ -19,7 +19,8 @@ CardID = str
 PlayerID = int
 
 # Global constants
-GAME_CONFIG_FN = os.path.join('Deadline', 'game_config.json')
+# GAME_CONFIG_FN = os.path.join('Deadline', 'game_config.json')
+GAME_CONFIG_FN = os.path.join('Deadline', 'game_config_test.json')
 
 
 class CardTarget(enum.Enum):
