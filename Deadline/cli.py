@@ -19,25 +19,23 @@ def print_game_info(game_data: GameData):
     print()
     print()
     print(f'day {gl["day"]} {"exams" if gl["have exams"] else ""}')
-
-    print(f'\nPlayer {pl["name"]}\n'
-          f'    free_hours_today = {pl["free time"]}\n'
-          f'    score = {pl["score"]}\n'
-          f'    hand = {pl["hand"]}\n'
-          f'    deadlines = {pl["deadlines"]}\n'
-          f'    effects = {pl["effects"]}\n'
-          f'    delayed_effects = {pl["delayed effects"]}')
-    print(f'\nOpponent {op["name"]}\n'
-          f'    free_hours_today = {op["free time"]}\n'
-          f'    score = {op["score"]}\n'
-          f'    hand size = {op["hand size"]}\n'
-          f'    deadlines = {op["deadlines"]}\n'
-          f'    effects = {op["effects"]}\n'
-          f'    delayed_effects = {op["delayed effects"]}')
-
-    print()
     print(f'cards in deck: {gl["deck size"]}')
-    print(f'global effects: {gl["effects"]}')
+    print()
+    print(f'Opponent {op["name"]}\n'
+          f'    free_hours_today = {op["free time"]}, score = {op["score"]}\n'
+          f'    hand: {["?"] * op["hand size"]}\n\n'
+          f'    deadlines: {op["deadlines"]}\n'
+          f'    effects: {op["effects"]}\n'
+          f'    delayed_effects: {op["delayed effects"]}\n')
+
+    print(f'--- global effects: {gl["effects"]} ---\n')
+
+    print(f'    deadlines: {pl["deadlines"]}\n'
+          f'    effects: {pl["effects"]}\n'
+          f'    delayed_effects: {pl["delayed effects"]}\n\n'
+          f'    hand: {pl["hand"]}\n'
+          f'    free_hours_today = {pl["free time"]}, score = {pl["score"]}\n'
+          f'Player {pl["name"]}\n')
 
 
 def game():
