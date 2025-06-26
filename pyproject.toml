@@ -17,17 +17,18 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
 ]
+dependencies = ["pygame-ce", "ansicolors"]
 
 [project.urls]
 repository = "https://github.com/Anenokil/PythonProject-PreciousSource"
 
-# [project.gui-scripts]
-# MainApp = "Deadline.????:main"
+[project.gui-scripts]
+Deadline = "Deadline.main:main_gui"
 
 [build-system]
 requires = [
     "doit",
-    "Sphinx",
+    "sphinx",
     "flake8",
     "pydocstyle",
     "wheel",
