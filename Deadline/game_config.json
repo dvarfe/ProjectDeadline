@@ -71,9 +71,7 @@
       "image": "math_hw.png",
       "valid_target": "OPPONENT",
       "special": false,
-      "task": [
-        "t0"
-      ]
+      "task": "t0"
     },
     {
       "cid": "tc1",
@@ -82,9 +80,7 @@
       "image": "cs_hw.png",
       "valid_target": "OPPONENT",
       "special": false,
-      "task": [
-        "t1"
-      ]
+      "task": "t1"
     },
     {
       "cid": "tc2",
@@ -93,9 +89,7 @@
       "image": "cs_hw.png",
       "valid_target": "PLAYER",
       "special": true,
-      "task": [
-        "t2"
-      ]
+      "task": "t2"
     }
   ],
   "action_cards": [
@@ -107,15 +101,9 @@
       "valid_target": "PLAYER",
       "special": false,
       "cost": 0,
-      "action": [
-        "e0"
-      ],
-      "req_args": [
-        null
-      ],
-      "check_args": [
-        null
-      ]
+      "action": "e0",
+      "req_args": null,
+      "check_args": null
     }
   ]
 }
