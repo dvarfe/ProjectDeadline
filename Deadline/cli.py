@@ -137,6 +137,9 @@ def game():
                 elif res == 'defeat':
                     print(f'Player {game_data[i].get_game_info()["player"]["name"]} lost!')
                     break
+                elif res == 'draw':
+                    print('Draw!')
+                    break
                 i = 1 - i
                 game_data[i].turn_begin()
             case 'E':  # Exit
