@@ -588,6 +588,8 @@ class Game:
                     self.__take_special_task(pid, args[0])
                 case 'add free_hours_today':
                     self.__players[pid].free_hours_today += args[0]
+                    if self.__players[pid].free_hours_today > 24:
+                        self.__players[pid].free_hours_today = 24
 
     def player_takes_card(self):
         self.__take_card(self.__player_pid)
