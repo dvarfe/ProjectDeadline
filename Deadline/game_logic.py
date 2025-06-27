@@ -692,6 +692,16 @@ class Game:
             else:
                 self.__events(effect.everyday_events, self.__player_pid)
 
+        # Remove expired effects
+        for idx, (init_day, eid) in enumerate(self.__player.effects):
+            effect = self.__ALL_EFFECTS[eid]
+            if self.__day == init_day + effect.delay + effect.period:
+                self.__player.effects.pop(idx)
+        for idx, (init_day, eid) in enumerate(self.__effects):
+            effect = self.__ALL_EFFECTS[eid]
+            if self.__day == init_day + effect.delay + effect.period:
+                self.__effects.pop(idx)
+
         # Check player failed deadlines
         for idx, deadline in enumerate(self.__player.deadlines):
             if deadline.init_day + deadline.deadline == self.__day:
@@ -726,6 +736,16 @@ class Game:
                 self.__events(effect.final_events, self.__opponent_pid)
             else:
                 self.__events(effect.everyday_events, self.__opponent_pid)
+
+        # Remove expired effects
+        for idx, (init_day, eid) in enumerate(self.__opponent.effects):
+            effect = self.__ALL_EFFECTS[eid]
+            if self.__day == init_day + effect.delay + effect.period:
+                self.__opponent.effects.pop(idx)
+        for idx, (init_day, eid) in enumerate(self.__effects):
+            effect = self.__ALL_EFFECTS[eid]
+            if self.__day == init_day + effect.delay + effect.period:
+                self.__effects.pop(idx)
 
         # Check opponent failed deadlines
         for idx, deadline in enumerate(self.__opponent.deadlines):
