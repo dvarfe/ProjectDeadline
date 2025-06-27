@@ -689,6 +689,20 @@ class Game:
                     self._players[pid].hours_today += args[0]
                     if self._players[pid].hours_today > self._HOURS_IN_DAY_MAX:
                         self._players[pid].hours_today = self._HOURS_IN_DAY_MAX
+                case 'take card':
+                    if len(self._deck) != 0:
+                        self._players[pid].take_cards_from_deck([self._deck.pop(0)])
+                case 'met opt':
+                    if random.randint(1, 3) == 1:
+                        self._players[pid].score += 4
+                    else:
+                        self._take_special_task(pid, args[0])
+                case 'kurs failed':
+                    idx = [deadline.task.tid for deadline in self._players[pid].deadlines].index(args[0])
+                    self._players[pid].score -= self._players[pid].deadlines.pop(idx).get_rem_hours() * 2
+                # case 'ocean of deadlines':
+                #     for deadline in self._players[pid].deadlines:
+                #         deadline.progress -= 1
 
     def _take_card(self, actor_pid: PlayerID):
         """
