@@ -15,11 +15,14 @@
       "delay": 0,
       "is_removable": false,
       "init_events": [
-        "player.free_hours_today += 3"
+        [
+          "add hours",
+          [
+            6
+          ]
+        ]
       ],
-      "final_events": [
-        "player.free_hours_today -= 3"
-      ],
+      "final_events": [],
       "everyday_events": []
     }
   ],
@@ -28,7 +31,7 @@
       "tid": "t0",
       "name": "Матан",
       "description": "Обычное задание по матану",
-      "image": "math_hw.png",
+      "image": "textures/cards/test.png",
       "difficulty": 3,
       "deadline": 3,
       "award": 3,
@@ -40,13 +43,18 @@
       "tid": "t1",
       "name": "ML",
       "description": "Research-задание по ML",
-      "image": "cs_hw.png",
+      "image": "textures/cards/test.png",
       "difficulty": 5,
       "deadline": 7,
       "award": 5,
       "penalty": -5,
       "events_on_success": [
-        "player.get_card( \"tc2\" )"
+        [
+          "special task",
+          [
+            "t2"
+          ]
+        ]
       ],
       "events_on_fail": []
     },
@@ -54,7 +62,7 @@
       "tid": "t2",
       "name": "Кросс-проверка",
       "description": "Нужно проверить 3 чужих решения домашки по ML",
-      "image": "cs_hw.png",
+      "image": "textures/cards/test.png",
       "difficulty": 1,
       "deadline": 7,
       "award": 0,
@@ -68,7 +76,7 @@
       "cid": "tc0",
       "name": "Матан",
       "description": "Обычное задание по матану",
-      "image": "math_hw.png",
+      "image": "textures/cards/test.png",
       "valid_target": "OPPONENT",
       "special": false,
       "task": "t0"
@@ -77,19 +85,10 @@
       "cid": "tc1",
       "name": "ML",
       "description": "Research-задание по ML",
-      "image": "cs_hw.png",
+      "image": "textures/cards/test.png",
       "valid_target": "OPPONENT",
       "special": false,
       "task": "t1"
-    },
-    {
-      "cid": "tc2",
-      "name": "Кросс-проверка",
-      "description": "Нужно проверить 3 чужих решения домашки по ML",
-      "image": "cs_hw.png",
-      "valid_target": "PLAYER",
-      "special": true,
-      "task": "t2"
     }
   ],
   "action_cards": [
@@ -102,8 +101,8 @@
       "special": false,
       "cost": 0,
       "action": "e0",
-      "req_args": null,
-      "check_args": null
+      "req_args": [],
+      "check_args": []
     }
   ]
 }

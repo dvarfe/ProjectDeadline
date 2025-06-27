@@ -486,7 +486,7 @@ class GameScene(Scene):
         self.example = Card(
             game,
             self.game_obj,
-            self.game_obj.get_card_info(self.game_obj.get_game_info()['player']['hand'][0]),
+            self.game_obj.get_game_info()['player']['hand'][0],
             self.cardtypes_images,
             350,
             (self.game.window_size[0] // 2, self.game.window_size[1] // 2),
