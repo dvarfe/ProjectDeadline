@@ -25,14 +25,12 @@ def print_game_info(game_data: GameData):
           f'    free_hours_today = {op["free time"]}, score = {op["score"]}\n'
           f'    hand: {["?"] * op["hand size"]}\n\n'
           f'    deadlines: {op["deadlines"]}\n'
-          f'    effects: {op["effects"]}\n'
-          f'    delayed_effects: {op["delayed effects"]}\n')
+          f'    effects: {op["effects"]}\n')
 
     print(f'--- global effects: {gl["effects"]} ---\n')
 
     print(f'    deadlines: {pl["deadlines"]}\n'
-          f'    effects: {pl["effects"]}\n'
-          f'    delayed_effects: {pl["delayed effects"]}\n\n'
+          f'    effects: {pl["effects"]}\n\n'
           f'    hand: {pl["hand"]}\n'
           f'    free_hours_today = {pl["free time"]}, score = {pl["score"]}\n'
           f'Player #{pl["pid"]} {pl["name"]}\n')

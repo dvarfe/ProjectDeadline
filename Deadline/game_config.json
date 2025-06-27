@@ -21,13 +21,7 @@
           "True"
         ]
       ],
-      "final_events": [
-        [
-          "self._Game__players[pid].free_hours_today -= 6",
-          [],
-          "True"
-        ]
-      ],
+      "final_events": [],
       "everyday_events": []
     }
   ],
