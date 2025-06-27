@@ -876,3 +876,32 @@ class Card():
             self.penalty_text.draw()
             self.progress_text.draw()
         self.description_text.draw()
+
+    def move_to(self, pos: Point):
+        """Переместить карточку в новую позицию и обновить все элементы."""
+        self.pos = pos
+        anchor_rect(self.rect, self.pos, self.anchor)
+        image_pos = rect_anchor_pos(self.rect, Anchor.TOP_LEFT)
+        image_pos = (image_pos[0] + round(self.size[0] * CARD_IMAGE_OFFSET_RATIO[0]),
+                     image_pos[1] + round(self.size[1] * CARD_IMAGE_OFFSET_RATIO[1]))
+        anchor_rect(self.rect_image, image_pos, Anchor.TOP_LEFT)
+
+        self.name_text.change(
+            pos=(self.rect.topleft[0] + round(CARD_NAME_CENTRE_OFFSET_RATIO[0] * self.size[0]),
+                 self.rect.topleft[1] + round(CARD_NAME_CENTRE_OFFSET_RATIO[1] * self.size[1])))
+        self.description_text.change(
+            pos=(self.rect.topleft[0] + round(CARD_DESCRIPTION_CENTRE_OFFSET_RATIO[0] * self.size[0]),
+                 self.rect.topleft[1] + round(CARD_DESCRIPTION_CENTRE_OFFSET_RATIO[1] * self.size[1])))
+        if self.card_type == "TaskCard":
+            self.clock_text.change(
+                pos=(self.rect.topleft[0] + round(CARD_CLOCK_CENTRE_OFFSET_RATIO[0] * self.size[0]),
+                     self.rect.topleft[1] + round(CARD_CLOCK_CENTRE_OFFSET_RATIO[1] * self.size[1])))
+            self.award_text.change(
+                pos=(self.rect.topleft[0] + round(CARD_AWARD_CENTRE_OFFSET_RATIO[0] * self.size[0]),
+                     self.rect.topleft[1] + round(CARD_AWARD_CENTRE_OFFSET_RATIO[1] * self.size[1])))
+            self.penalty_text.change(
+                pos=(self.rect.topleft[0] + round(CARD_PENALTY_CENTRE_OFFSET_RATIO[0] * self.size[0]),
+                     self.rect.topleft[1] + round(CARD_PENALTY_CENTRE_OFFSET_RATIO[1] * self.size[1])))
+            self.progress_text.change(
+                pos=(self.rect.topleft[0] + round(CARD_PROGGRESS_CENTRE_OFFSET_RATIO[0] * self.size[0]),
+                     self.rect.topleft[1] + round(CARD_PROGGRESS_CENTRE_OFFSET_RATIO[1] * self.size[1])))
