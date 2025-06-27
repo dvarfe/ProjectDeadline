@@ -16,9 +16,10 @@
       "is_removable": false,
       "init_events": [
         [
-          "self._Game__players[pid].free_hours_today += 6",
-          [],
-          "True"
+          "add free_hours_today",
+          [
+            6
+          ]
         ]
       ],
       "final_events": [],
@@ -49,9 +50,10 @@
       "penalty": -5,
       "events_on_success": [
         [
-          "self._Game__take_special_task(pid, \"t2\")",
-          [],
-          "True"
+          "special task",
+          [
+            "t2"
+          ]
         ]
       ],
       "events_on_fail": []

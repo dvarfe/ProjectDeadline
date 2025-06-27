@@ -12,7 +12,7 @@ Days = int
 Hours = int
 Points = int
 Image = str
-Event = tuple[str, list[str], str | None]
+Event = tuple[str, list]
 EffectID = str
 TaskID = str
 CardID = str
@@ -579,13 +579,15 @@ class Game:
         """
         Activate events.
 
-        :param events: List of events with args and check functions.
+        :param events: List of events with args.
         :pid: Target player ID.
         """
-        for event, args, check_func in events:
-            args_map = {'self': self, 'pid': pid}
-            assert eval(check_func, args_map)
-            exec(event, args_map)
+        for event, args in events:
+            match event:
+                case 'special task':
+                    self.__take_special_task(pid, args[0])
+                case 'add free_hours_today':
+                    self.__players[pid].free_hours_today += args[0]
 
     def player_takes_card(self):
         self.__take_card(self.__player_pid)

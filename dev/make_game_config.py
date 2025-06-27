@@ -71,11 +71,8 @@ def action_card(cid, name, description, image, valid_target, special, cost, acti
 
 
 # Events
-event0 = 'self._Game__take_special_task(pid, %s)'
-event1 = 'self._Game__players[pid].free_hours_today += %s'
-
-# Check functions
-check0 = 'True'
+event0 = 'special task'
+event1 = 'add free_hours_today'
 
 # Create JSON config
 with open('../Deadline/game_config.json', 'w') as f:
@@ -88,15 +85,15 @@ with open('../Deadline/game_config.json', 'w') as f:
         'HOURS_IN_DAY_DEFAULT': 16,
         'effects': [
             effect('e0', 'Кофе', 'Выпить кружку кофе', 'coffee.png', 1, 0, False,
-                   [(event1 % '6', [], check0)], [], []),
+                   [(event1, [6])], [], []),
         ],
         'tasks': [
             task('t0', 'Матан',          'Обычное задание по матану',                     'textures/cards/test.png',
-                 3, 3, 3, -6, [],                              []),
+                 3, 3, 3, -6, [],                 []),
             task('t1', 'ML',             'Research-задание по ML',                        'textures/cards/test.png',
-                 5, 7, 5, -5, [(event0 % '"t2"', [], check0)], []),
+                 5, 7, 5, -5, [(event0, ['t2'])], []),
             task('t2', 'Кросс-проверка', 'Нужно проверить 3 чужих решения домашки по ML', 'textures/cards/test.png',
-                 1, 7, 0, -5, [],                              []),
+                 1, 7, 0, -5, [],                 []),
         ],
         'task_cards': [
             task_card('tc0', 'Матан',          'Обычное задание по матану',
