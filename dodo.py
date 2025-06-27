@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import glob
 from doit.tools import create_folder
 PODEST = "Deadline/po"
@@ -80,7 +79,7 @@ def task_style():
 
 def task_docstyle():
     """Check docstrings against pydocstyle."""
-    return {'actions': ['']}  # TODO: Remove
+    # return {'actions': ['']}  # TODO: Remove
     return {
         'actions': ['pydocstyle Deadline']
     }
