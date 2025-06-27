@@ -1,3 +1,5 @@
+"""Module implementing game mechanics."""
+
 import os
 import abc
 import enum
@@ -38,11 +40,13 @@ str_to_card_target = {'GLOBAL': CardTarget.GLOBAL,
 
 
 class Effect:
+    """An effect applied to the player."""
+
     def __init__(self, eid: EffectID, name: str, description: str, image: Image,
                  period: Days, delay: Days, is_removable: bool,
                  init_events: list[Event], final_events: list[Event], everyday_events: list[Event]):
         """
-        An effect applied to the player.
+        Construct an effect applied to the player.
 
         :param eid: Effect ID.
         :param name: Effect name.
@@ -67,6 +71,7 @@ class Effect:
         self.everyday_events = everyday_events
 
     def __str__(self) -> str:
+        """Return user-friendly string representation."""
         return f'\nEffect #{self.eid}: {self.name}\n' \
             f'    description = "{self.description}"\n' \
             f'    image = {self.image}\n' \
@@ -78,15 +83,18 @@ class Effect:
             f'    everyday_events = {self.everyday_events}'
 
     def __repr__(self) -> str:
+        """Return technical string representation."""
         return f'{self.eid} "{self.name}"'
 
 
 class Task:
+    """A task that can be given to a player."""
+
     def __init__(self, tid: TaskID, name: str, description: str, image: Image,
                  difficulty: Hours, deadline: Days, award: Points, penalty: Points,
                  events_on_success: list[Event], events_on_fail: list[Event]):
         """
-        A task that can be given to a player.
+        Construct a task that can be given to a player.
 
         :param tid: Task ID.
         :param name: Task name.
@@ -111,6 +119,7 @@ class Task:
         self.events_on_fail = events_on_fail
 
     def __str__(self) -> str:
+        """Return user-friendly string representation."""
         return f'\nTask #{self.tid}: {self.name}\n' \
             f'    description = "{self.description}"\n' \
             f'    image = {self.image}\n' \
@@ -122,15 +131,18 @@ class Task:
             f'    events_on_fail = {self.events_on_fail}'
 
     def __repr__(self) -> str:
+        """Return technical string representation."""
         return f'{self.tid} "{self.name}"'
 
 
 class Card(abc.ABC):
+    """Playing card."""
+
     @abc.abstractmethod
     def __init__(self, cid: CardID, name: str, description: str, image: Image,
                  valid_target: CardTarget | str, special: bool):
         """
-        Playing card.
+        Construct a playing card.
 
         :param cid: Card ID.
         :param name: Card name.
@@ -148,6 +160,7 @@ class Card(abc.ABC):
         self.special = special
 
     def __str__(self) -> str:
+        """Return user-friendly string representation."""
         return f'\nCard #{self.cid}: {self.name}\n' \
             f'    description = "{self.description}"\n' \
             f'    image = {self.image}\n' \
@@ -155,14 +168,17 @@ class Card(abc.ABC):
             f'    special = {self.special}'
 
     def __repr__(self) -> str:
+        """Return technical string representation."""
         return f'{self.cid} "{self.name}"'
 
 
 class TaskCard(Card):
+    """Task card - one of the card types."""
+
     def __init__(self, cid: CardID, name: str, description: str, image: Image,
                  valid_target: CardTarget | str, special: bool, task: TaskID):
         """
-        Task card - one of the card types.
+        Construct a task card.
 
         :param cid: Card ID.
         :param name: Card name.
@@ -178,11 +194,13 @@ class TaskCard(Card):
 
 
 class ActionCard(Card):
+    """Action card - one of the card types."""
+
     def __init__(self, cid: CardID, name: str, description: str, image: Image,
                  valid_target: CardTarget | str, special: bool, cost: Hours, action: EffectID,
                  req_args: list[str] | None, check_args: str | None):
         """
-        Action card - one of the card types.
+        Construct an action card.
 
         :param cid: Card ID.
         :param name: Card name.
@@ -205,9 +223,11 @@ class ActionCard(Card):
 
 
 class Deadline:
+    """Player's deadline."""
+
     def __init__(self, task: Task, init_day: Day):
         """
-        Player's deadline.
+        Construct a deadline.
 
         :param task: Task.
         :param init_day: The day when the task was issued.
@@ -238,13 +258,16 @@ class Deadline:
         return self.get_rem_hours() == 0
 
     def __repr__(self) -> str:
+        """Return technical string representation."""
         return f'{self.task.tid} ({self.progress}/{self.task.difficulty})'
 
 
 class Player:
+    """A player."""
+
     def __init__(self, pid: PlayerID, name: str, hours_in_day: Hours):
         """
-        A player.
+        Construct a player.
 
         :param pid: Player ID.
         :param name: Player name.
@@ -260,6 +283,7 @@ class Player:
         self.effects: list[tuple[Day, EffectID]] = []  # Effects by the days they were applied to the player
 
     def __str__(self) -> str:
+        """Return user-friendly string representation."""
         return f'\nPlayer #{self.pid}: {self.name}\n' \
             f'    hours_today = {self.hours_today}\n' \
             f'    spent_hours_today = {self.spent_hours_today}\n' \
@@ -269,6 +293,7 @@ class Player:
             f'    effects = {self.effects}'
 
     def __repr__(self) -> str:
+        """Return technical string representation."""
         return f'Player {self.name}: ' \
             f'hand "{self.hand}" ' \
             f'deadlines {self.deadlines} ' \
@@ -322,9 +347,11 @@ class Player:
 
 
 class Game:
+    """A game. Contains all the data of the current game."""
+
     def __init__(self, player_name: str, opponent_name: str, is_first: bool, network: Network):
         """
-        A game. Contains all the data of the current game.
+        Construct a game object.
 
         :param player_name: Player name.
         :param opponent_name: Opponent name.
@@ -361,47 +388,55 @@ class Game:
         self.__create_deck()
         self.__deal_cards()
 
-    def __load_data(self):
-        """
-        Load basic game data.
-        """
+    def _load_data(self):
+        """Load basic game data."""
         with open(GAME_CONFIG_FN, 'r') as f:
             data = json.load(f)
 
-        self.__HAND_SIZE = data['HAND_SIZE']
-        self.__DECK_SIZE = data['DECK_SIZE']
-        assert self.__DECK_SIZE >= 2 * self.__HAND_SIZE
-        assert self.__HAND_SIZE > 0
-        self.__WIN_THRESHOLD = data['WIN_THRESHOLD']
-        self.__DEFEAT_THRESHOLD = data['DEFEAT_THRESHOLD']
-        assert self.__WIN_THRESHOLD > self.__DEFEAT_THRESHOLD
-        assert self.__WIN_THRESHOLD > 0
-        self.__DAYS_IN_TERM = data['DAYS_IN_TERM']
-        self.__HOURS_IN_DAY_DEFAULT = data['HOURS_IN_DAY_DEFAULT']
-        self.__ALL_EFFECTS = {dct['eid']: Effect(**dct) for dct in data['effects']}
-        self.__ALL_TASKS = {dct['tid']: Task(**dct) for dct in data['tasks']}
-        self.__ALL_CARDS = {dct['cid']: TaskCard(**dct) for dct in data['task_cards']}
-        self.__ALL_CARDS.update({dct['cid']: ActionCard(**dct) for dct in data['action_cards']})
+        self._HAND_SIZE = data['HAND_SIZE']
+        self._DECK_SIZE = data['DECK_SIZE']
+        assert self._DECK_SIZE >= 2 * self._HAND_SIZE
+        assert self._HAND_SIZE > 0
 
-    def __check_consistency(self):
+        self._WIN_THRESHOLD = data['WIN_THRESHOLD']
+        self._DEFEAT_THRESHOLD = data['DEFEAT_THRESHOLD']
+        assert self._WIN_THRESHOLD > self._DEFEAT_THRESHOLD
+        assert self._WIN_THRESHOLD > 0
+
+        self._DAYS_IN_TERM = data['DAYS_IN_TERM']
+
+        self._HOURS_IN_DAY_DEFAULT = data['HOURS_IN_DAY_DEFAULT']
+        assert self._HOURS_IN_DAY_DEFAULT <= self._HOURS_IN_DAY_MAX
+
+        self._ALL_EFFECTS = {dct['eid']: Effect(**dct) for dct in data['effects']}
+        self._ALL_TASKS = {dct['tid']: Task(**dct) for dct in data['tasks']}
+        self._ALL_CARDS = {dct['cid']: TaskCard(**dct) for dct in data['task_cards']}
+        self._ALL_CARDS.update({dct['cid']: ActionCard(**dct) for dct in data['action_cards']})
+
+    def _check_consistency(self):
         """Check the consistency of configurations between players."""
         pass
 
-    def __create_deck(self):
+    def _create_deck(self):
         """First player creates a deck of cards and share it with the second one."""
-        if self.__is_first:
-            self.__deck = random.choices([k for k, v in self.__ALL_CARDS.items() if not v.special], k=self.__DECK_SIZE)
-            self.__network.send_deck(self.__deck)
+        if self._is_first:
+            self._deck = random.choices([k for k, v in self._ALL_CARDS.items() if not v.special], k=self._DECK_SIZE)
+            self._network.send_deck(self._deck)
         else:
             while 'create_deck' not in self.__network.get_active_events():  # todo: мб уйти от активного ожидания
                 pass
             self.__deck = self.__network.events_dict['create_deck'].pop(0)
 
-    def __deal_cards(self):
+    def _deal_cards(self):
         """Deal cards to players."""
-        self.__players[1].take_cards_from_deck(self.__deck[:self.__HAND_SIZE])
-        self.__players[0].take_cards_from_deck(self.__deck[self.__HAND_SIZE:2*self.__HAND_SIZE])
-        self.__deck = self.__deck[2*self.__HAND_SIZE:]
+        # Deal cards to the first player
+        self._players[1].take_cards_from_deck(self._deck[:self._HAND_SIZE])
+        # Deal cards to the second player
+        self._players[0].take_cards_from_deck(self._deck[self._HAND_SIZE:2*self._HAND_SIZE])
+        # Remove dealt cards from the deck
+        self._deck = self._deck[2*self._HAND_SIZE:]
+
+    """ Getters """
 
     def get_game_info(self) -> dict[str, dict[str, any]]:
         """
@@ -532,14 +567,28 @@ class Game:
         return {'res': True}
 
     def player_can_take_card(self) -> dict[str, any]:
-        return self.__can_take_card(self.__player_pid)
+        """
+        Whether player can take a card from the deck.
+
+        :return: Dict with keys `res` and optionally `msg`.
+            `res` corresponds to main result (bool).
+            `msg` is used in case of a False response to indicate the reason.
+        """
+        return self._can_take_card(self._player_pid)
 
     def opponent_can_take_card(self) -> dict[str, any]:
-        return self.__can_take_card(self.__opponent_pid)
+        """
+        Whether opponent can take a card from the deck.
+
+        :return: Dict with keys `res` and optionally `msg`.
+            `res` corresponds to main result (bool).
+            `msg` is used in case of a False response to indicate the reason.
+        """
+        return self._can_take_card(self._opponent_pid)
 
     def __can_use_card(self, actor_pid: PlayerID, cid: CardID) -> dict[str, any]:
         """
-        Whether the player can use a card from the deck.
+        Whether a player can use a card from the deck.
 
         :param actor_pid: ID of player who wants to use a card.
         :param cid: Card ID.
@@ -553,10 +602,26 @@ class Game:
         return {'res': True}
 
     def player_can_use_card(self, cid: CardID) -> dict[str, any]:
-        return self.__can_use_card(self.__player_pid, cid)
+        """
+        Whether player can use a card from the deck.
+
+        :param cid: Card ID.
+        :return: Dict with keys `res` and optionally `msg`.
+            `res` corresponds to main result (bool).
+            `msg` is used in case of a False response to indicate the reason.
+        """
+        return self._can_use_card(self._player_pid, cid)
 
     def opponent_can_use_card(self, cid: CardID) -> dict[str, any]:
-        return self.__can_use_card(self.__opponent_pid, cid)
+        """
+        Whether opponent can use a card from the deck.
+
+        :param cid: Card ID.
+        :return: Dict with keys `res` and optionally `msg`.
+            `res` corresponds to main result (bool).
+            `msg` is used in case of a False response to indicate the reason.
+        """
+        return self._can_use_card(self._opponent_pid, cid)
 
     def __can_spend_time(self, actor_pid: PlayerID, target_deadline_idx: int, hours: Hours) -> dict[str, any]:
         """
@@ -576,22 +641,30 @@ class Game:
         return {'res': True}
 
     def player_can_spend_time(self, target_deadline_idx: int, hours: Hours) -> dict[str, any]:
-        return self.__can_spend_time(self.__player_pid, target_deadline_idx, hours)
+        """
+        Spend time for something.
+
+        :param target_deadline_idx: Index of target deadline in deadline list.
+        :param hours: Number of hours to spend.
+        :return: Dict with keys `res` and optionally `msg`.
+            `res` corresponds to main result (bool).
+            `msg` is used in case of a False response to indicate the reason.
+        """
+        return self._can_spend_time(self._player_pid, target_deadline_idx, hours)
 
     def opponent_can_spend_time(self, target_deadline_idx: int, hours: Hours) -> dict[str, any]:
-        return self.__can_spend_time(self.__opponent_pid, target_deadline_idx, hours)
+        """
+        Spend time for something.
+
+        :param target_deadline_idx: Index of target deadline in deadline list.
+        :param hours: Number of hours to spend.
+        :return: Dict with keys `res` and optionally `msg`.
+            `res` corresponds to main result (bool).
+            `msg` is used in case of a False response to indicate the reason.
+        """
+        return self._can_spend_time(self._opponent_pid, target_deadline_idx, hours)
 
     """ Actions """
-
-    def __take_card(self, actor_pid: PlayerID):
-        """
-        Let the player pick a card from the deck.
-
-        :param actor_pid: ID of player who takes a card.
-        """
-        assert self.__can_take_card(actor_pid)['res']
-
-        self.__players[actor_pid].take_cards_from_deck([self.__deck.pop(0)])
 
     def __events(self, events: list[Event], pid: PlayerID):
         """
@@ -605,15 +678,46 @@ class Game:
                 case 'special task':
                     self.__take_special_task(pid, args[0])
                 case 'add hours':
-                    self.__players[pid].hours_today += args[0]
-                    if self.__players[pid].hours_today > 24:
-                        self.__players[pid].hours_today = 24
+                    self._players[pid].hours_today += args[0]
+                    if self._players[pid].hours_today > self._HOURS_IN_DAY_MAX:
+                        self._players[pid].hours_today = self._HOURS_IN_DAY_MAX
+                case 'take card':
+                    if len(self._deck) != 0:
+                        self._players[pid].take_cards_from_deck([self._deck.pop(0)])
+                case 'met opt':
+                    if random.randint(1, 3) == 1:
+                        self._players[pid].score += 4
+                    else:
+                        self._take_special_task(pid, args[0])
+                case 'kurs failed':
+                    idx = [deadline.task.tid for deadline in self._players[pid].deadlines].index(args[0])
+                    self._players[pid].score -= self._players[pid].deadlines.pop(idx).get_rem_hours() * 2
+                # case 'ocean of deadlines':
+                #     for deadline in self._players[pid].deadlines:
+                #         deadline.progress -= 1
+
+    def _take_card(self, actor_pid: PlayerID):
+        """
+        Let a player pick a card from the deck.
+
+        :param actor_pid: ID of player who takes a card.
+        """
+        assert self._can_take_card(actor_pid)['res']
+
+        self._players[actor_pid].take_cards_from_deck([self._deck.pop(0)])
+
+        if actor_pid == self._player_pid:
+            self._player_took_card = True
+        else:
+            self._opponent_took_card = True
 
     def player_takes_card(self):
-        self.__take_card(self.__player_pid)
+        """Let player pick a card from the deck."""
+        self._take_card(self._player_pid)
 
     def opponent_takes_card(self):
-        self.__take_card(self.__opponent_pid)
+        """Let opponent pick a card from the deck."""
+        self._take_card(self._opponent_pid)
 
     def __take_special_task(self, actor_pid: PlayerID, tid: TaskID):
         """
@@ -661,10 +765,24 @@ class Game:
                 self.__players[real_target_pid].deadlines.append(Deadline(self.__ALL_TASKS[card.task], self.__day))
 
     def player_uses_card(self, card_idx_in_hand: int, target_pid: PlayerID = None, target_cid: CardID = None):
-        self.__use_card(self.__player_pid, card_idx_in_hand, target_pid, target_cid)
+        """
+        Use a card from hand.
+
+        :param card_idx_in_hand: Card index in players hand.
+        :param target_pid: Target player ID (if card is applied to a player).
+        :param target_cid: Target card ID (if card is applied to a specific player card).
+        """
+        self._use_card(self._player_pid, card_idx_in_hand, target_pid, target_cid)
 
     def opponent_uses_card(self, card_idx_in_hand: int, target_pid: PlayerID = None, target_cid: CardID = None):
-        self.__use_card(self.__opponent_pid, card_idx_in_hand, target_pid, target_cid)
+        """
+        Use a card from hand.
+
+        :param card_idx_in_hand: Card index in players hand.
+        :param target_pid: Target player ID (if card is applied to a player).
+        :param target_cid: Target card ID (if card is applied to a specific player card).
+        """
+        self._use_card(self._opponent_pid, card_idx_in_hand, target_pid, target_cid)
 
     def __spend_time(self, actor_pid: PlayerID, target_deadline_idx: int, hours: Hours):
         """
@@ -681,14 +799,30 @@ class Game:
         deadline.work(hours)
 
     def player_spends_time(self, target_deadline_idx: int, hours: Hours = 1):
-        self.__spend_time(self.__player_pid, target_deadline_idx, hours)
+        """
+        Spend time for something.
+
+        :param target_deadline_idx: Index of target deadline in deadline list.
+        :param hours: Number of hours to spend.
+        """
+        self._spend_time(self._player_pid, target_deadline_idx, hours)
 
     def opponent_spends_time(self, target_deadline_idx: int, hours: Hours = 1):
-        self.__spend_time(self.__opponent_pid, target_deadline_idx, hours)
+        """
+        Spend time for something.
+
+        :param target_deadline_idx: Index of target deadline in deadline list.
+        :param hours: Number of hours to spend.
+        """
+        self._spend_time(self._opponent_pid, target_deadline_idx, hours)
 
     def turn_begin(self):
         """Actions performed at the beginning of a turn."""
-        for idx, deadline in enumerate(self.__opponent.deadlines):
+        self._player_took_card = False
+        self._opponent_took_card = False
+
+        # Check opponent completed deadlines
+        for idx, deadline in enumerate(self._opponent.deadlines):
             if deadline.get_rem_hours() == 0:
                 self.__opponent.score += deadline.task.award
                 self.__events(deadline.task.events_on_success, self.__opponent_pid)
