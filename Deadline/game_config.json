@@ -43,7 +43,7 @@
       "tid": "t1",
       "name": "ML",
       "description": "Research-задание по ML",
-      "image": "textures/cards/test.png",
+      "image": "textures/cards/ml_research.png",
       "difficulty": 5,
       "deadline": 7,
       "award": 5,
