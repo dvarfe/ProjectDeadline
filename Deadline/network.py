@@ -290,9 +290,7 @@ class Network:
         self.events_dict[event] = self.events_dict.get(event, []) + [args]
 
     def close_client_socket(self):
-        """
-        Close the client/peer socket connection.
-        """
+        """Close the client/peer socket connection."""
         if self.socket:
             try:
                 self.socket.close()
@@ -302,9 +300,7 @@ class Network:
             self.connection = False
 
     def close_server_socket(self):
-        """
-        Close the server socket.
-        """
+        """Close the server socket."""
         if self.server_socket:
             try:
                 self.server_socket.close()
@@ -313,16 +309,12 @@ class Network:
             self.server_socket = None
 
     def close_all_connections(self):
-        """
-        Close all network connections and reset network state.
-        """
+        """Close all network connections and reset network state."""
         self.close_client_socket()
         self.close_server_socket()
         self.external_ip = None
         self.external_port = None
 
     def __del__(self):
-        """
-        Destructor to ensure proper cleanup of network resources.
-        """
+        """Destructor to ensure proper cleanup of network resources."""
         self.close_all_connections()

@@ -23,9 +23,8 @@ GAME_CONFIG_FN = os.path.join('Deadline', 'game_config.json')
 
 
 class CardTarget(enum.Enum):
-    """
-    Kinds of card targets.
-    """
+    """Kinds of card targets."""
+
     GLOBAL = 0  # Affects everyone
     PLAYER = 1  # Affects the player himself
     OPPONENT = 2  # Affects the opponent
@@ -385,15 +384,11 @@ class Game:
         self.__ALL_CARDS.update({dct['cid']: ActionCard(**dct) for dct in data['action_cards']})
 
     def __check_consistency(self):
-        """
-        Check the consistency of configurations between players.
-        """
+        """Check the consistency of configurations between players."""
         pass
 
     def __create_deck(self):
-        """
-        First player creates a deck of cards and share it with the second one.
-        """
+        """First player creates a deck of cards and share it with the second one."""
         if self.__is_first:
             self.__deck = random.choices([k for k, v in self.__ALL_CARDS.items() if not v.special], k=self.__DECK_SIZE)
             self.__network.send_deck(self.__deck)
@@ -403,14 +398,10 @@ class Game:
             self.__deck = self.__network.events_dict['create_deck'].pop(0)
 
     def __deal_cards(self):
-        """
-        Deal cards to players.
-        """
+        """Deal cards to players."""
         self.__players[1].take_cards_from_deck(self.__deck[:self.__HAND_SIZE])
         self.__players[0].take_cards_from_deck(self.__deck[self.__HAND_SIZE:2*self.__HAND_SIZE])
         self.__deck = self.__deck[2*self.__HAND_SIZE:]
-
-    """ Getters """
 
     def get_game_info(self) -> dict[str, dict[str, any]]:
         """
@@ -696,9 +687,7 @@ class Game:
         self.__spend_time(self.__opponent_pid, target_deadline_idx, hours)
 
     def turn_begin(self):
-        """
-        Actions performed at the beginning of a turn.
-        """
+        """Actions performed at the beginning of a turn."""
         for idx, deadline in enumerate(self.__opponent.deadlines):
             if deadline.get_rem_hours() == 0:
                 self.__opponent.score += deadline.task.award

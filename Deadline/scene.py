@@ -10,6 +10,7 @@ import Deadline.game_logic as gl
 class Scene(abc.ABC):
     """
     Abstract base class representing a game scene/screen.
+
     All game scenes should inherit from this class and implement the abstract methods.
 
     Attributes
