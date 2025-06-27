@@ -232,7 +232,7 @@ class Network:
             deck (List[Card]): deck of cards
 
         """
-        msg = 'create_deck,' + ','.join(deck)
+        msg = 'create_deck,' + ','.join(deck) + '\n'
         self.send_msg(msg)
 
     def check_for_message(self) -> None:
@@ -268,16 +268,22 @@ class Network:
         except Exception as e:
             raise Exception(_("Error checking for message:") + str(e))
 
-    def send_use_card(self, cid, player_pid, target_idx):
+    def send_end_turn(self):
+        """Send end_turn event.
+        """
+        self.send_msg('end_turn\n')
+
+    def send_use_card(self, cid, target_pid, target_idx, card_idx_in_hand):
         """Send to opponent info about played card.
 
         Args:
             cid (CardID): Played Card ID.
-            player_pid (PlayerID): Target player.
+            target_pid (PlayerID): Target player.
             target_idx(int): Index of target on table.
-
+            card_idx_in_hand (int): Index of card in hand (для корректного применения у оппонента)
         """
-        msg = f'use_card,{cid},{player_pid},{target_idx}\n'
+        # Теперь отправляем card_idx_in_hand для корректной синхронизации
+        msg = f'use_card,{cid},{target_pid},{target_idx},{card_idx_in_hand}\n'
         self.send_msg(msg)
 
     def send_work(self, task_idx, hours):
