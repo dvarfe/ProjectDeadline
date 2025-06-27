@@ -16,7 +16,7 @@
       "is_removable": false,
       "init_events": [
         [
-          "add free_hours_today",
+          "add hours",
           [
             6
           ]

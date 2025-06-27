@@ -253,8 +253,8 @@ class Player:
         """
         self.pid = pid
         self.name = name
-        self.free_hours_today = hours_in_day
-
+        self.hours_today = hours_in_day
+        self.spent_hours_today: Hours = 0
         self.score: Points = 0  # Player score
         self.hand: list[CardID] = []  # Player's cards
         self.deadlines: list[Deadline] = []  # Player deadlines
@@ -262,7 +262,8 @@ class Player:
 
     def __str__(self) -> str:
         return f'\nPlayer #{self.pid}: {self.name}\n' \
-               f'    free_hours_today = {self.free_hours_today}\n' \
+               f'    hours_today = {self.hours_today}\n' \
+               f'    spent_hours_today = {self.spent_hours_today}\n' \
                f'    score = {self.score}\n' \
                f'    hand = {self.hand}\n' \
                f'    deadlines = {self.deadlines}\n' \
@@ -273,6 +274,14 @@ class Player:
                f'hand "{self.hand}" ' \
                f'deadlines {self.deadlines} ' \
                f'effects {self.effects} '
+
+    def free_hours(self) -> Hours:
+        """
+        Return number of free hours today.
+
+        :return: Number of free hours.
+        """
+        return self.hours_today - self.spent_hours_today
 
     def take_cards_from_deck(self, cards: list[CardID]):
         """
@@ -298,9 +307,9 @@ class Player:
 
         :param hours: Number of hours to spend.
         """
-        assert hours <= self.free_hours_today
+        assert hours <= self.free_hours()
 
-        self.free_hours_today -= hours
+        self.spent_hours_today += hours
 
     def work(self, deadline_idx: int, hours: Hours):
         """
@@ -431,7 +440,9 @@ class Game:
                 'pid': self.__player.pid,
                 'name': self.__player.name,
                 'score': self.__player.score,
-                'free hours': self.__player.free_hours_today,
+                'hours': self.__player.hours_today,
+                'spent hours': self.__player.spent_hours_today,
+                'free hours': self.__player.free_hours(),
                 'deadlines': self.__player.deadlines,
                 'effects': eids_to_effects(self.__player.effects),
                 'hand': cids_to_cards(self.__player.hand),
@@ -440,7 +451,9 @@ class Game:
                 'pid': self.__opponent.pid,
                 'name': self.__opponent.name,
                 'score': self.__opponent.score,
-                'free hours': self.__opponent.free_hours_today,
+                'hours': self.__opponent.hours_today,
+                'spent hours': self.__opponent.spent_hours_today,
+                'free hours': self.__opponent.free_hours(),
                 'deadlines': self.__opponent.deadlines,
                 'effects': eids_to_effects(self.__opponent.effects),
                 'hand size': len(self.__opponent.hand),
@@ -457,7 +470,7 @@ class Game:
                 'win threshold': self.__WIN_THRESHOLD,
                 'defeat threshold': self.__DEFEAT_THRESHOLD,
                 'days in term': self.__DAYS_IN_TERM,
-                'free hours': self.__HOURS_IN_DAY_DEFAULT,
+                'hours': self.__HOURS_IN_DAY_DEFAULT,
             }
         }
 
@@ -548,7 +561,7 @@ class Game:
             `msg` is used in case of a False response to indicate the reason.
         """
         if self.get_card_type(cid) == 'ActionCard' and \
-                self.__ALL_CARDS[cid].cost > self.__players[actor_pid].free_hours_today:
+                self.__ALL_CARDS[cid].cost > self.__players[actor_pid].free_hours():
             return {'res': False, 'msg': 'Not enough free time!'}
         return {'res': True}
 
@@ -571,7 +584,7 @@ class Game:
         """
         if hours > self.__players[actor_pid].deadlines[target_deadline_idx].get_rem_hours():
             return {'res': False, 'msg': 'You are trying to spend too much time!'}
-        if hours > self.__players[actor_pid].free_hours_today:
+        if hours > self.__players[actor_pid].free_hours():
             return {'res': False, 'msg': 'Not enough free time!'}
         return {'res': True}
 
@@ -604,10 +617,10 @@ class Game:
             match event:
                 case 'special task':
                     self.__take_special_task(pid, args[0])
-                case 'add free_hours_today':
-                    self.__players[pid].free_hours_today += args[0]
-                    if self.__players[pid].free_hours_today > 24:
-                        self.__players[pid].free_hours_today = 24
+                case 'add hours':
+                    self.__players[pid].hours_today += args[0]
+                    if self.__players[pid].hours_today > 24:
+                        self.__players[pid].hours_today = 24
 
     def player_takes_card(self):
         self.__take_card(self.__player_pid)
@@ -698,7 +711,8 @@ class Game:
                 self.__opponent.deadlines.pop(idx)
 
         # Update number of hours
-        self.__player.free_hours_today = self.__HOURS_IN_DAY_DEFAULT
+        self.__player.hours_today = self.__HOURS_IN_DAY_DEFAULT
+        self.__player.spent_hours_today = 0
 
         # Apply active effects
         for init_day, eid in self.__player.effects + self.__effects:
@@ -743,7 +757,8 @@ class Game:
                 self.__player.deadlines.pop(idx)
 
         # Update number of hours
-        self.__opponent.free_hours_today = self.__HOURS_IN_DAY_DEFAULT
+        self.__opponent.hours_today = self.__HOURS_IN_DAY_DEFAULT
+        self.__opponent.spent_hours_today = 0
 
         # Apply active effects
         for init_day, eid in self.__opponent.effects:

@@ -72,7 +72,7 @@ def action_card(cid, name, description, image, valid_target, special, cost, acti
 
 # Events
 event0 = 'special task'
-event1 = 'add free_hours_today'
+event1 = 'add hours'
 
 # Create JSON config
 with open('../Deadline/game_config.json', 'w') as f:
