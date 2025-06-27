@@ -338,6 +338,7 @@ class Game:
         self._DEFEAT_THRESHOLD: Points  # Lower score threshold; when it is reached, the player loses
         self._DAYS_IN_TERM: Days  # Number of days in a term; the session starts after that number of days
         self._HOURS_IN_DAY_DEFAULT: Hours  # Number of free hours per day with no effects
+        self._HOURS_IN_DAY_MAX: Hours = 24  # Maximal number of free hours per day
         self._ALL_EFFECTS: tuple[Effect, ...]  # All effects in the game
         self._ALL_TASKS: tuple[Task, ...]  # All tasks in the game
         self._ALL_CARDS: tuple[Card, ...]  # All cards in the game
@@ -376,12 +377,17 @@ class Game:
         self._DECK_SIZE = data['DECK_SIZE']
         assert self._DECK_SIZE >= 2 * self._HAND_SIZE
         assert self._HAND_SIZE > 0
+
         self._WIN_THRESHOLD = data['WIN_THRESHOLD']
         self._DEFEAT_THRESHOLD = data['DEFEAT_THRESHOLD']
         assert self._WIN_THRESHOLD > self._DEFEAT_THRESHOLD
         assert self._WIN_THRESHOLD > 0
+
         self._DAYS_IN_TERM = data['DAYS_IN_TERM']
+
         self._HOURS_IN_DAY_DEFAULT = data['HOURS_IN_DAY_DEFAULT']
+        assert self._HOURS_IN_DAY_DEFAULT <= self._HOURS_IN_DAY_MAX
+
         self._ALL_EFFECTS = {dct['eid']: Effect(**dct) for dct in data['effects']}
         self._ALL_TASKS = {dct['tid']: Task(**dct) for dct in data['tasks']}
         self._ALL_CARDS = {dct['cid']: TaskCard(**dct) for dct in data['task_cards']}
@@ -423,13 +429,13 @@ class Game:
         Get all game information.
 
         :return: Dict with keys 'player', 'opponent', 'global', 'constants'.
-            'player' corresponds to dict with keys 'pid', 'name', 'score', 'free hours',
-                'deadlines', 'effects' and 'hand'.
+            'player' corresponds to dict with keys 'pid', 'name', 'score', 'hours', 'spent hours',
+                'free hours', 'deadlines', 'effects' and 'hand'.
             'opponent' corresponds to the same dict; but instead of `hand` key,
                 there is `hand size` key.
             'global' corresponds to dict with keys 'day', 'have exams', 'effects', 'deck size'.
             'constants' corresponds to dict with keys 'init deck size', 'max hand size',
-                'win threshold', 'defeat threshold', 'days in term', 'free hours'.
+                'win threshold', 'defeat threshold', 'days in term', 'hours', 'max hours'.
         """
         def eids_to_effects(effects: list[tuple[int, EffectID]]) -> list[tuple[int, Effect]]:
             return [(init_day, self._ALL_EFFECTS[eid]) for init_day, eid in effects]
@@ -473,6 +479,7 @@ class Game:
                 'defeat threshold': self._DEFEAT_THRESHOLD,
                 'days in term': self._DAYS_IN_TERM,
                 'hours': self._HOURS_IN_DAY_DEFAULT,
+                'max hours': self._HOURS_IN_DAY_MAX,
             }
         }
 
@@ -629,8 +636,8 @@ class Game:
                     self._take_special_task(pid, args[0])
                 case 'add hours':
                     self._players[pid].hours_today += args[0]
-                    if self._players[pid].hours_today > 24:
-                        self._players[pid].hours_today = 24
+                    if self._players[pid].hours_today > self._HOURS_IN_DAY_MAX:
+                        self._players[pid].hours_today = self._HOURS_IN_DAY_MAX
 
     def player_takes_card(self):
         self._take_card(self._player_pid)
