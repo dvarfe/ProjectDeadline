@@ -10,20 +10,25 @@ import Deadline.game_logic as gl
 class Scene(abc.ABC):
     """
     Abstract base class representing a game scene/screen.
-
     All game scenes should inherit from this class and implement the abstract methods.
 
-    Attributes:
+    Attributes
         game (Game): Reference to the main Game instance.
+
     """
 
     def __init__(self, game: Game):
+        """Initialize scene.
+
+        Args:
+            game (Game): Game instance
+
+        """
         self.game = game
 
     @abc.abstractmethod
     def run(self):
-        """Main scene loop method that coordinates event checking, updating and drawing."""
-
+        """Run main scene loop method that coordinates event checking, updating and drawing."""
         self.check_events()
         self.update_scene()
         self.draw_scene()
@@ -49,7 +54,20 @@ STICKYNOTE_BUTTON_IMAGES_PATHS = ["./textures/button_idle.png",
 
 
 class MainMenu(Scene):
+    """Main Menu scene.
+
+    Args:
+        Scene (Scene): Scene.
+
+    """
+
     def __init__(self, game):
+        """Initialize Main Menu scene.
+
+        Args:
+            game (Game): Game instance.
+
+        """
         super().__init__(game)
         pg.display.set_caption(_('Deadline - Main menu'))
 
@@ -130,23 +148,27 @@ class MainMenu(Scene):
             Anchor.CENTRE)
 
     def run(self):
+        """Run main scene loop method that coordinates event checking, updating and drawing."""
         self.check_events()
         self.update_scene()
         self.draw_scene()
 
     def check_events(self):
+        """Process input events for all UI buttons."""
         self.button_host_game.check_event()
         self.button_connect.check_event()
         self.button_settings.check_event()
         self.button_exit.check_event()
 
     def update_scene(self):
+        """Update the scene state (game logic, animations, etc.)."""
         self.button_host_game.update()
         self.button_connect.update()
         self.button_settings.update()
         self.button_exit.update()
 
     def draw_scene(self):
+        """Render the main menu: background, title, and buttons."""
         self.game.canvas.fill((255, 255, 255))
 
         self.title.draw()
@@ -159,7 +181,22 @@ class MainMenu(Scene):
 
 
 class HostScene(Scene):
+    """Scene for hosting a multiplayer game session.
+
+    This scene provides UI elements for:
+    - Setting up connection parameters (port number)
+    - Choosing connection method (Bore or direct)
+    - Starting the game host
+    - Returning to main menu
+    """
+
     def __init__(self, game):
+        """Initialize the host game scene.
+
+        Args:
+            game (Game): Reference to the main game instance.
+
+        """
         super().__init__(game)
         pg.display.set_caption(_('Deadline - Host game'))
         self.buttons = []
@@ -211,11 +248,13 @@ class HostScene(Scene):
         self.texts.append(checkbox_text)
 
     def run(self):
+        """Execute one frame of the scene logic."""
         self.check_events()
         self.update_scene()
         self.draw_scene()
 
     def check_events(self):
+        """Process input events for all UI buttons."""
         for button in self.buttons:
             button.check_event()
         if self.host_button.mousedown:
@@ -239,12 +278,14 @@ class HostScene(Scene):
             self.texts.append(waiting_for_connection_text)
 
     def update_scene(self):
+        """Update the scene state (game logic, animations, etc.)."""
         for object in self.buttons + self.texts:
             object.update()
         if self.game.network.connection:
-            self.game.current_scene = GameScene(self.game)
+            self.game.current_scene = GameScene(self.game, is_first=True)
 
     def draw_scene(self):
+        """Render the main menu: background, title, and buttons."""
         self.game.canvas.fill("white")
         for object in self.buttons + self.texts:
             object.draw()
@@ -252,7 +293,21 @@ class HostScene(Scene):
 
 
 class ConnectScene(Scene):
+    """Scene for connecting to a multiplayer game session.
+
+    Provides UI elements for:
+    - Entering server connection details (IP and port)
+    - Establishing connection
+    - Returning to main menu
+    """
+
     def __init__(self, game):
+        """Initialize the connection scene.
+
+        Args:
+            game (Game): Reference to the main game instance.
+
+        """
         super().__init__(game)
         pg.display.set_caption(_('Deadline - Connect'))
         self.buttons = []
@@ -299,11 +354,13 @@ class ConnectScene(Scene):
             150))
 
     def run(self):
+        """Execute one frame of the scene logic."""
         self.check_events()
         self.update_scene()
         self.draw_scene()
 
     def check_events(self):
+        """Process input events for all UI buttons."""
         for button in self.buttons:
             button.check_event()
         if self.connect_button.mousedown:
@@ -321,12 +378,14 @@ class ConnectScene(Scene):
             self.connect_button.mousehold = False
 
     def update_scene(self):
+        """Update the scene state (game logic, animations, etc.)."""
         for object in self.buttons + self.texts:
             object.update()
         if self.game.network.connection:
-            self.game.current_scene = GameScene(self.game)
+            self.game.current_scene = GameScene(self.game, is_first=False)
 
     def draw_scene(self):
+        """Render the main menu: background, title, and buttons."""
         self.game.canvas.fill("white")
         for object in self.buttons + self.texts:
             object.draw()
@@ -334,7 +393,25 @@ class ConnectScene(Scene):
 
 
 class SettingsScene(Scene):
+    """Game settings configuration scene.
+
+    Provides interface for:
+    - Changing game language/regional settings
+    - Returning to main menu
+    """
+
     def __init__(self, game):
+        """Initialize settings scene with UI elements.
+
+        Args:
+            game (Game): Reference to the main game instance.
+
+        Attributes
+            buttons (list): Collection of interactive UI buttons
+            texts (list): Collection of text elements
+            cur_locale (tuple): Current locale settings (language, encoding)
+
+        """
         super().__init__(game)
         pg.display.set_caption(_('Deadline - Settings'))
         self.buttons = []
@@ -356,11 +433,13 @@ class SettingsScene(Scene):
                                                  Anchor.CENTRE))
 
     def run(self):
+        """Execute one frame of the scene logic."""
         self.check_events()
         self.update_scene()
         self.draw_scene()
 
     def check_events(self):
+        """Process input events for all UI buttons."""
         for button in self.buttons:
             button.check_event()
         if self.cur_locale != locale.getlocale():
@@ -373,10 +452,12 @@ class SettingsScene(Scene):
                 150)
 
     def update_scene(self):
+        """Update the scene state (game logic, animations, etc.)."""
         for object in self.buttons + self.texts:
             object.update()
 
     def draw_scene(self):
+        """Render the main menu: background, title, and buttons."""
         self.game.canvas.fill("white")
         for objects in self.buttons + self.texts:
             objects.draw()
@@ -384,59 +465,196 @@ class SettingsScene(Scene):
 
 
 class GameScene(Scene):
-    def __init__(self, game):
+    """Main gameplay scene handling core game rendering and logic."""
+
+    def __init__(self, game, is_first):
+        """Initialize the game scene.
+
+        Args:
+            game (Game): Reference to the main game controller instance.
+            is_first (bool): True if this player goes first, False otherwise.
+        """
         super().__init__(game)
         pg.display.set_caption(_('Deadline'))
 
-        # example scene
-        self.game_obj = gl.Game("Player1", "Player2", True, self.game.network)
+        self.game_obj = gl.Game("Player1", "Player2", is_first, self.game.network)
 
-        self.cardtypes_images = \
-            {"TaskCard": pg.image.load("./textures/card_task.png"),
-             "ActionCard": pg.image.load("./textures/card_action.png")}
+        self.cardtypes_images = {
+            "TaskCard": pg.image.load("./textures/card_task.png"),
+            "ActionCard": pg.image.load("./textures/card_action.png")
+        }
 
-        self.example = Card(
-            game,
-            self.game_obj,
-            self.game_obj.get_game_info()['player']['hand'][0],
-            self.cardtypes_images,
-            350,
-            (self.game.window_size[0] // 2, self.game.window_size[1] // 2),
-            Anchor.CENTRE)
+        hand = self.game_obj.get_game_info()['player']['hand']
+        self.hand_cards = []
+        self.card_height = 210
+        self.spacing = 24
+        self.num_cards = len(hand)
+        card_img = self.cardtypes_images["TaskCard"]
+        self.card_width = round(self.card_height * card_img.get_width() / card_img.get_height())
+        self.selected_card_idx = None
+        self.hovered_card_idx = None
+        self.played_cards = []
+        self.is_player_turn = is_first
+        self.opponent_played_cards = []
+
+        self._layout_hand_cards()
+
+    def _layout_hand_cards(self):
+        hand = self.game_obj.get_game_info()['player']['hand']
+        self.hand_cards = []
+        num_cards = len(hand)
+        total_width = num_cards * self.card_width + (num_cards - 1) * self.spacing if num_cards > 0 else 0
+        start_x = (self.game.window_size[0] - total_width) // 2 + self.card_width // 2
+        y = self.game.window_size[1] - self.card_height // 2 - 80
+        for i, card_info in enumerate(hand):
+            x = start_x + i * (self.card_width + self.spacing)
+            self.hand_cards.append({
+                'card': Card(
+                    self.game,
+                    self.game_obj,
+                    card_info,
+                    self.cardtypes_images,
+                    self.card_height,
+                    (x, y),
+                    Anchor.CENTRE
+                ),
+                'pos': (x, y),
+                'orig_y': y
+            })
+
+    def _layout_played_cards(self):
+        num = len(self.played_cards)
+        if num == 0:
+            return
+        spacing = 24
+        card_width = self.card_width
+        total_width = num * card_width + (num - 1) * spacing
+        start_x = (self.game.window_size[0] - total_width) // 2 + card_width // 2
+        y = self.game.window_size[1] // 2 + 10
+        for i, card in enumerate(self.played_cards):
+            x = start_x + i * (card_width + spacing)
+            card.move_to((x, y))
+
+    def _layout_opponent_hand(self):
+        hand_size = self.game_obj.get_game_info()['opponent']['hand size']
+        self.opponent_hand_rects = []
+        num_cards = hand_size
+        total_width = num_cards * self.card_width + (num_cards - 1) * self.spacing if num_cards > 0 else 0
+        start_x = (self.game.window_size[0] - total_width) // 2 + self.card_width // 2
+        y = self.card_height // 2 + 40
+        for i in range(num_cards):
+            x = start_x + i * (self.card_width + self.spacing)
+            rect = pg.Rect(0, 0, self.card_width, self.card_height)
+            rect.center = (x, y)
+            self.opponent_hand_rects.append(rect)
 
     def run(self):
+        """Execute one frame of game loop processing."""
         self.check_events()
         self.update_scene()
         self.draw_scene()
 
     def check_events(self):
-        pass
+        mouse_pos = pg.mouse.get_pos()
+        mouse_pressed = pg.mouse.get_pressed()[0]
+        self.hovered_card_idx = None
+        if not self.is_player_turn:
+            return
+        for idx, card_dict in enumerate(self.hand_cards):
+            card = card_dict['card']
+            rect = card.rect.copy()
+            if self.selected_card_idx == idx:
+                continue
+            if rect.collidepoint(mouse_pos):
+                self.hovered_card_idx = idx
+                if mouse_pressed:
+                    self.selected_card_idx = idx
+        if self.selected_card_idx is not None and not mouse_pressed:
+            played_card = self.hand_cards[self.selected_card_idx]['card']
+            self.game_obj.player_uses_card(self.selected_card_idx)
+            cid = played_card.card_info.cid
+            target_pid = None
+            target_idx = None
+            card_idx_in_hand = self.selected_card_idx
+            self.game.network.send_use_card(cid, target_pid, target_idx, card_idx_in_hand)
+            self.selected_card_idx = None
+            self._layout_hand_cards()
+            self.played_cards.append(played_card)
+            self._layout_played_cards()
+
+    def update_scene(self):
+        if not self.is_player_turn:
+            event_keys = self.game.network.get_active_events()
+            for key in event_keys:
+                event_list = self.game.network.events_dict[key]
+                while event_list:
+                    args = event_list.pop(0)
+                    if key == 'use_card':
+                        card_idx_in_hand = int(args[3]) if len(args) > 3 else 0
+                        self.game_obj.opponent_uses_card(card_idx_in_hand)
+                        self._layout_hand_cards()
+                        self._layout_played_cards()
+                    elif key == 'end_turn':
+                        self.is_player_turn = True
 
     def draw_scene(self):
         self.game.canvas.fill((255, 255, 255))
-        self.example.draw()
+        self._layout_opponent_hand()
+        for rect in self.opponent_hand_rects:
+            pg.draw.rect(self.game.canvas, (120, 120, 180), rect, border_radius=16)
+            pg.draw.rect(self.game.canvas, (60, 60, 100), rect, width=4, border_radius=16)
+        num = len(self.opponent_played_cards)
+        if num > 0:
+            spacing = 24
+            card_width = self.card_width
+            total_width = num * card_width + (num - 1) * spacing
+            start_x = (self.game.window_size[0] - total_width) // 2 + card_width // 2
+            y = self.card_height // 2 + 120
+            for i, card in enumerate(self.opponent_played_cards):
+                x = start_x + i * (card_width + spacing)
+                card.move_to((x, y))
+                card.draw()
+        for card in self.played_cards:
+            card.draw()
+        for idx, card_dict in enumerate(self.hand_cards):
+            card = card_dict['card']
+            x, y = card_dict['pos']
+            draw_y = y
+            if idx == self.hovered_card_idx:
+                draw_y = y - 40
+            old_pos = card.pos
+            card.move_to((x, draw_y))
+            card.draw()
+            card.move_to(old_pos)
         self.game.blit_screen()
 
-    def update_scene(self):
-        pass
-
-
 class EmptyScene(Scene):
+    """Placeholder scene used for testing and transitions."""
+
     def __init__(self, game):
+        """Initialize an empty placeholder scene.
+
+        Args:
+            game (Game): Reference to the main game controller instance.
+        """
         pg.display.set_caption('Empty')
         super().__init__(game)
 
     def run(self):
+        """Execute one frame of scene processing."""
         self.check_events()
         self.update_scene()
         self.draw_scene()
 
     def check_events(self):
+        """Process input events for all UI buttons."""
         pass
 
     def update_scene(self):
+        """Update the scene state(game logic, animations, etc.)."""
         pass
 
     def draw_scene(self):
+        """Render the main menu: background, title, and buttons."""
         self.game.canvas.fill((0, 0, 0))
         self.game.blit_screen()
