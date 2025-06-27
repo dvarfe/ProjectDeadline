@@ -17,8 +17,9 @@ def print_game_info(game_data: GameData):
         else:
             print('    deadlines:')
             for deadline in deadlines:
+                days_rem = deadline.deadline - gl['day']
                 print(f'        {deadline.task.name} ({deadline.progress}/{deadline.task.difficulty}, '
-                      f'{deadline.get_rem_days()} days remains)')
+                      f'{days_rem} days remain)')
 
     def print_effects(dct):
         effects = dct['effects']
@@ -27,7 +28,7 @@ def print_game_info(game_data: GameData):
         else:
             print('    effects:')
             for init_day, effect in effects:
-                print(f'        {effect.name} ({gl["day"] + effect.period - init_day} days remains)')
+                print(f'        {effect.name} ({gl["day"] + effect.period - init_day} days remain)')
 
     def print_global_effects(dct):
         effects = dct['effects']

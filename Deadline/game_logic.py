@@ -226,14 +226,6 @@ class Deadline:
         """
         return self.task.difficulty - self.progress
 
-    def get_rem_days(self) -> Days:
-        """
-        Get number of days before deadline.
-
-        :return: Number of days.
-        """
-        return self.deadline - self.init_day
-
     def work(self, hours: Hours) -> bool:
         """
         Work on the task for `hours` hours.
