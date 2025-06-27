@@ -45,4 +45,4 @@ build-backend = "setuptools.build_meta"
 Deadline = "Deadline"
 
 [tool.setuptools.package-data]
-Deadline = ["po/*/*/*.mo"]
+Deadline = ["po/*/*/*.mo", "textures/*"]

@@ -5,6 +5,7 @@ from .game import Game, Text, Anchor, TextField, BackButton, ChooseLanguageButto
     SceneSwitchButton, ExitButton, ConnectButton, CheckBoxButton, Card
 from .game import _
 import Deadline.game_logic as gl
+import os
 
 
 class Scene(abc.ABC):
@@ -49,8 +50,9 @@ class Scene(abc.ABC):
         pass
 
 
-STICKYNOTE_BUTTON_IMAGES_PATHS = ["./textures/button_idle.png",
-                                  "./textures/button_hover.png", "./textures/button_pressed.png"]
+textures = os.path.join(os.path.dirname(__file__), "textures")
+STICKYNOTE_BUTTON_IMAGES_PATHS = [f"{textures}/button_idle.png",
+                                  f"{textures}/button_hover.png", f"{textures}/button_pressed.png"]
 
 
 class MainMenu(Scene):
