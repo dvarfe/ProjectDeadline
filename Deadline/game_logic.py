@@ -419,12 +419,14 @@ class Game:
         """
         Get all game information.
 
-        :return: Dict with keys 'player', 'opponent', 'global'.
-            'player' corresponds to dict with keys 'pid', 'name', 'score', 'free time',
+        :return: Dict with keys 'player', 'opponent', 'global', 'constants'.
+            'player' corresponds to dict with keys 'pid', 'name', 'score', 'free hours',
                 'deadlines', 'effects' and 'hand'.
             'opponent' corresponds to the same dict; but instead of `hand` key,
                 there is `hand size` key.
             'global' corresponds to dict with keys 'day', 'have exams', 'effects', 'deck size'.
+            'constants' corresponds to dict with keys 'init deck size', 'max hand size',
+                'win threshold', 'defeat threshold', 'days in term', 'free hours'.
         """
         def eids_to_effects(effects: list[tuple[int, EffectID]]) -> list[tuple[int, Effect]]:
             return [(init_day, self.__ALL_EFFECTS[eid]) for init_day, eid in effects]
@@ -437,7 +439,7 @@ class Game:
                 'pid': self.__player.pid,
                 'name': self.__player.name,
                 'score': self.__player.score,
-                'free time': self.__player.free_hours_today,
+                'free hours': self.__player.free_hours_today,
                 'deadlines': self.__player.deadlines,
                 'effects': eids_to_effects(self.__player.effects),
                 'hand': cids_to_cards(self.__player.hand),
@@ -446,7 +448,7 @@ class Game:
                 'pid': self.__opponent.pid,
                 'name': self.__opponent.name,
                 'score': self.__opponent.score,
-                'free time': self.__opponent.free_hours_today,
+                'free hours': self.__opponent.free_hours_today,
                 'deadlines': self.__opponent.deadlines,
                 'effects': eids_to_effects(self.__opponent.effects),
                 'hand size': len(self.__opponent.hand),
@@ -457,6 +459,14 @@ class Game:
                 'effects': eids_to_effects(self.__effects),
                 'deck size': len(self.__deck),
             },
+            'constants': {
+                'init deck size': self.__DECK_SIZE,
+                'max hand size': self.__HAND_SIZE,
+                'win threshold': self.__WIN_THRESHOLD,
+                'defeat threshold': self.__DEFEAT_THRESHOLD,
+                'days in term': self.__DAYS_IN_TERM,
+                'free hours': self.__HOURS_IN_DAY_DEFAULT,
+            }
         }
 
     def get_effect_info(self, eid: EffectID) -> Effect:

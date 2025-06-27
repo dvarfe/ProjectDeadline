@@ -48,7 +48,7 @@ def print_game_info(game_data: GameData):
 
     print(f'{op["name"]} (opponent, id:{op["pid"]})')
     print(f'    score: {op["score"]}')
-    print(f'    free_hours_today: {op["free time"]}')
+    print(f'    free_hours_today: {op["free hours"]}')
     print()
     print(f'    hand: {", ".join(["[?]"] * op["hand size"])}')
     print()
@@ -64,7 +64,7 @@ def print_game_info(game_data: GameData):
     print()
     print(f'    hand: {", ".join(card.name for card in pl["hand"])}')
     print()
-    print(f'    free_hours_today: {pl["free time"]}')
+    print(f'    free_hours_today: {pl["free hours"]}')
     print(f'    score: {pl["score"]}')
     print(f'{pl["name"]} (you, id:{pl["pid"]})')
 
