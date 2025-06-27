@@ -355,6 +355,8 @@ class Game:
         self._players = {self._player_pid: self._player, self._opponent_pid: self._opponent}
 
         self._day: Day = 1  # Day number
+        self._player_took_card = False  # True if player took a card today
+        self._opponent_took_card = False  # True if opponent took a card today
         self._have_exams: bool = False  # True when players have exams
         self._effects: list[tuple[Day, EffectID]] = []  # Effects affecting both players by the days they were applied
 
@@ -542,6 +544,9 @@ class Game:
             return {'res': False, 'msg': 'No more cards in deck!'}
         if len(self._players[actor_pid].hand) >= self._HAND_SIZE:
             return {'res': False, 'msg': 'Cards limit is reached!'}
+        if actor_pid == self._player_pid and self._player_took_card or \
+           actor_pid == self._opponent_took_card and self._opponent_took_card:
+            return {'res': False, 'msg': 'You have reached the daily limit!'}
         return {'res': True}
 
     def player_can_take_card(self) -> dict[str, any]:
@@ -605,6 +610,11 @@ class Game:
         assert self._can_take_card(actor_pid)['res']
 
         self._players[actor_pid].take_cards_from_deck([self._deck.pop(0)])
+
+        if actor_pid == self._player_pid:
+            self._player_took_card = True
+        else:
+            self._opponent_took_card = True
 
     def _events(self, events: list[Event], pid: PlayerID):
         """
@@ -703,6 +713,9 @@ class Game:
         """
         Actions performed at the beginning of a turn.
         """
+        self._player_took_card = False
+        self._opponent_took_card = False
+
         # Check opponent completed deadlines
         for idx, deadline in enumerate(self._opponent.deadlines):
             if deadline.get_rem_hours() == 0:
@@ -748,6 +761,8 @@ class Game:
         :return: 'win', 'defeat', 'draw' or 'game continues'.
         """
         self._day += 1
+        self._player_took_card = False
+        self._opponent_took_card = False
 
         # Check player completed deadlines
         for idx, deadline in enumerate(self._player.deadlines):
