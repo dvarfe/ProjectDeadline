@@ -97,14 +97,14 @@ with open('../Deadline/game_config.json', 'w') as f:
         ],
         'task_cards': [
             task_card('tc0', 'Матан',          'Обычное задание по матану',                     'math_hw.png',
-                      'OPPONENT', False, ['t0']),
+                      'OPPONENT', False, 't0'),
             task_card('tc1', 'ML',             'Research-задание по ML',                        'cs_hw.png',
-                      'OPPONENT', False, ['t1']),
+                      'OPPONENT', False, 't1'),
             task_card('tc2', 'Кросс-проверка', 'Нужно проверить 3 чужих решения домашки по ML', 'cs_hw.png',
-                      'PLAYER',   True,  ['t2']),
+                      'PLAYER',   True,  't2'),
         ],
         'action_cards': [
-            action_card('ac0', 'Кофе', 'Выпить кружку кофе', 'coffee.png', 'PLAYER', False, 0, ['e0'], [None], [None]),
+            action_card('ac0', 'Кофе', 'Выпить кружку кофе', 'coffee.png', 'PLAYER', False, 0, 'e0', None, None),
         ],
     }
     json.dump(data, f, ensure_ascii=False, indent=2)

@@ -1,9 +1,10 @@
 import abc
 import pygame as pg
 import locale
-from .game import Game, Text, Anchor, TextField, \
-    BackButton, ChooseLanguageButton, SceneSwitchButton, ExitButton, ConnectButton, CheckBoxButton
+from .game import Game, Text, Anchor, TextField, BackButton, ChooseLanguageButton, \
+    SceneSwitchButton, ExitButton, ConnectButton, CheckBoxButton, Card
 from .game import _
+import Deadline.game_logic as gl
 
 
 class Scene(abc.ABC):
@@ -48,6 +49,10 @@ class Scene(abc.ABC):
         pass
 
 
+STICKYNOTE_BUTTON_IMAGES_PATHS = ["./textures/button_idle.png",
+                                  "./textures/button_hover.png", "./textures/button_pressed.png"]
+
+
 class MainMenu(Scene):
     """Main Menu scene.
 
@@ -66,9 +71,11 @@ class MainMenu(Scene):
         super().__init__(game)
         pg.display.set_caption(_('Deadline - Main menu'))
 
+        self.stickynote_button_images = list(map(pg.image.load, STICKYNOTE_BUTTON_IMAGES_PATHS))
+
         self.title = Text(
             game,
-            (self.game.window_size[0] / 2, self.game.window_size[1] / 8),
+            (self.game.window_size[0] // 2, self.game.window_size[1] // 8),
             Anchor.CENTRE,
             _("Deadline"),
             150)
@@ -83,10 +90,10 @@ class MainMenu(Scene):
         self.button_host_game = SceneSwitchButton(
             game,
             HostScene,
-            (600, 120),
-            (self.game.window_size[0] / 2, self.game.window_size[1] / 16 * 5),
+            (600, 325),
+            (self.game.window_size[0] // 3, self.game.window_size[1] // 16 * 6),
             Anchor.CENTRE,
-            None,
+            self.stickynote_button_images,
             button_text,
             Anchor.CENTRE)
 
@@ -100,10 +107,10 @@ class MainMenu(Scene):
         self.button_connect = SceneSwitchButton(
             game,
             ConnectScene,
-            (600, 120),
-            (self.game.window_size[0] / 2, self.game.window_size[1] / 16 * 7),
+            (600, 325),
+            (self.game.window_size[0] // 3, self.game.window_size[1] // 16 * 12),
             Anchor.CENTRE,
-            None,
+            self.stickynote_button_images,
             button_text,
             Anchor.CENTRE)
 
@@ -117,10 +124,10 @@ class MainMenu(Scene):
         self.button_settings = SceneSwitchButton(
             game,
             SettingsScene,
-            (600, 120),
-            (self.game.window_size[0] / 2, self.game.window_size[1] / 16 * 9),
+            (600, 325),
+            (self.game.window_size[0] // 3 * 2, self.game.window_size[1] // 16 * 6),
             Anchor.CENTRE,
-            None,
+            self.stickynote_button_images,
             button_text,
             Anchor.CENTRE)
 
@@ -133,10 +140,10 @@ class MainMenu(Scene):
 
         self.button_exit = ExitButton(
             game,
-            (600, 120),
-            (self.game.window_size[0] / 2, self.game.window_size[1] / 16 * 11),
+            (600, 325),
+            (self.game.window_size[0] // 3 * 2, self.game.window_size[1] // 16 * 12),
             Anchor.CENTRE,
-            None,
+            self.stickynote_button_images,
             button_text,
             Anchor.CENTRE)
 
@@ -198,7 +205,7 @@ class HostScene(Scene):
             game,
             MainMenu))
 
-        checkbox_pos = self.game.window_size[0] / 32 * 11, self.game.window_size[1] / 16 * 8
+        checkbox_pos = self.game.window_size[0] // 32 * 11, self.game.window_size[1] // 16 * 8
         checkbox_text = Text(
             game,
             (checkbox_pos[0] + 70, checkbox_pos[1] + 15),
@@ -218,13 +225,13 @@ class HostScene(Scene):
 
         self.host_button = ConnectButton(game,
                                          size=(600, 120),
-                                         pos=(self.game.window_size[0] / 32 * 16, self.game.window_size[1] / 16 * 7),
+                                         pos=(self.game.window_size[0] // 32 * 16, self.game.window_size[1] // 16 * 7),
                                          anchor=Anchor.CENTRE,
                                          text=connect_button_text)
 
         self.port_field = TextField(game,
                                     size=(200, 120),
-                                    pos=(self.game.window_size[0] / 32 * 16, self.game.window_size[1] / 16 * 5),
+                                    pos=(self.game.window_size[0] // 32 * 16, self.game.window_size[1] // 16 * 5),
                                     anchor=Anchor.CENTRE,
                                     max_length=5,
                                     placeholder=_('Enter Port')
@@ -234,7 +241,7 @@ class HostScene(Scene):
         self.texts = []
         self.texts.append(Text(
             game,
-            (self.game.window_size[0] / 2, self.game.window_size[1] / 8),
+            (self.game.window_size[0] // 2, self.game.window_size[1] // 8),
             Anchor.CENTRE,
             _("Host Game"),
             150))
@@ -264,7 +271,7 @@ class HostScene(Scene):
                 str(self.game.network.external_ip) + ":" + str(self.game.network.external_port)
             waiting_for_connection_text = Text(
                 self.game,
-                (self.game.window_size[0] / 2, self.game.window_size[1] / 4 * 3),
+                (self.game.window_size[0] // 2, self.game.window_size[1] // 4 * 3),
                 Anchor.CENTRE,
                 waiting_for_connection_msg,
                 40)
@@ -318,19 +325,20 @@ class ConnectScene(Scene):
 
         self.connect_button = ConnectButton(game,
                                             size=(600, 120),
-                                            pos=(self.game.window_size[0] / 32 * 14, self.game.window_size[1] / 16 * 7),
+                                            pos=(self.game.window_size[0] // 32 * 14,
+                                                 self.game.window_size[1] // 16 * 7),
                                             anchor=Anchor.CENTRE,
                                             text=connect_button_text)
 
         self.ip_field = TextField(game,
                                   size=(600, 120),
-                                  pos=(self.game.window_size[0] / 32 * 14, self.game.window_size[1] / 16 * 5),
+                                  pos=(self.game.window_size[0] // 32 * 14, self.game.window_size[1] // 16 * 5),
                                   anchor=Anchor.CENTRE,
                                   placeholder=_('Enter IP')
                                   )
         self.port_field = TextField(game,
                                     size=(200, 120),
-                                    pos=(self.game.window_size[0] / 32 * 21, self.game.window_size[1] / 16 * 5),
+                                    pos=(self.game.window_size[0] // 32 * 21, self.game.window_size[1] // 16 * 5),
                                     anchor=Anchor.CENTRE,
                                     max_length=5,
                                     placeholder=_('Enter Port')
@@ -340,7 +348,7 @@ class ConnectScene(Scene):
         self.texts = []
         self.texts.append(Text(
             game,
-            (self.game.window_size[0] / 2, self.game.window_size[1] / 8),
+            (self.game.window_size[0] // 2, self.game.window_size[1] // 8),
             Anchor.CENTRE,
             _("Connect"),
             150))
@@ -411,7 +419,7 @@ class SettingsScene(Scene):
         self.cur_locale = locale.getlocale()
         self.texts.append(Text(
             game,
-            (self.game.window_size[0] / 2, self.game.window_size[1] / 8),
+            (self.game.window_size[0] // 2, self.game.window_size[1] // 8),
             Anchor.CENTRE,
             _("Settings"),
             150))
@@ -421,7 +429,7 @@ class SettingsScene(Scene):
             MainMenu))
         self.buttons.append(ChooseLanguageButton(game,
                                                  (600, 120),
-                                                 (self.game.window_size[0] / 2, self.game.window_size[1] / 16 * 9),
+                                                 (self.game.window_size[0] // 2, self.game.window_size[1] // 16 * 9),
                                                  Anchor.CENTRE))
 
     def run(self):
@@ -438,7 +446,7 @@ class SettingsScene(Scene):
             self.cur_locale = locale.getlocale()
             self.texts[0] = Text(
                 self.game,
-                (self.game.window_size[0] / 2, self.game.window_size[1] / 8),
+                (self.game.window_size[0] // 2, self.game.window_size[1] // 8),
                 Anchor.CENTRE,
                 _("Settings"),
                 150)
@@ -468,6 +476,22 @@ class GameScene(Scene):
         super().__init__(game)
         pg.display.set_caption(_('Deadline'))
 
+        # example scene
+        self.game_obj = gl.Game("Player1", "Player2", True, self.game.network)
+
+        self.cardtypes_images = \
+            {"TaskCard": pg.image.load("./textures/card_task.png"),
+             "ActionCard": pg.image.load("./textures/card_action.png")}
+
+        self.example = Card(
+            game,
+            self.game_obj,
+            self.game_obj.get_card_info(self.game_obj.get_game_info()['player']['hand'][0]),
+            self.cardtypes_images,
+            350,
+            (self.game.window_size[0] // 2, self.game.window_size[1] // 2),
+            Anchor.CENTRE)
+
     def run(self):
         """Execute one frame of game loop processing."""
         self.check_events()
@@ -479,8 +503,8 @@ class GameScene(Scene):
         pass
 
     def draw_scene(self):
-        """Render the main menu: background, title, and buttons."""
-        self.game.canvas.fill((0, 0, 0))
+        self.game.canvas.fill((255, 255, 255))
+        self.example.draw()
         self.game.blit_screen()
 
     def update_scene(self):
