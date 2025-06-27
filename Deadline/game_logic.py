@@ -745,7 +745,7 @@ class Game:
         """
         Actions performed at the end of a turn.
 
-        :return: 'win' if player won, 'defeat' if player lost, otherwise 'none'.
+        :return: 'win', 'defeat', 'draw' or 'game continues'.
         """
         self.__day += 1
 
@@ -787,9 +787,20 @@ class Game:
                 self.__events(deadline.task.events_on_fail, self.__opponent_pid)
                 self.__opponent.deadlines.pop(idx)
 
+        # Check if it is impossible to continue the game
+        if 0 == len(self.__deck) == len(self.__effects) == \
+                len(self.__player.hand) == len(self.__opponent.hand) == \
+                len(self.__player.deadlines) == len(self.__opponent.deadlines) == \
+                len(self.__player.effects) == len(self.__opponent.effects):
+            if self.__player.score == self.__player.score:
+                return 'draw'
+            if self.__player.score > self.__player.score:
+                return 'win'
+            return 'defeat'
+
         # Check if player won or lost
         if self.__player.score >= self.__WIN_THRESHOLD:
             return 'win'
         if self.__player.score <= self.__DEFEAT_THRESHOLD:
             return 'defeat'
-        return 'none'
+        return 'game continues'
