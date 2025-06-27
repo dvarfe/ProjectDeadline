@@ -84,14 +84,14 @@ def game():
 
         cmd = input()
         match cmd:
-            case 'G':  # Get new card
+            case 'G':
                 can_take_card = game_data[i].player_can_take_card()
                 if not can_take_card['res']:
                     print(can_take_card['msg'])
                     continue
                 game_data[i].player_takes_card()
                 game_data[1-i].opponent_takes_card()
-            case 'U':  # Use card
+            case 'U':
                 idx = int(input('Enter card idx: '))
                 if not 0 <= idx < len(game_data[i].get_game_info()['player']['hand']):
                     print('Incorrect index!')
@@ -118,7 +118,7 @@ def game():
                         raise ValueError
                 game_data[i].player_uses_card(idx, target_pid, None)
                 game_data[1-i].opponent_uses_card(idx, target_pid, None)
-            case 'S':  # Spend one hour
+            case 'S':
                 idx = int(input('Enter deadline idx: '))
                 if not 0 <= idx < len(game_data[i].get_game_info()['player']['deadlines']):
                     print('Incorrect index!')
@@ -129,7 +129,7 @@ def game():
                     continue
                 game_data[i].player_spends_time(idx, 1)
                 game_data[1-i].opponent_spends_time(idx, 1)
-            case 'N':  # Next turn
+            case 'N':
                 res = game_data[i].turn_end()
                 if res == 'win':
                     print(f'Player {game_data[i].get_game_info()["player"]["name"]} won!')
@@ -137,12 +137,9 @@ def game():
                 elif res == 'defeat':
                     print(f'Player {game_data[i].get_game_info()["player"]["name"]} lost!')
                     break
-                elif res == 'draw':
-                    print('Draw!')
-                    break
                 i = 1 - i
                 game_data[i].turn_begin()
-            case 'E':  # Exit
+            case 'E':
                 break
-            case _:  # Missclick
+            case _:
                 continue

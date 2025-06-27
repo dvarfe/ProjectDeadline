@@ -53,7 +53,6 @@ class Game():
         Args:
             scene_class: The class of the initial scene to run.
         """
-
         pg.init()
         self.window_size = WINDOW_SIZE
         self.canvas = pg.Surface(self.window_size)
@@ -67,7 +66,6 @@ class Game():
 
     def run(self) -> None:
         """Run the main game loop until self.running becomes False."""
-
         while self.running:
             self.events = get_events_dict()
             if pg.QUIT in self.events.keys():
@@ -99,7 +97,6 @@ class Game():
 
     def blit_screen(self) -> None:
         """Update the display by blitting the canvas to the display surface."""
-
         self.display.blit(self.canvas, (0, 0))
         pg.display.update()
 
@@ -110,7 +107,6 @@ class Anchor(enum.Enum):
 
     Used for positioning elements relative to different points of their bounding boxes.
     """
-
     CENTRE = 1
     TOP_LEFT = 2
     TOP_RIGHT = 3
@@ -127,7 +123,6 @@ def anchor_rect(rect: pg.Rect, pos: Vector2, anchor: Anchor) -> None:
         pos: The target position (x, y).
         anchor: The Anchor enum value specifying which point of the rect to position.
     """
-
     match anchor:
         case Anchor.CENTRE:
             rect.center = pos
@@ -152,7 +147,6 @@ def rect_anchor_pos(rect: pg.Rect, anchor: Anchor) -> Vector2:
     Returns:
         Vector2: The (x, y) coordinates of the requested anchor point.
     """
-
     match anchor:
         case Anchor.CENTRE:
             return rect.center
@@ -361,7 +355,6 @@ class Button(abc.ABC):
 
     def draw(self):
         """Draw the button to the game's canvas."""
-
         if self.images:
             if self.mousehold:
                 self.image = self.image_clicked
@@ -386,7 +379,6 @@ class Button(abc.ABC):
 
     def check_event(self):
         """Check for mouse events related to the button (hover, click)."""
-
         self.mousedown = False
         self.mouseup = False
         if pg.MOUSEMOTION in self.game.events.keys():
@@ -409,7 +401,6 @@ class Button(abc.ABC):
     @abc.abstractmethod
     def update(self):
         """Abstract method to be implemented by subclasses for button behavior."""
-
         pass
 
 
@@ -876,3 +867,32 @@ class Card():
             self.penalty_text.draw()
             self.progress_text.draw()
         self.description_text.draw()
+
+    def move_to(self, pos: Point):
+        """Переместить карточку в новую позицию и обновить все элементы."""
+        self.pos = pos
+        anchor_rect(self.rect, self.pos, self.anchor)
+        image_pos = rect_anchor_pos(self.rect, Anchor.TOP_LEFT)
+        image_pos = (image_pos[0] + round(self.size[0] * CARD_IMAGE_OFFSET_RATIO[0]),
+                     image_pos[1] + round(self.size[1] * CARD_IMAGE_OFFSET_RATIO[1]))
+        anchor_rect(self.rect_image, image_pos, Anchor.TOP_LEFT)
+
+        self.name_text.change(
+            pos=(self.rect.topleft[0] + round(CARD_NAME_CENTRE_OFFSET_RATIO[0] * self.size[0]),
+                 self.rect.topleft[1] + round(CARD_NAME_CENTRE_OFFSET_RATIO[1] * self.size[1])))
+        self.description_text.change(
+            pos=(self.rect.topleft[0] + round(CARD_DESCRIPTION_CENTRE_OFFSET_RATIO[0] * self.size[0]),
+                 self.rect.topleft[1] + round(CARD_DESCRIPTION_CENTRE_OFFSET_RATIO[1] * self.size[1])))
+        if self.card_type == "TaskCard":
+            self.clock_text.change(
+                pos=(self.rect.topleft[0] + round(CARD_CLOCK_CENTRE_OFFSET_RATIO[0] * self.size[0]),
+                     self.rect.topleft[1] + round(CARD_CLOCK_CENTRE_OFFSET_RATIO[1] * self.size[1])))
+            self.award_text.change(
+                pos=(self.rect.topleft[0] + round(CARD_AWARD_CENTRE_OFFSET_RATIO[0] * self.size[0]),
+                     self.rect.topleft[1] + round(CARD_AWARD_CENTRE_OFFSET_RATIO[1] * self.size[1])))
+            self.penalty_text.change(
+                pos=(self.rect.topleft[0] + round(CARD_PENALTY_CENTRE_OFFSET_RATIO[0] * self.size[0]),
+                     self.rect.topleft[1] + round(CARD_PENALTY_CENTRE_OFFSET_RATIO[1] * self.size[1])))
+            self.progress_text.change(
+                pos=(self.rect.topleft[0] + round(CARD_PROGGRESS_CENTRE_OFFSET_RATIO[0] * self.size[0]),
+                     self.rect.topleft[1] + round(CARD_PROGGRESS_CENTRE_OFFSET_RATIO[1] * self.size[1])))
