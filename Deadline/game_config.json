@@ -15,10 +15,18 @@
       "delay": 0,
       "is_removable": false,
       "init_events": [
-        "player.free_hours_today += 6"
+        [
+          "self._Game__players[pid].free_hours_today += 6",
+          [],
+          "True"
+        ]
       ],
       "final_events": [
-        "player.free_hours_today -= 6"
+        [
+          "self._Game__players[pid].free_hours_today -= 6",
+          [],
+          "True"
+        ]
       ],
       "everyday_events": []
     }
@@ -46,7 +54,11 @@
       "award": 5,
       "penalty": -5,
       "events_on_success": [
-        "player.get_card( \"tc2\" )"
+        [
+          "self._Game__take_special_task(pid, \"t2\")",
+          [],
+          "True"
+        ]
       ],
       "events_on_fail": []
     },
@@ -81,15 +93,6 @@
       "valid_target": "OPPONENT",
       "special": false,
       "task": "t1"
-    },
-    {
-      "cid": "tc2",
-      "name": "Кросс-проверка",
-      "description": "Нужно проверить 3 чужих решения домашки по ML",
-      "image": "textures/cards/test.png",
-      "valid_target": "PLAYER",
-      "special": true,
-      "task": "t2"
     }
   ],
   "action_cards": [
@@ -102,8 +105,8 @@
       "special": false,
       "cost": 0,
       "action": "e0",
-      "req_args": null,
-      "check_args": null
+      "req_args": [],
+      "check_args": []
     }
   ]
 }

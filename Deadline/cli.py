@@ -86,15 +86,27 @@ def game():
                         raise ValueError
                 game_data[i].player_uses_card(idx, target_pid, None)
                 game_data[1-i].opponent_uses_card(idx, target_pid, None)
-            case 'T':  # Time management
+            case 'S':  # Spend one hour
                 idx = int(input('Enter deadline idx: '))
                 if not 0 <= idx < len(game_data[i].get_game_info()['player']['deadlines']):
                     print('Incorrect index!')
                     continue
+                can_spend_time = game_data[i].player_can_spend_time(idx, 1)
+                if not can_spend_time['res']:
+                    print(can_spend_time['msg'])
+                    continue
                 game_data[i].player_spends_time(idx, 1)
                 game_data[1-i].opponent_spends_time(idx, 1)
-            case 'S':  # Skip a turn
+            case 'N':  # Next turn
+                res = game_data[i].turn_end()
+                if res == 'win':
+                    print(f'Player {game_data[i].get_game_info()["player"]["name"]} won!')
+                    break
+                elif res == 'defeat':
+                    print(f'Player {game_data[i].get_game_info()["player"]["name"]} lost!')
+                    break
                 i = 1 - i
+                game_data[i].turn_begin()
             case 'E':  # Exit
                 break
             case _:  # Missclick

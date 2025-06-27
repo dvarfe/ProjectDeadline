@@ -236,23 +236,6 @@ class Deadline:
         self.progress += hours
         return self.get_rem() == 0
 
-    def new_day(self):
-        """
-        Update the deadline when a new day arrives.
-        """
-        pass
-
-    def __str__(self) -> str:
-        return f'\nDeadline #{self.tid}: {self.name}\n' \
-               f'    description = "{self.description}"\n' \
-               f'    image = {self.image}\n' \
-               f'    difficulty = {self.difficulty}\n' \
-               f'    deadline = {self.deadline}\n' \
-               f'    award = {self.award}\n' \
-               f'    penalty = {self.penalty}\n' \
-               f'    events_on_success = {self.events_on_success}\n' \
-               f'    events_on_fail = {self.events_on_fail}'
-
     def __repr__(self) -> str:
         return f'{self.task.tid} ({self.progress}/{self.task.difficulty})'
 
@@ -329,9 +312,6 @@ class Player:
         """
         self.spend_time(hours)
         self.deadlines[deadline_idx].work(hours)
-
-    def apply_effect(self, action, req_args, check_args):
-        pass
 
 
 class Game:
@@ -578,6 +558,8 @@ class Game:
         """
         if hours > self.__players[actor_pid].deadlines[target_deadline_idx].get_rem():
             return {'res': False, 'msg': 'You are trying to spend too much time!'}
+        if hours > self.__players[actor_pid].free_hours_today:
+            return {'res': False, 'msg': 'Not enough free time!'}
         return {'res': True}
 
     def player_can_spend_time(self, target_deadline_idx: int, hours: Hours) -> dict[str, any]:
@@ -604,6 +586,15 @@ class Game:
     def opponent_takes_card(self):
         self.__take_card(self.__opponent_pid)
 
+    def __take_special_task(self, actor_pid: PlayerID, tid: TaskID):
+        """
+        Take a task by task ID.
+
+        :param actor_pid: ID of player who takes a card.
+        :param tid: Task ID.
+        """
+        self.__players[actor_pid].deadlines.append(Deadline(self.__ALL_TASKS[tid], self.__day))
+
     def __use_card(self, actor_pid: PlayerID, card_idx_in_hand: int,
                    target_pid: PlayerID | None, target_cid: CardID | None):
         """
@@ -626,7 +617,7 @@ class Game:
         else:
             if self.get_card_type(cid) == 'ActionCard':
                 self.__players[actor_pid].spend_time(card.cost)
-                self.__players[target_pid].effects.append((card.action, card.req_args, card.check_args))
+                self.__players[target_pid].effects.append(card.action)
             else:
                 self.__players[target_pid].deadlines.append(Deadline(self.__ALL_TASKS[card.task], self.__day))
 
@@ -636,24 +627,90 @@ class Game:
     def opponent_uses_card(self, card_idx_in_hand: int, target_pid: PlayerID = None, target_cid: CardID = None):
         self.__use_card(self.__opponent_pid, card_idx_in_hand, target_pid, target_cid)
 
-    def __spend_time(self, actor_pid: PlayerID, target_deadline_idx: int, hours: Hours) -> bool:
+    def __spend_time(self, actor_pid: PlayerID, target_deadline_idx: int, hours: Hours):
         """
         Spend time for something.
 
         :param actor_pid: ID of player who uses a card.
         :param target_deadline_idx: Index of target deadline in deadline list.
         :param hours: Number of hours to spend.
-        :return: True if task is completed; otherwise False.
         """
         assert self.__can_spend_time(actor_pid, target_deadline_idx, hours)
 
-        is_done = self.__players[actor_pid].deadlines[target_deadline_idx].work(hours)
-        if is_done:
-            self.__players[actor_pid].deadlines.pop(target_deadline_idx)
-        return is_done
+        self.__players[actor_pid].spend_time(hours)
+        deadline = self.__players[actor_pid].deadlines[target_deadline_idx]
+        deadline.work(hours)
 
-    def player_spends_time(self, target_deadline_idx: int, hours: Hours = 1) -> bool:
-        return self.__spend_time(self.__player_pid, target_deadline_idx, hours)
+    def player_spends_time(self, target_deadline_idx: int, hours: Hours = 1):
+        self.__spend_time(self.__player_pid, target_deadline_idx, hours)
 
-    def opponent_spends_time(self, target_deadline_idx: int, hours: Hours = 1) -> bool:
-        return self.__spend_time(self.__opponent_pid, target_deadline_idx, hours)
+    def opponent_spends_time(self, target_deadline_idx: int, hours: Hours = 1):
+        self.__spend_time(self.__opponent_pid, target_deadline_idx, hours)
+
+    def turn_begin(self):
+        """
+        Actions performed at the beginning of a turn.
+        """
+        # Check opponent completed deadlines
+        for idx, deadline in enumerate(self.__opponent.deadlines):
+            if deadline.get_rem() == 0:
+                self.__opponent.score += deadline.task.award
+                for event, args, check_func in deadline.task.events_on_success:
+                    args_map = {'self': self, 'pid': self.__opponent_pid}
+                    assert eval(check_func, args_map)
+                    eval(event, args_map)
+                self.__opponent.deadlines.pop(idx)
+
+        # Update number of hours
+        self.__player.free_hours_today = self.__HOURS_IN_DAY_DEFAULT
+
+        # Apply active effects
+        for effect in self.__effects:
+            pass
+        for effect in self.__player.effects:
+            pass
+
+        # Check player failed deadlines
+        for idx, deadline in enumerate(self.__player.deadlines):
+            if deadline.init_day + deadline.deadline == self.__day:
+                self.__player.score += deadline.task.penalty
+                for event, args, check_func in deadline.task.events_on_fail:
+                    args_map = {'self': self, 'pid': self.__player_pid}
+                    assert eval(check_func, args_map)
+                    eval(event, args_map)
+                self.__player.deadlines.pop(idx)
+
+    def turn_end(self) -> str:
+        """
+        Actions performed at the end of a turn.
+
+        :return: 'win' if player won, 'defeat' if player lost, otherwise 'none'.
+        """
+        self.__day += 1
+
+        # Check player completed deadlines
+        for idx, deadline in enumerate(self.__player.deadlines):
+            if deadline.get_rem() == 0:
+                self.__player.score += deadline.task.award
+                for event, args, check_func in deadline.task.events_on_success:
+                    args_map = {'self': self, 'pid': self.__player_pid}
+                    assert eval(check_func, args_map)
+                    eval(event, args_map)
+                self.__player.deadlines.pop(idx)
+
+        # Check opponent failed deadlines
+        for idx, deadline in enumerate(self.__opponent.deadlines):
+            if deadline.init_day + deadline.deadline == self.__day:
+                self.__opponent.score += deadline.task.penalty
+                for event, args, check_func in deadline.task.events_on_fail:
+                    args_map = {'self': self, 'pid': self.__opponent_pid}
+                    assert eval(check_func, args_map)
+                    eval(event, args_map)
+                self.__opponent.deadlines.pop(idx)
+
+        # Check if player won or lost
+        if self.__player.score >= self.__WIN_THRESHOLD:
+            return 'win'
+        if self.__player.score <= self.__DEFEAT_THRESHOLD:
+            return 'defeat'
+        return 'none'
