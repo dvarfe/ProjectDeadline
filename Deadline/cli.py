@@ -10,30 +10,63 @@ class MockNetwork:
 
 
 def print_game_info(game_data: GameData):
+    def print_deadlines(dct):
+        deadlines = dct['deadlines']
+        if not deadlines:
+            print('    no deadlines')
+        else:
+            print('    deadlines:')
+            for deadline in deadlines:
+                print(f'        {deadline.task.name} ({deadline.progress}/{deadline.task.difficulty}, '
+                      f'{deadline.get_rem_days()} days remains)')
+
+    def print_effects(dct):
+        effects = dct['effects']
+        if not effects:
+            print('    no effects')
+        else:
+            print('    effects:')
+            for init_day, effect in effects:
+                print(f'        {effect.name} ({gl["day"] + effect.period - init_day} days remains)')
+
+    def print_global_effects(dct):
+        effects = dct['effects']
+        if not effects:
+            print('--- no global effects ---')
+        else:
+            print(f'--- global effects: {[ef.name for _, ef in effects]} ---')
+
     data = game_data.get_game_info()
     pl = data['player']
     op = data['opponent']
     gl = data['global']
 
+    print('\n\n')
+    print(f'====== day {gl["day"]} {"exams" if gl["have exams"] else ""} ======')
+    print(f'Cards in deck: {gl["deck size"]}')
     print()
-    print()
-    print()
-    print(f'day {gl["day"]} {"exams" if gl["have exams"] else ""}')
-    print(f'cards in deck: {gl["deck size"]}')
-    print()
-    print(f'Opponent #{op["pid"]} {op["name"]}\n'
-          f'    free_hours_today = {op["free time"]}, score = {op["score"]}\n'
-          f'    hand: {["?"] * op["hand size"]}\n\n'
-          f'    deadlines: {op["deadlines"]}\n'
-          f'    effects: {op["effects"]}\n')
 
-    print(f'--- global effects: {gl["effects"]} ---\n')
+    print(f'{op["name"]} (opponent, id:{op["pid"]})')
+    print(f'    score: {op["score"]}')
+    print(f'    free_hours_today: {op["free time"]}')
+    print()
+    print(f'    hand: {", ".join(["[?]"] * op["hand size"])}')
+    print()
+    print_deadlines(op)
+    print_effects(op)
+    print()
 
-    print(f'    deadlines: {pl["deadlines"]}\n'
-          f'    effects: {pl["effects"]}\n\n'
-          f'    hand: {pl["hand"]}\n'
-          f'    free_hours_today = {pl["free time"]}, score = {pl["score"]}\n'
-          f'Player #{pl["pid"]} {pl["name"]}\n')
+    print_global_effects(gl)
+
+    print()
+    print_effects(pl)
+    print_deadlines(pl)
+    print()
+    print(f'    hand: {", ".join(card.name for card in pl["hand"])}')
+    print()
+    print(f'    free_hours_today: {pl["free time"]}')
+    print(f'    score: {pl["score"]}')
+    print(f'{pl["name"]} (you, id:{pl["pid"]})')
 
 
 def game():

@@ -218,11 +218,21 @@ class Deadline:
         self.deadline: Day = init_day + self.task.deadline  # The day before which the task must be completed
         self.progress: Hours = 0  # How many hours the player has already worked on the task.
 
-    def get_rem(self) -> Hours:
+    def get_rem_hours(self) -> Hours:
         """
         Get remaining time in hours.
+
+        :return: Remaining time.
         """
         return self.task.difficulty - self.progress
+
+    def get_rem_days(self) -> Days:
+        """
+        Get number of days before deadline.
+
+        :return: Number of days.
+        """
+        return self.deadline - self.init_day
 
     def work(self, hours: Hours) -> bool:
         """
@@ -231,10 +241,10 @@ class Deadline:
         :param hours: How long to work on the task.
         :return: True if task is completed; otherwise False.
         """
-        assert hours <= self.get_rem()
+        assert hours <= self.get_rem_hours()
 
         self.progress += hours
-        return self.get_rem() == 0
+        return self.get_rem_hours() == 0
 
     def __repr__(self) -> str:
         return f'{self.task.tid} ({self.progress}/{self.task.difficulty})'
@@ -557,7 +567,7 @@ class Game:
             `res` corresponds to main result (bool).
             `msg` is used in case of a False response to indicate the reason.
         """
-        if hours > self.__players[actor_pid].deadlines[target_deadline_idx].get_rem():
+        if hours > self.__players[actor_pid].deadlines[target_deadline_idx].get_rem_hours():
             return {'res': False, 'msg': 'You are trying to spend too much time!'}
         if hours > self.__players[actor_pid].free_hours_today:
             return {'res': False, 'msg': 'Not enough free time!'}
@@ -680,7 +690,7 @@ class Game:
         """
         # Check opponent completed deadlines
         for idx, deadline in enumerate(self.__opponent.deadlines):
-            if deadline.get_rem() == 0:
+            if deadline.get_rem_hours() == 0:
                 self.__opponent.score += deadline.task.award
                 self.__events(deadline.task.events_on_success, self.__opponent_pid)
                 self.__opponent.deadlines.pop(idx)
@@ -725,7 +735,7 @@ class Game:
 
         # Check player completed deadlines
         for idx, deadline in enumerate(self.__player.deadlines):
-            if deadline.get_rem() == 0:
+            if deadline.get_rem_hours() == 0:
                 self.__player.score += deadline.task.award
                 self.__events(deadline.task.events_on_success, self.__player_pid)
                 self.__player.deadlines.pop(idx)
