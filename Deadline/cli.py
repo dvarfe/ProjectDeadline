@@ -10,32 +10,64 @@ class MockNetwork:
 
 
 def print_game_info(game_data: GameData):
+    def print_deadlines(dct):
+        deadlines = dct['deadlines']
+        if not deadlines:
+            print('    no deadlines')
+        else:
+            print('    deadlines:')
+            for deadline in deadlines:
+                days_rem = deadline.deadline - gl['day']
+                print(f'        {deadline.task.name} ({deadline.progress}/{deadline.task.difficulty}, '
+                      f'{days_rem} days remain)')
+
+    def print_effects(dct):
+        effects = dct['effects']
+        if not effects:
+            print('    no effects')
+        else:
+            print('    effects:')
+            for init_day, effect in effects:
+                print(f'        {effect.name} ({gl["day"] + effect.period - init_day} days remain)')
+
+    def print_global_effects(dct):
+        effects = dct['effects']
+        if not effects:
+            print('--- no global effects ---')
+        else:
+            print(f'--- global effects: {[ef.name for _, ef in effects]} ---')
+
     data = game_data.get_game_info()
     pl = data['player']
     op = data['opponent']
     gl = data['global']
 
+    print('\n\n')
+    print(f'====== day {gl["day"]} {"exams" if gl["have exams"] else ""} ======')
+    print(f'Cards in deck: {gl["deck size"]}')
     print()
-    print()
-    print()
-    print(f'day {gl["day"]} {"exams" if gl["have exams"] else ""}')
-    print(f'cards in deck: {gl["deck size"]}')
-    print()
-    print(f'Opponent #{op["pid"]} {op["name"]}\n'
-          f'    free_hours_today = {op["free time"]}, score = {op["score"]}\n'
-          f'    hand: {["?"] * op["hand size"]}\n\n'
-          f'    deadlines: {op["deadlines"]}\n'
-          f'    effects: {op["effects"]}\n'
-          f'    delayed_effects: {op["delayed effects"]}\n')
 
-    print(f'--- global effects: {gl["effects"]} ---\n')
+    print(f'{op["name"]} (opponent, id:{op["pid"]})')
+    print(f'    score: {op["score"]}')
+    print(f'    free_hours_today: {op["free hours"]}')
+    print()
+    print(f'    hand: {", ".join(["[?]"] * op["hand size"])}')
+    print()
+    print_deadlines(op)
+    print_effects(op)
+    print()
 
-    print(f'    deadlines: {pl["deadlines"]}\n'
-          f'    effects: {pl["effects"]}\n'
-          f'    delayed_effects: {pl["delayed effects"]}\n\n'
-          f'    hand: {pl["hand"]}\n'
-          f'    free_hours_today = {pl["free time"]}, score = {pl["score"]}\n'
-          f'Player #{pl["pid"]} {pl["name"]}\n')
+    print_global_effects(gl)
+
+    print()
+    print_effects(pl)
+    print_deadlines(pl)
+    print()
+    print(f'    hand: {", ".join(card.name for card in pl["hand"])}')
+    print()
+    print(f'    free_hours_today: {pl["free hours"]}')
+    print(f'    score: {pl["score"]}')
+    print(f'{pl["name"]} (you, id:{pl["pid"]})')
 
 
 def game():
@@ -86,15 +118,27 @@ def game():
                         raise ValueError
                 game_data[i].player_uses_card(idx, target_pid, None)
                 game_data[1-i].opponent_uses_card(idx, target_pid, None)
-            case 'T':  # Time management
+            case 'S':  # Spend one hour
                 idx = int(input('Enter deadline idx: '))
                 if not 0 <= idx < len(game_data[i].get_game_info()['player']['deadlines']):
                     print('Incorrect index!')
                     continue
+                can_spend_time = game_data[i].player_can_spend_time(idx, 1)
+                if not can_spend_time['res']:
+                    print(can_spend_time['msg'])
+                    continue
                 game_data[i].player_spends_time(idx, 1)
                 game_data[1-i].opponent_spends_time(idx, 1)
-            case 'S':  # Skip a turn
+            case 'N':  # Next turn
+                res = game_data[i].turn_end()
+                if res == 'win':
+                    print(f'Player {game_data[i].get_game_info()["player"]["name"]} won!')
+                    break
+                elif res == 'defeat':
+                    print(f'Player {game_data[i].get_game_info()["player"]["name"]} lost!')
+                    break
                 i = 1 - i
+                game_data[i].turn_begin()
             case 'E':  # Exit
                 break
             case _:  # Missclick
