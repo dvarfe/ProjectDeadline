@@ -10,7 +10,6 @@ import Deadline.game_logic as gl
 class Scene(abc.ABC):
     """
     Abstract base class representing a game scene/screen.
-
     All game scenes should inherit from this class and implement the abstract methods.
 
     Attributes
@@ -550,6 +549,7 @@ class GameScene(Scene):
             self.opponent_hand_rects.append(rect)
 
     def run(self):
+        """Execute one frame of game loop processing."""
         self.check_events()
         self.update_scene()
         self.draw_scene()
@@ -627,7 +627,6 @@ class GameScene(Scene):
             card.draw()
             card.move_to(old_pos)
         self.game.blit_screen()
-
 
 class EmptyScene(Scene):
     """Placeholder scene used for testing and transitions."""
