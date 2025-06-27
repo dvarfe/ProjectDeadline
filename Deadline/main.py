@@ -6,6 +6,7 @@ from .cli import game as game_cli
 
 
 def get_args():
+    """Parse command-line arguments."""
     parser = argparse.ArgumentParser()
     parser.add_argument('-m', '--mode', choices=['play', 'debug'], default='play',
                         help='Mode: `play` with GUI - for playing, `debug` with no GUI - for debugging.')
@@ -13,17 +14,13 @@ def get_args():
 
 
 def main_gui():
-    """
-    GUI mode for players.
-    """
+    """GUI mode for players."""
     g = Game(MainMenu)
     g.run()
 
 
 def main_cli():
-    """
-    CLI mode for debugging.
-    """
+    """CLI mode for debugging."""
     game_cli()
 
 

@@ -473,6 +473,7 @@ class GameScene(Scene):
         Args:
             game (Game): Reference to the main game controller instance.
             is_first (bool): True if this player goes first, False otherwise.
+
         """
         super().__init__(game)
         pg.display.set_caption(_('Deadline'))
@@ -555,6 +556,7 @@ class GameScene(Scene):
         self.draw_scene()
 
     def check_events(self):
+        """Process input events for all UI buttons."""
         mouse_pos = pg.mouse.get_pos()
         mouse_pressed = pg.mouse.get_pressed()[0]
         self.hovered_card_idx = None
@@ -583,6 +585,7 @@ class GameScene(Scene):
             self._layout_played_cards()
 
     def update_scene(self):
+        """Update the scene state(game logic, animations, etc.)."""
         if not self.is_player_turn:
             event_keys = self.game.network.get_active_events()
             for key in event_keys:
@@ -598,6 +601,7 @@ class GameScene(Scene):
                         self.is_player_turn = True
 
     def draw_scene(self):
+        """Render the main menu: background, title, and buttons."""
         self.game.canvas.fill((255, 255, 255))
         self._layout_opponent_hand()
         for rect in self.opponent_hand_rects:
@@ -628,6 +632,7 @@ class GameScene(Scene):
             card.move_to(old_pos)
         self.game.blit_screen()
 
+
 class EmptyScene(Scene):
     """Placeholder scene used for testing and transitions."""
 
@@ -636,6 +641,7 @@ class EmptyScene(Scene):
 
         Args:
             game (Game): Reference to the main game controller instance.
+
         """
         pg.display.set_caption('Empty')
         super().__init__(game)

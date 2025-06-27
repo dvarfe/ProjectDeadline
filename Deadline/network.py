@@ -269,8 +269,7 @@ class Network:
             raise Exception(_("Error checking for message:") + str(e))
 
     def send_end_turn(self):
-        """Send end_turn event.
-        """
+        """Send end_turn event."""
         self.send_msg('end_turn\n')
 
     def send_use_card(self, cid, target_pid, target_idx, card_idx_in_hand):
@@ -281,8 +280,8 @@ class Network:
             target_pid (PlayerID): Target player.
             target_idx(int): Index of target on table.
             card_idx_in_hand (int): Index of card in hand (для корректного применения у оппонента)
+
         """
-        # Теперь отправляем card_idx_in_hand для корректной синхронизации
         msg = f'use_card,{cid},{target_pid},{target_idx},{card_idx_in_hand}\n'
         self.send_msg(msg)
 

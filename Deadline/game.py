@@ -18,12 +18,7 @@ DEFAULT_FONT = pg.font.get_default_font()
 
 
 def get_events_dict() -> Dict[int, List[pg.Event]]:
-    """
-    Get all Pygame events and organize them in a dictionary by event type.
-
-    Returns:
-        dict: A dictionary where keys are event types and values are lists of events.
-    """
+    """Get all Pygame events and organize them in a dictionary by event type."""
     events = pg.event.get()
     events_dict: Dict[int, List[pg.Event]] = {}
 
@@ -36,7 +31,7 @@ class Game():
     """
     Main game class that manages the game loop.
 
-    Attributes:
+    Attributes
         window_size (tuple): The size of the game window (width, height).
         canvas (pygame.Surface): The main drawing surface.
         display (pygame.Surface): The display surface.
@@ -44,6 +39,7 @@ class Game():
         current_scene (Scene): The currently active scene.
         running (bool): Flag indicating if the game is running.
         network (Network): class for network communication.
+
     """
 
     def __init__(self, scene_class):
@@ -52,6 +48,7 @@ class Game():
 
         Args:
             scene_class: The class of the initial scene to run.
+
         """
         pg.init()
         self.window_size = WINDOW_SIZE
@@ -102,11 +99,8 @@ class Game():
 
 
 class Anchor(enum.Enum):
-    """
-    Enumeration for different anchor points of UI elements.
+    """Enumeration for different anchor points of UI elements."""
 
-    Used for positioning elements relative to different points of their bounding boxes.
-    """
     CENTRE = 1
     TOP_LEFT = 2
     TOP_RIGHT = 3
@@ -115,14 +109,7 @@ class Anchor(enum.Enum):
 
 
 def anchor_rect(rect: pg.Rect, pos: Vector2, anchor: Anchor) -> None:
-    """
-    Position a rectangle relative to a given anchor point.
-
-    Args:
-        rect: The pygame Rect to position.
-        pos: The target position (x, y).
-        anchor: The Anchor enum value specifying which point of the rect to position.
-    """
+    """Position a rectangle relative to a given anchor point."""
     match anchor:
         case Anchor.CENTRE:
             rect.center = pos
@@ -137,16 +124,7 @@ def anchor_rect(rect: pg.Rect, pos: Vector2, anchor: Anchor) -> None:
 
 
 def rect_anchor_pos(rect: pg.Rect, anchor: Anchor) -> Vector2:
-    """
-    Get the position of a specific anchor point on a rectangle.
-
-    Args:
-        rect: The pygame Rect to examine.
-        anchor: The Anchor enum value specifying which point to get.
-
-    Returns:
-        Vector2: The (x, y) coordinates of the requested anchor point.
-    """
+    """Get the position of a specific anchor point on a rectangle."""
     match anchor:
         case Anchor.CENTRE:
             return rect.center
@@ -164,7 +142,7 @@ class Text():
     """
     A class for creating and rendering text surfaces.
 
-    Attributes:
+    Attributes
         game (Game): Reference to the main Game instance.
         rect (pygame.Rect): The bounding rectangle of the text surface.
         pos (Point): Current position of the text.
@@ -175,6 +153,7 @@ class Text():
         color (pygame.Color): Current text color.
         font (pygame.font.Font): The pygame Font object.
         text_surface (pygame.Surface): The rendered text surface.
+
     """
 
     def __init__(
@@ -186,18 +165,7 @@ class Text():
             font_size: int,
             font_name: str = DEFAULT_FONT,
             color: pgt.ColorLike = pg.Color(0, 0, 0)):
-        """Initialize a Text object.
-
-        Args:
-            game: Reference to the Game instance.
-            pos: Position to place the text.
-            anchor: Anchor point for positioning.
-            text: The text string to display.
-            font_size: Size of the font.
-            font_name: Name of the font to use.
-            color: Color of the text (RGB tuple).
-        """
-
+        """Initialize a Text object."""
         self.game = game
         self.change(pos, anchor, text, font_size, font_name, color)
 
@@ -209,20 +177,7 @@ class Text():
             font_size: Optional[int] = None,
             font_name: Optional[str] = None,
             color: Optional[pgt.ColorLike] = None) -> None:
-        """Update the text properties.
-
-        Any argument not provided will keep its current value.
-        Automatically handles re-rendering the text surface when needed.
-
-        Args:
-            pos: New position.
-            anchor: New anchor point.
-            text: New text string.
-            font_size: New font size.
-            font_name: New font name.
-            color: New text color.
-        """
-
+        """Update the text properties."""
         change = bool(font_size) or bool(font_name)
         if change:
             if font_size:
@@ -249,6 +204,7 @@ class Text():
             anchor_rect(self.rect, self.pos, self.anchor)
 
     def update(self):
+        """Do nothing.Dummy."""
         pass
 
     def draw(self):
@@ -257,18 +213,7 @@ class Text():
 
 
 class Button(abc.ABC):
-    """Abstract base class for button UI elements.
-
-    Attributes:
-        game (Game): Reference to the main Game instance.
-        size (Vector2): Size of the button (width, height).
-        pos (Point): Position of the button.
-        anchor (Anchor): Anchor point for positioning.
-        images (List[Image])
-        text (Text): Text object for the button (optional).
-        text_anchor (Anchor): Anchor point for the button text.
-        mouseover (bool): Whether the mouse is over the button.
-    """
+    """Abstract base class for button UI elements."""
 
     def __init__(
             self,
@@ -279,18 +224,7 @@ class Button(abc.ABC):
             images: Optional[List[pg.Surface]] = None,
             text: Optional[Text] = None,
             text_anchor: Anchor = Anchor.CENTRE):
-        """Initialize a Button instance.
-
-        Args:
-            game: Reference to the Game instance.
-            size: Size of the button (width, height).
-            pos: Position of the button.
-            anchor: Anchor point for positioning.
-            image: Button textures for idle, hover and pressed states (optional).
-            text: Text object for the button (optional).
-            text_anchor: Anchor point for the button text.
-        """
-
+        """Initialize a Button instance."""
         self.game = game
 
         self.mouseover = False
@@ -319,7 +253,7 @@ class Button(abc.ABC):
             images: Optional[List[pg.Surface]] = None,
             text: Optional[Text] = None,
             text_anchor: Optional[Anchor] = None):
-
+        """Change the button's properties."""
         change = bool(size)
         if change:
             self.size = size
@@ -417,19 +351,7 @@ class SceneSwitchButton(Button):
             images: Optional[List[pg.Surface]] = None,
             text: Optional[Text] = None,
             text_anchor: Anchor = Anchor.CENTRE):
-        """Initialize a SceneSwitchButton.
-
-        Args:
-            game: Reference to the Game instance.
-            scene_class: The scene class to switch to when clicked.
-            size: Size of the button (width, height).
-            pos: Position of the button.
-            anchor: Anchor point for positioning.
-            image_paths: Paths to button images (optional).
-            text: Text object for the button (optional).
-            text_anchor: Anchor point for the button text.
-        """
-
+        """Initialize a SceneSwitchButton."""
         Button.__init__(self, game, size, pos, anchor, images, text, text_anchor)
         self.scene_class = scene_class
 
@@ -450,17 +372,7 @@ class BackButton(SceneSwitchButton):
             pos: Point = (0, 0),
             anchor: Anchor = Anchor.TOP_LEFT,
             images: Optional[List[pg.Surface]] = None):
-        """Initialize a BackButton.
-
-        Args:
-            game (Game): Reference to the Game instance.
-            scene_class (Scene): The scene class to switch to when clicked.
-            size (Vector2, optional): Size of the button (width, height). Defaults to (120, 120).
-            pos (Point, optional): Position of the button. Defaults to (0, 0).
-            anchor (Anchor, optional): Anchor point for positioning. Defaults to Anchor.TOP_LEFT.
-            image_paths (Optional[List[str]], optional): Paths to button images (optional). Defaults to None.
-        """
-
+        """Initialize a BackButton."""
         super().__init__(game, scene_class, size, pos, anchor, images)
         self.arrow_color = "black"
         self.arrow_polygon = ((100, 55), (100, 65), (40, 65), (40, 75), (15, 60), (40, 45), (40, 55))
@@ -480,15 +392,7 @@ class ChooseLanguageButton(Button):
             size: Vector2,
             pos: Point,
             anchor: Anchor = Anchor.CENTRE):
-        """Initialize a ChooseLanguageButton.
-
-        Args:
-            game (Game): Reference to the Game instance.
-            size (Vector2): Size of the button (width, height).
-            pos (Point): Position of the button.
-            anchor (Anchor, optional): Anchor point for positioning. Defaults to Anchor.CENTRE.
-        """
-
+        """Initialize a ChooseLanguageButton."""
         super().__init__(game=game,
                          size=size,
                          pos=pos,
@@ -537,18 +441,7 @@ class ExitButton(Button):
             images: Optional[List[pg.Surface]] = None,
             text: Optional[Text] = None,
             text_anchor: Anchor = Anchor.CENTRE):
-        """Initialize an ExitButton.
-
-        Args:
-            game: Reference to the Game instance.
-            size: Size of the button (width, height).
-            pos: Position of the button.
-            anchor: Anchor point for positioning.
-            image_paths: Paths to button images (optional).
-            text: Text object for the button (optional).
-            text_anchor: Anchor point for the button text.
-        """
-
+        """Initialize an ExitButton."""
         Button.__init__(self, game, size, pos, anchor, images, text, text_anchor)
 
     def update(self):
@@ -573,22 +466,7 @@ class TextField:
             border_width: int = 2,
             max_length: int = 32,
             placeholder: str = ""):
-        """Initialize TextField class.
-
-        Args:
-            game (Game): Reference to the Game instance.
-            size (Vector2): Size of the field (width, height).
-            pos (Point): Position of the field.
-            anchor (Anchor): Anchor point for positioning.
-            font_size (int, optional): Font size. Defaults to 40.
-            font_color (ColorLike, optional): Font color. Defaults to (0, 0, 0).
-            bg_color (ColorLike, optional): Background color. Defaults to (255, 255, 255).
-            border_color (ColorLike, optional): Border color. Defaults to (200, 200, 200).
-            border_width (int, optional): Border width. Defaults to 2.
-            max_length (int, optional): Maximum number of accepted characters. Defaults to 32.
-            placeholder (str, optional): Placeholder value to show in background, while the field is inactive.
-                Defaults to "".
-        """
+        """Initialize TextField class."""
         self.game = game
         self.size = size
         self.pos = pos
@@ -615,6 +493,7 @@ class TextField:
         self.cursor_switch_frames = 30
 
     def check_event(self):
+        """Check for mouse events related to the button (hover, click)."""
         self.mousedown = False
         self.mouseover = self.rect.collidepoint(pg.mouse.get_pos())
 
@@ -637,6 +516,7 @@ class TextField:
                     self.value += event.unicode
 
     def update(self):
+        """Update the cursor for the text field."""
         if self.active:
             self.cursor_counter += 1
             if self.cursor_counter >= self.cursor_switch_frames:
@@ -646,6 +526,7 @@ class TextField:
             self.cursor_visible = False
 
     def draw(self):
+        """Draw the text field with current value and cursor."""
         # Field and border
         pg.draw.rect(self.game.canvas, self.bg_color, self.rect)
         pg.draw.rect(self.game.canvas, self.border_color, self.rect, self.border_width)
@@ -670,7 +551,10 @@ class TextField:
 
 
 class ConnectButton(Button):
+    """A Button that connects to network (stub for extension)."""
+
     def update(self):
+        """Update button."""
         return super().update()
 
 
@@ -686,6 +570,7 @@ class CheckBoxButton(Button):
             images: Optional[List[pg.Surface]] = None,
             text: Optional[Text] = None,
             text_anchor: Anchor = Anchor.CENTRE):
+        """Initialize CheckBoxButton."""
         super().__init__(game,
                          size,
                          pos,
@@ -716,11 +601,13 @@ class CheckBoxButton(Button):
         )
 
     def draw(self):
+        """Draw the checkbox button (with tick if clicked)."""
         super().draw()
         if self.clicked:
             pg.draw.polygon(self.game.canvas, self.tick_color, self.tick_polygon)
 
     def update(self):
+        """Toggle checkbox state if clicked."""
         if self.mousedown:
             self.clicked = not self.clicked
             self.mousedown = False
@@ -731,11 +618,13 @@ class ErrorPopUp(Button):
     """Class representing error popup message."""
 
     def run(self):
+        """Display the error popup and handle events."""
         self.check_event()
         self.draw()
         self.game.blit_screen()
 
     def update(self):
+        """Do nothing. Dummy."""
         pass
 
 
@@ -751,6 +640,7 @@ CARD_PROGGRESS_CENTRE_OFFSET = (510, 910)
 
 
 def get_size_ratio(x: Vector2, y: Vector2):
+    """Return the width and height ratios between two vectors."""
     return (x[0] / y[0], x[1] / y[1])
 
 
@@ -766,6 +656,8 @@ CARD_PROGGRESS_CENTRE_OFFSET_RATIO = get_size_ratio(CARD_PROGGRESS_CENTRE_OFFSET
 
 
 class Card():
+    """Class representing a card UI element."""
+
     def __init__(
             self,
             game: Game,
@@ -775,7 +667,7 @@ class Card():
             height: int,
             pos: Point,
             anchor: Anchor = Anchor.CENTRE):
-
+        """Initialize a Card UI element."""
         self.game = game
         self.game_obj = game_obj
         self.card_info = card_info
@@ -855,9 +747,11 @@ class Card():
                 self.size[0] // 8)
 
     def update(self):
+        """Do nothing. Dummy."""
         pass
 
     def draw(self):
+        """Draw the card and its elements."""
         self.game.canvas.blit(self.surface_card_image, self.rect_image)
         self.game.canvas.blit(self.surface_card_type_image, self.rect)
         self.name_text.draw()
@@ -869,7 +763,7 @@ class Card():
         self.description_text.draw()
 
     def move_to(self, pos: Point):
-        """Переместить карточку в новую позицию и обновить все элементы."""
+        """Move card to new position."""
         self.pos = pos
         anchor_rect(self.rect, self.pos, self.anchor)
         image_pos = rect_anchor_pos(self.rect, Anchor.TOP_LEFT)

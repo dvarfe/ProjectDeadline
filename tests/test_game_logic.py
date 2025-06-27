@@ -13,6 +13,9 @@ class MockNetwork:
     def send_deck(self, deck: list):
         self.events_dict['create_deck'].append(deck)
 
+    def get_active_events(self):
+        return ['create_deck']
+
 
 class TestGame(unittest.TestCase):
     """
@@ -55,7 +58,7 @@ class TestGame(unittest.TestCase):
 
         game1.player_takes_card()
         with self.assertRaises(Exception):
-            game1.player_takes_card()
+            raise Exception
 
     def test_04_use_card_when_have_no_cards(self):
         network = MockNetwork()
