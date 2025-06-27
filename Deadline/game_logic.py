@@ -416,6 +416,12 @@ class Game:
                 there is `hand size` key.
             'global' corresponds to dict with keys 'day', 'have exams', 'effects', 'deck size'.
         """
+        def eids_to_effects(effects: list[tuple[int, EffectID]]) -> list[tuple[int, Effect]]:
+            return [(init_day, self.__ALL_EFFECTS[eid]) for init_day, eid in effects]
+
+        def cids_to_cards(cids: list[CardID]) -> list[Card]:
+            return [self.__ALL_CARDS[cid] for cid in cids]
+
         return {
             'player': {
                 'pid': self.__player.pid,
@@ -423,8 +429,8 @@ class Game:
                 'score': self.__player.score,
                 'free time': self.__player.free_hours_today,
                 'deadlines': self.__player.deadlines,
-                'effects': self.__player.effects,
-                'hand': self.__player.hand,
+                'effects': eids_to_effects(self.__player.effects),
+                'hand': cids_to_cards(self.__player.hand),
             },
             'opponent': {
                 'pid': self.__opponent.pid,
@@ -432,13 +438,13 @@ class Game:
                 'score': self.__opponent.score,
                 'free time': self.__opponent.free_hours_today,
                 'deadlines': self.__opponent.deadlines,
-                'effects': self.__opponent.effects,
+                'effects': eids_to_effects(self.__opponent.effects),
                 'hand size': len(self.__opponent.hand),
             },
             'global': {
                 'day': self.__day,
                 'have exams': self.__have_exams,
-                'effects': self.__effects,
+                'effects': eids_to_effects(self.__effects),
                 'deck size': len(self.__deck),
             },
         }
