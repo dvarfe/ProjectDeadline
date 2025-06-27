@@ -704,7 +704,7 @@ class Game:
 
         # Check player failed deadlines
         for idx, deadline in enumerate(self.__player.deadlines):
-            if deadline.init_day + deadline.deadline == self.__day:
+            if deadline.deadline == self.__day:
                 self.__player.score += deadline.task.penalty
                 self.__events(deadline.task.events_on_fail, self.__player_pid)
                 self.__player.deadlines.pop(idx)
@@ -749,7 +749,7 @@ class Game:
 
         # Check opponent failed deadlines
         for idx, deadline in enumerate(self.__opponent.deadlines):
-            if deadline.init_day + deadline.deadline == self.__day:
+            if deadline.deadline == self.__day:
                 self.__opponent.score += deadline.task.penalty
                 self.__events(deadline.task.events_on_fail, self.__opponent_pid)
                 self.__opponent.deadlines.pop(idx)
