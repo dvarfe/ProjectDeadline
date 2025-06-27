@@ -1,10 +1,10 @@
+"""Module for game config building."""
+
 import json
 
 
 def effect(eid, name, description, image, period, delay, is_removable, init_events, final_events, everyday_events):
-    """
-    Make effect dict.
-    """
+    """Make effect dict."""
     return {
         'eid': eid,
         'name': name,
@@ -20,9 +20,7 @@ def effect(eid, name, description, image, period, delay, is_removable, init_even
 
 
 def task(tid, name, description, image, difficulty, deadline, award, penalty, events_on_success, events_on_fail):
-    """
-    Make task dict.
-    """
+    """Make task dict."""
     return {
         'tid': tid,
         'name': name,
@@ -38,9 +36,7 @@ def task(tid, name, description, image, difficulty, deadline, award, penalty, ev
 
 
 def task_card(cid, name, description, image, valid_target, special, task):
-    """
-    Make task card dict.
-    """
+    """Make task card dict."""
     return {
         'cid': cid,
         'name': name,
@@ -53,9 +49,7 @@ def task_card(cid, name, description, image, valid_target, special, task):
 
 
 def action_card(cid, name, description, image, valid_target, special, cost, action, req_args, check_args):
-    """
-    Make action card dict.
-    """
+    """Make action card dict."""
     return {
         'cid': cid,
         'name': name,

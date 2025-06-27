@@ -1,16 +1,36 @@
+"""CLI for manual debugging."""
+
 from .game_logic import Game as GameData, CardTarget
 
 
 class MockNetwork:
+    """Mock for network interaction."""
+
     def __init__(self):
+        """Construct MockNetwork."""
         self.events_dict = {'create_deck': []}
 
     def send_deck(self, deck: list):
+        """
+        Send data (deck) over the network.
+
+        :param deck: Deck of card ids.
+        """
         self.events_dict['create_deck'].append(deck)
 
 
 def print_game_info(game_data: GameData):
+    """
+    Print game info.
+
+    :param game_data: dict with all data.
+    """
     def print_deadlines(dct):
+        """
+        Print deadlines info.
+
+        :param dct: dict with deadlines data.
+        """
         deadlines = dct['deadlines']
         if not deadlines:
             print('    no deadlines')
@@ -22,6 +42,11 @@ def print_game_info(game_data: GameData):
                       f'{days_rem} days remain)')
 
     def print_effects(dct):
+        """
+        Print effects info.
+
+        :param dct: dict with effects data.
+        """
         effects = dct['effects']
         if not effects:
             print('    no effects')
@@ -31,6 +56,11 @@ def print_game_info(game_data: GameData):
                 print(f'        {effect.name} ({gl["day"] + effect.period - init_day} days remain)')
 
     def print_global_effects(dct):
+        """
+        Print global effects info.
+
+        :param dct: dict with global effects data.
+        """
         effects = dct['effects']
         if not effects:
             print('--- no global effects ---')
@@ -71,6 +101,7 @@ def print_game_info(game_data: GameData):
 
 
 def game():
+    """Play game using CLI."""
     player1 = 'Alex'
     player2 = 'Bob'
     network = MockNetwork()
